@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Phone stills</title>
+<script type="importmap">
+  {
+    "imports": {
+      "three": "/node_modules/three/build/three.module.js",
+      "three/addons/": "/node_modules/three/examples/jsm/"
+    }
+  }
+</script>
+<canvas></canvas>
+<script type="module">
+  import { createPhone, POSES } from "/src/phone/phone.js";
+
+  const phone = createPhone(document.querySelector("canvas"), { fill: 0.9 });
+  /** A PNG of the phone in a pose, with the screenshot at `shot` on its screen if one is given. */
+  window.still = async (pose, width, height, shot) => {
+    phone.setSize(width, height);
+    phone.setPose(POSES[pose]);
+    if (shot) phone.setScreen(await phone.loadScreen(shot));
+    phone.render();
+    return document.querySelector("canvas").toDataURL("image/png");
+  };
+</script>

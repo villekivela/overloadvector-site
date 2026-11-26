@@ -14,6 +14,7 @@ npm run dev       # http://localhost:4321, without search
 npm run build     # into dist/, with the search index
 npm test          # checks the built site, in a headless Chrome too (set CHROME to choose one)
 npm run preview   # serves dist/, search included
+npm run stills    # redraws the home page's still phones (The home page)
 ```
 
 ## The logo
@@ -35,7 +36,7 @@ capitals are logo art only: running text says Overload Vector.
 
 | Page | File |
 | --- | --- |
-| Home | `src/content/docs/index.mdx` |
+| Home | `src/components/Home.astro`, then `src/content/docs/index.mdx` |
 | User docs, `/docs/…` | `src/content/docs/docs/` |
 | FAQ, contact, privacy policy | `src/content/docs/faq.md`, `contact.md`, `privacy.md` |
 
@@ -43,6 +44,26 @@ Write for users, in plain English, from the app as it is. A new page goes in the
 (`astro.config.mjs`) and in `test/pages.mjs`.
 
 `/privacy/` is the app's privacy policy: its address must not change. Keep its date current.
+
+### The home page
+
+`src/components/Home.astro` is the top of the home page: the pitch, then the app's four jobs, beside
+one phone. `index.mdx` holds the pitch's words and buttons, and everything below the phone.
+
+On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it turns from its back
+to its front as the reader scrolls through the pitch, then stays pinned while each section puts its
+own screen on it. `phone.js` is the model, a Pixel 10 Pro's shape built from plain geometry, with no
+maker's logo and nothing downloaded. `story.js` says what the phone shows at a scroll position, and
+`stage.js` drives the model from it.
+
+A narrow screen, a visitor who asked for less motion and a browser without WebGL get a still of the
+same phone under each text instead, and never load three.js. The stills are in `src/assets/phone/`,
+drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing
+the model or a screenshot the home page shows, and commit what it draws.
+
+While the owner picks how a new screen arrives, the page takes `?transition=fade` (the screens
+crossfade and the phone leans with the scroll; the default) or `?transition=turn` (the phone swings
+edge-on and comes back with the new screen).
 
 ### The file format pages
 
@@ -61,7 +82,7 @@ have changed: update `scripts/sync-formats.mjs` then.
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
 
-A page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
+A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:
 
 ```md

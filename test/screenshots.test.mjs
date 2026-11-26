@@ -3,10 +3,9 @@ import { after, before, test } from "node:test";
 import { openSite } from "./browser.mjs";
 import { page } from "./dist.mjs";
 
-// The home page and the pages that explain a screen show it, in screenshots from the app: how
-// many screens each shows at least.
+// The pages that explain a screen show it, in screenshots from the app: how many screens each
+// shows at least. The home page shows its screens on a phone (home.test.mjs).
 const SHOWN = {
-  "/": 4,
   "/docs/getting-started/": 2,
   "/docs/logging/": 2,
   "/docs/progression/": 1,
@@ -60,7 +59,7 @@ for (const [system, picked, theme] of [
       await site.visit(route);
       const seen = await site.run((value) => {
         const select = document.querySelector("starlight-theme-select select");
-        // The home page has the menu too; a pick is kept in the browser for the next page.
+        // A pick is kept in the browser for the next page.
         select.value = value;
         select.dispatchEvent(new Event("change"));
         return [...document.querySelectorAll('img[src*="/_astro/shot-"]')]
