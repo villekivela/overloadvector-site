@@ -67,6 +67,11 @@ test("no page loads anything from another server", async () => {
   assert.deepEqual(site.requests.filter((url) => !url.startsWith(`${site.origin}/`) && !url.startsWith("data:")), []);
 });
 
+test("the footer's credit reads as a sentence", () => {
+  const words = page("/faq/").replace(/<[^>]*>/g, "").replace(/\s+/g, " ");
+  assert.ok(words.includes("Fonts: Inter and Space Grotesk, under the SIL Open Font License."), words.slice(-300));
+});
+
 for (const family of ["Inter", "SpaceGrotesk"]) {
   test(`the site ships ${family}'s licence and every page credits it`, () => {
     const licence = `fonts/${family}-OFL.txt`;
