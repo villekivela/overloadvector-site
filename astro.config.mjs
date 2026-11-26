@@ -18,8 +18,8 @@ export default defineConfig({
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
       ],
       customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
-      // The home page is the only one with a hero, and Home is all of its top (README, The home page).
-      components: { Footer: "./src/components/Footer.astro", Hero: "./src/components/Home.astro" },
+      // Hero puts Home.astro at the top of the home page (README, The home page).
+      components: { Footer: "./src/components/Footer.astro", Hero: "./src/components/Hero.astro" },
       pagination: false,
       sidebar: [
         {

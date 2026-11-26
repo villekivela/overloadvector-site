@@ -3,7 +3,6 @@
 // phone is a live 3D model (src/phone/) that turns with the scroll and stays pinned while its
 // screen changes. A narrow screen, a visitor who asked for less motion and a browser without
 // WebGL get a still of the same phone under each text, and never load three.js.
-// It stands in for Starlight's hero, which only the home page has.
 import { getImage, Image } from "astro:assets";
 import { LinkButton } from "@astrojs/starlight/components";
 import back from "../assets/phone/phone-back.png";
@@ -72,14 +71,17 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
         return false;
       }
     };
-    let can;
-    // "live" is the 3D phone, "still" the pictures of it. Asked again when the window changes.
-    window.homePhone = () => {
-      if (wide.matches) can ??= draws();
-      document.documentElement.dataset.home = wide.matches && can ? "live" : "still";
-      return document.documentElement.dataset.home === "live";
+    let able;
+    // Sets the page to "live", the 3D phone, or "still", the pictures of it, and says whether it
+    // is live. `broken` is passed when the 3D phone failed: the page then keeps to the stills.
+    window.setHomePhone = (broken) => {
+      if (broken) able = false;
+      else if (wide.matches) able ??= draws();
+      const live = wide.matches && able;
+      document.documentElement.dataset.home = live ? "live" : "still";
+      return live;
     };
-    window.homePhone();
+    window.setHomePhone();
     wide.addEventListener("change", () => window.dispatchEvent(new Event("homephone")));
   })();
 </script>
@@ -122,11 +124,16 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
   // only once the page has been drawn.
   let started = false;
   function start() {
-    if (started || !window.homePhone()) return;
+    // Set anew each time the window changes, also once the phone runs.
+    const live = window.setHomePhone();
+    if (started || !live) return;
     started = true;
     const stage = document.querySelector(".home-stage");
     const transition = new URLSearchParams(location.search).get("transition");
-    const load = () => import("../phone/stage.js").then(({ startStage }) => startStage(stage, { transition }));
+    const load = () =>
+      import("../phone/stage.js")
+        .then(({ startStage }) => startStage(stage, { transition }))
+        .catch(() => window.setHomePhone(true));
     if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 1500 });
     else setTimeout(load, 200);
   }

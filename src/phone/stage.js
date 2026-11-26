@@ -7,21 +7,23 @@ import { story } from "./story.js";
 const ease = (t) => t * t * (3 - 2 * t);
 const lerp = (from, to, t) => from + (to - from) * t;
 
-// How a new screen arrives, by `?transition=`. Each gives the pose's change and the screen's
-// blend at `t`, 0 to 1 through the change; `towards` is 1 scrolling down and -1 scrolling up.
+// How a new screen arrives, by `?transition=`. `lean` moves the resting pose at `t`, 0 to 1
+// through the change, where `towards` is 1 scrolling down and -1 scrolling up and `drift` is the
+// story's. `blend` is how much of the new screen shows at `t`.
 const TRANSITIONS = {
   // The screens crossfade, and the phone leans a little with the scroll.
   fade: {
     duration: 350,
-    yaw: (yaw, _t, _towards, drift) => yaw + drift * 0.16,
-    pitch: (pitch, drift) => pitch - drift * 0.04,
+    lean: ({ yaw, pitch, roll }, { drift }) => ({ yaw: yaw + drift * 0.16, pitch: pitch - drift * 0.04, roll }),
     blend: (t) => ease(t),
   },
   // The phone swings edge-on, and comes back with the new screen.
   turn: {
     duration: 750,
-    yaw: (yaw, t, towards) => lerp(yaw, (towards * Math.PI) / 2, Math.sin(Math.PI * ease(t))),
-    pitch: (pitch) => pitch,
+    lean: (pose, { t, towards }) => ({
+      ...pose,
+      yaw: lerp(pose.yaw, (towards * Math.PI) / 2, Math.sin(Math.PI * ease(t))),
+    }),
     blend: (t) => (t < 0.5 ? 0 : 1),
   },
 };
@@ -44,10 +46,14 @@ export function startStage(stage, { transition: named } = {}) {
     if (asked.has(key)) return;
     asked.add(key);
     const [screen, theme] = key.split(":");
-    phone.loadScreen(screens[screen][theme]).then((texture) => {
-      loaded.set(key, texture);
-      draw();
-    });
+    phone.loadScreen(screens[screen][theme]).then(
+      (texture) => {
+        loaded.set(key, texture);
+        redraw();
+      },
+      // Asked for again the next time it is wanted.
+      () => asked.delete(key),
+    );
   }
 
   let shown = null;
@@ -57,7 +63,7 @@ export function startStage(stage, { transition: named } = {}) {
   let queued = false;
   let sized = false;
 
-  function draw() {
+  function redraw() {
     if (queued) return;
     queued = true;
     requestAnimationFrame(frame);
@@ -72,7 +78,7 @@ export function startStage(stage, { transition: named } = {}) {
     const { turn, screen, drift } = story({
       scrollY: window.scrollY,
       viewport: window.innerHeight,
-      turnOver: hero.offsetHeight * 0.6,
+      turnOver: hero.offsetHeight * 0.5,
       sections: sections.map((section) => {
         const { top, bottom } = section.getBoundingClientRect();
         return { screen: section.dataset.screen, top: top + window.scrollY, bottom: bottom + window.scrollY };
@@ -97,11 +103,12 @@ export function startStage(stage, { transition: named } = {}) {
     }
 
     const facing = ease(turn);
-    phone.setPose({
-      yaw: transition.yaw(lerp(POSES.back.yaw, POSES.front.yaw, facing), t, change?.towards ?? 1, drift * facing),
-      pitch: transition.pitch(lerp(POSES.back.pitch, POSES.front.pitch, facing), drift * facing),
+    const resting = {
+      yaw: lerp(POSES.back.yaw, POSES.front.yaw, facing),
+      pitch: lerp(POSES.back.pitch, POSES.front.pitch, facing),
       roll: lerp(POSES.back.roll, POSES.front.roll, facing),
-    });
+    };
+    phone.setPose(transition.lean(resting, { t, towards: change?.towards ?? 1, drift: drift * facing }));
     phone.render();
 
     // What the canvas shows, for a reader who can't see it and for the tests.
@@ -113,17 +120,21 @@ export function startStage(stage, { transition: named } = {}) {
     stage.dataset.ready = "";
 
     if (change && t >= 1) change = null;
-    if (change || (wanted !== shown && loaded.has(wanted))) draw();
+    if (change || (wanted !== shown && loaded.has(wanted))) redraw();
   }
 
   new ResizeObserver(() => {
     if (stage.clientWidth === 0) return;
     phone.setSize(stage.clientWidth, stage.clientHeight);
     sized = true;
-    draw();
+    redraw();
   }).observe(stage);
-  window.addEventListener("scroll", draw, { passive: true });
-  new MutationObserver(draw).observe(root, { attributeFilter: ["data-theme", "data-home"] });
-  // The other sections' screens, before the reader gets to them.
-  for (const screen of Object.keys(screens)) ask(keyOf(screen));
+  window.addEventListener("scroll", redraw, { passive: true });
+  // Every section's screen in the theme in use, before the reader gets to it.
+  const preload = () => Object.keys(screens).forEach((screen) => ask(keyOf(screen)));
+  new MutationObserver(() => {
+    preload();
+    redraw();
+  }).observe(root, { attributeFilter: ["data-theme", "data-home"] });
+  preload();
 }

@@ -36,6 +36,12 @@ test("each still phone is there in both themes, and described", () => {
   }
 });
 
+test("the page for a wrong address has no phone", () => {
+  const html = read("404.html").toString("utf8");
+  assert.doesNotMatch(html, /home-stage|phone-still/);
+  assert.match(html, /<h1[^>]*>\s*404\s*<\/h1>/);
+});
+
 let site;
 before(async () => (site = await openSite()));
 after(() => site?.close());
@@ -49,9 +55,9 @@ async function visit({ width, height }, { route = "/", reducedMotion = false } =
       { name: "prefers-reduced-motion", value: reducedMotion ? "reduce" : "no-preference" },
     ],
   });
-  const before = site.requests.length;
+  const asked = site.requests.length;
   await site.visit(route);
-  return () => site.requests.slice(before);
+  return () => site.requests.slice(asked);
 }
 
 /** Whether any script the page asked for holds three.js. */
@@ -119,8 +125,8 @@ for (const transition of ["fade", "turn"]) {
     assert.ok(askedForThree(requests()), "three.js wasn't asked for");
     assert.deepEqual(await stillsSeen().catch(() => "the canvas"), "the canvas");
 
-    await scrollTo(".home .hero .actions");
-    await site.run(() => window.scrollBy({ top: window.innerHeight * 0.45, behavior: "instant" }));
+    // Past the turn, before the first section has come up.
+    await site.run(() => window.scrollTo({ top: document.querySelector(".home .hero").offsetHeight * 0.55, behavior: "instant" }));
     await phoneShows("front", "today");
     for (const screen of SECTIONS) {
       await scrollTo(`.home [data-screen="${screen}"]`);
@@ -169,6 +175,15 @@ test("the theme menu changes the phone's screen, both ways", async () => {
 });
 
 const STILLS = ["today", ...SECTIONS];
+
+test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
+  await visit(DESK);
+  await phoneShows("back", "today");
+  await site.send("Emulation.setDeviceMetricsOverride", { ...POCKET, deviceScaleFactor: 1, mobile: false });
+  assert.deepEqual(await stillsSeen(), STILLS.map((screen) => `phone-${screen}-dark`));
+  await site.send("Emulation.setDeviceMetricsOverride", { ...DESK, deviceScaleFactor: 1, mobile: false });
+  await until("the canvas back in view", () => document.querySelector(".home-stage canvas").getClientRects().length > 0);
+});
 
 for (const [who, open] of [
   ["a narrow window", () => visit(POCKET)],

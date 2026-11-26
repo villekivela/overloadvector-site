@@ -24,20 +24,20 @@ test("the phone turns with the scroll, and back again", () => {
   assert.equal(at(150).turn, 0.25);
 });
 
-test("past the hero the front stays, on Today until a section reaches the middle", () => {
+test("past the hero the front rests on Today until a section nears the top third", () => {
   assert.deepEqual(at(549), { turn: 0.915, screen: "today", drift: 0 });
-  assert.equal(at(700).turn, 1);
+  assert.deepEqual(at(699), { turn: 1, screen: "today", drift: 0 });
 });
 
-test("the section across the middle of the view sets the screen", () => {
-  assert.equal(at(550).screen, "new-program");
-  assert.equal(at(1249).screen, "new-program");
-  assert.equal(at(1250).screen, "logging");
+test("the section across the line a third down the view sets the screen", () => {
+  assert.equal(at(700).screen, "new-program");
+  assert.equal(at(1399).screen, "new-program");
+  assert.equal(at(1400).screen, "logging");
   assert.equal(at(5000).screen, "logging");
 });
 
-test("the drift runs from -1 to 1 as a section passes the middle", () => {
-  assert.equal(at(550).drift, -1);
+test("the drift runs from -1 to 1 as a section passes the middle of the view", () => {
+  assert.equal(at(725).drift, -0.5);
   assert.equal(at(900).drift, 0);
   assert.equal(at(1075).drift, 0.5);
   assert.equal(at(5000).drift, 1);
