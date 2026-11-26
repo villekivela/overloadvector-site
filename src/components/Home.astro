@@ -237,6 +237,10 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     mask-image: radial-gradient(ellipse 62% 56% at 50% 50%, #000 15%, transparent 78%);
   }
 
+  :global(:root[data-home="live"]) {
+    scroll-snap-type: y proximity;
+  }
+
   /* The live phone: the texts scroll past on one side, the phone stays on the other. */
   :global(:root[data-home="live"]) {
     .home {
@@ -248,8 +252,15 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     .home-feature {
       align-items: flex-start;
       justify-content: center;
-      min-height: 80vh;
+      min-height: 62vh;
       text-align: start;
+    }
+    /* A scroll that ends near a section settles with its words in the middle of the view. */
+    .hero {
+      scroll-snap-align: start;
+    }
+    .home-feature {
+      scroll-snap-align: center;
     }
     .hero {
       min-height: calc(100vh - var(--sl-nav-height) - 3rem);

@@ -99,7 +99,7 @@ const SCREEN_FRAGMENT = `
     vec3 shown = mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend);
     float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
     float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
-    gl_FragColor = vec4(shown + glare * 0.05, 1.0);
+    gl_FragColor = vec4(shown + glare * 0.028, 1.0);
     #include <colorspace_fragment>
   }
 `;
