@@ -21,9 +21,14 @@ test("every page's footer has the support address and the privacy policy", () =>
   }
 });
 
+/** What a page says, without its head's summary and its footer. */
+function content(route) {
+  const html = page(route);
+  return html.slice(html.indexOf("<main")).split('<footer class="site-footer')[0];
+}
+
 test("the contact page gives the support address in its text", () => {
-  const body = page("/contact/").split('<footer class="site-footer')[0];
-  assert.match(body, /<a href="mailto:support@overloadvector\.com">support@overloadvector\.com<\/a>/);
+  assert.match(content("/contact/"), /<a href="mailto:support@overloadvector\.com">support@overloadvector\.com<\/a>/);
 });
 
 test("the sidebar leads to every page", () => {
@@ -86,7 +91,7 @@ test("nothing published points into the app's private repository", () => {
 });
 
 for (const [what, words] of [
-  ["what stays on the phone", /What stays on your phone/],
+  ["what stays on the phone", /What stays on your phone[\s\S]*Everything you put in the app/],
   ["Android's backup to Google", /Android(?:'|&#39;|’)s backup<\/strong> copies/],
   ["the calls to Anthropic with the user's key", /api\.anthropic\.com/],
   ["the server's sync and proposals", /Connecting Claude to your Overload Vector account[\s\S]*A proposal waits on our server/],
@@ -102,6 +107,6 @@ for (const [what, words] of [
   ["the contact", /Changes and contact[\s\S]*support@overloadvector\.com/],
 ]) {
   test(`the privacy policy covers ${what}`, () => {
-    assert.match(page("/privacy/").split('<footer class="site-footer')[0], words);
+    assert.match(content("/privacy/"), words);
   });
 }
