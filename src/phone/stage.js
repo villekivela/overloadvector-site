@@ -9,10 +9,10 @@ const lerp = (from, to, t) => from + (to - from) * t;
 
 // A new screen arrives over this many milliseconds: the phone swings a little the way the page
 // is going and draws back, the screens crossfade while it is turned, and it settles again.
-const CHANGE = 700;
-const SWING = { yaw: 0.42, size: 0.05 };
+const CHANGE = 550;
+const SWING = { yaw: 0.13, size: 0.015 };
 // How far the phone leans with the story's drift, in radians.
-const LEAN = { yaw: 0.16, pitch: -0.04 };
+const LEAN = { yaw: 0.07, pitch: -0.02 };
 
 /** Starts the phone in `stage`, an element holding a canvas and the screens' addresses. */
 export function startStage(stage) {
@@ -77,7 +77,12 @@ export function startStage(stage) {
     if (!change && wanted !== shown && loaded.has(wanted)) {
       // The first screen and a change of theme just appear; a new section's screen arrives.
       const sameTheme = shown?.split(":")[1] === wanted.split(":")[1];
-      if (sameTheme) change = { from: shown, to: wanted, start: now, towards };
+      if (sameTheme) {
+        // Within one section the screens only crossfade: the phone swings between sections.
+        const names = [shown, wanted].map((key) => key.split(":")[0]);
+        const within = sections.some((section) => names.every((name) => section.dataset.screen.split(" ").includes(name)));
+        change = { from: shown, to: wanted, start: now, towards: within ? 0 : towards };
+      }
       else shown = wanted;
     }
     let t = 0;
