@@ -1,8 +1,71 @@
 ---
 title: Overload Vector
-description: A strength-training app for Android.
+description: A strength-training app for Android that runs a periodized program, logs your sessions and coaches you with Claude.
 template: splash
+hero:
+  tagline: Run your program, log every set, and get coached when life gets in the way. A strength-training app for Android, free in the beta.
+  actions:
+    - text: Get the beta
+      link: https://github.com/villekivela/overloadvector-releases/releases/latest
+      icon: external
+    - text: Read the docs
+      link: /docs/getting-started/
+      variant: minimal
+      icon: right-arrow
 ---
 
-A strength-training app for Android: it runs a periodized program, logs your sessions and coaches
-you when the plan meets real life. The full site is on its way.
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<div class="shots">
+
+![Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works](../../assets/shots/shot-today-light.png)
+![Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works](../../assets/shots/shot-today-dark.png)
+![Logging a set: weight, reps and reps in reserve, with the rest timer running](../../assets/shots/shot-logging-light.png)
+![Logging a set: weight, reps and reps in reserve, with the rest timer running](../../assets/shots/shot-logging-dark.png)
+![An exercise's details, with the mannequin doing the movement](../../assets/shots/shot-exercise-light.png)
+![An exercise's details, with the mannequin doing the movement](../../assets/shots/shot-exercise-dark.png)
+![The coach asking what's going on: pain, short on time, another gym and more](../../assets/shots/shot-check-in-light.png)
+![The coach asking what's going on: pain, short on time, another gym and more](../../assets/shots/shot-check-in-dark.png)
+
+</div>
+
+## What it does
+
+<CardGrid>
+  <Card title="Runs a periodized program" icon="list-format">
+    Blocks of weeks, days and set targets. Setup writes a first program for your week and your gym,
+    or you import your own.
+  </Card>
+  <Card title="Logs your sessions" icon="pencil">
+    Weight, reps, reps in reserve, intensity techniques and rest, with warm-ups and plates worked
+    out for you.
+  </Card>
+  <Card title="Moves the weights up" icon="up-arrow">
+    Every exercise gets its next weight from what you did, using only weights your gym really has,
+    and says why.
+  </Card>
+  <Card title="Coaches with Claude" icon="comment-alt">
+    Sore wrist, short evening, hotel gym: Claude proposes what to change, and nothing changes until
+    you accept it.
+  </Card>
+</CardGrid>
+
+<div class="shots">
+
+![A new program for review, with its weekly sets per muscle shown on the mannequin](../../assets/shots/shot-new-program-light.png)
+![A new program for review, with its weekly sets per muscle shown on the mannequin](../../assets/shots/shot-new-program-dark.png)
+![The week's sets per muscle against their targets](../../assets/shots/shot-progress-light.png)
+![The week's sets per muscle against their targets](../../assets/shots/shot-progress-dark.png)
+
+</div>
+
+## Your training stays yours
+
+No account, no ads and no trackers. Your training lives on your phone and leaves it only for what you
+switch on. See the [privacy policy](/privacy/).
+
+## The beta
+
+Overload Vector is in beta and [free](/docs/free-and-full/). It runs on Android 8.0 or newer, on
+64-bit ARM phones. [Install it](/docs/getting-started/), and tell us what you think at
+[support@overloadvector.com](mailto:support@overloadvector.com).

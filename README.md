@@ -12,7 +12,7 @@ Needs Node 22.23.4 or newer.
 npm ci
 npm run dev       # http://localhost:4321, without search
 npm run build     # into dist/, with the search index
-npm test          # checks the built site
+npm test          # checks the built site, in a headless Chrome too (set CHROME to choose one)
 npm run preview   # serves dist/, search included
 ```
 
@@ -30,6 +30,52 @@ them there with `python3 -I tools/brand/brand.py`, then copy its `brand/site/` f
 
 The header shows the logo in place of the site's title, which stays its accessible name. The
 capitals are logo art only: running text says Overload Vector.
+
+## The pages
+
+| Page | File |
+| --- | --- |
+| Home | `src/content/docs/index.mdx` |
+| User docs, `/docs/…` | `src/content/docs/docs/` |
+| FAQ, contact, privacy policy | `src/content/docs/faq.md`, `contact.md`, `privacy.md` |
+
+Write for users, in plain English, from the app as it is. A new page goes in the sidebar
+(`astro.config.mjs`) and in `test/pages.mjs`.
+
+`/privacy/` is the app's privacy policy: its address must not change. Keep its date current.
+
+### The file format pages
+
+`program-format.md` and `gym-format.md` are copies of the app's own notes, so don't edit them here.
+When a note changes:
+
+```sh
+npm run formats -- <path to the app repo>
+```
+
+It stops if a note holds something only the app repo's readers can follow, or if words it rewrites
+have changed: update `scripts/sync-formats.mjs` then.
+
+### Screenshots
+
+`src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
+emulator with made-up training. No real person's data, and nothing that shows a debug build.
+
+A page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
+shows its own:
+
+```md
+![What the screen shows](../../../assets/shots/shot-today-light.png)
+![What the screen shows](../../../assets/shots/shot-today-dark.png)
+```
+
+## Fonts
+
+The app's own: Space Grotesk for words in titles, Inter for everything else and every number
+(`src/styles/fonts.css`). They are served from this site, never from a font service, and their
+licences are published beside them (`public/fonts/`) and linked in the footer. `src/assets/fonts/`
+holds the app's font files, whole, packed with `woff2_compress`; Inter's keep the hyphen
+proportional under tabular figures, as the app patches them.
 
 ## Publishing
 

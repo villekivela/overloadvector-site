@@ -17,6 +17,27 @@ export default defineConfig({
         { tag: "meta", attrs: { property: "og:image", content: "https://overloadvector.com/social.png" } },
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
       ],
+      customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
+      components: { Footer: "./src/components/Footer.astro" },
+      pagination: false,
+      sidebar: [
+        {
+          label: "Docs",
+          items: [
+            "docs/getting-started",
+            "docs/logging",
+            "docs/progression",
+            "docs/programs",
+            "docs/program-format",
+            "docs/gyms",
+            "docs/gym-format",
+            "docs/coaching",
+            "docs/backups",
+            "docs/free-and-full",
+          ],
+        },
+        { label: "Help", items: ["faq", "contact", "privacy"] },
+      ],
     }),
   ],
 });
