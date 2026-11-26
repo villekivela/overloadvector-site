@@ -5,7 +5,8 @@ import { openSite } from "./browser.mjs";
 import { page, read } from "./dist.mjs";
 
 // The feature sections in page order, by the screen each puts on the phone.
-const SECTIONS = ["new-program", "logging", "exercise", "progress", "check-in"];
+// The Technique section shows two: the mannequin, then its muscles.
+const SECTIONS = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
 const DESK = { width: 1280, height: 800 };
 const POCKET = { width: 390, height: 800 };
 
@@ -137,7 +138,14 @@ const stillsSeen = () =>
     await site.run(() => window.scrollTo({ top: document.querySelector(".home .hero").offsetHeight * 0.55, behavior: "instant" }));
     await phoneShows("front", "today");
     for (const screen of SECTIONS) {
-      await scrollTo(`.home [data-screen~="${screen}"]`);
+      // A section's first screen shows with its words in the middle of the view, its second
+      // once the section has gone half past the line a third of the way down.
+      await site.run((screen) => {
+        const section = document.querySelector(`.home [data-screen~="${screen}"]`);
+        const second = section.dataset.screen.split(" ").indexOf(screen) > 0;
+        section.scrollIntoView({ block: "center", behavior: "instant" });
+        if (second) window.scrollBy({ top: window.innerHeight / 6 + section.offsetHeight / 4, behavior: "instant" });
+      }, screen);
       await phoneShows("front", screen);
     }
     // The phone is still pinned in view beside the last section.
@@ -147,7 +155,7 @@ const stillsSeen = () =>
     });
     assert.ok(pinned, "the phone has scrolled away");
 
-    await scrollTo(`.home [data-screen="${SECTIONS[0]}"]`);
+    await scrollTo(`.home [data-screen~="${SECTIONS[0]}"]`);
     await phoneShows("front", SECTIONS[0]);
     await scrollTo(null);
     await phoneShows("back", "today");

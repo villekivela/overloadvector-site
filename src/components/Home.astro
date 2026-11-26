@@ -42,7 +42,7 @@ const FEATURES = [
     alts: ["Logging a set: weight, reps and reps in reserve, with the rest timer running"],
   },
   {
-    screens: ["exercise"],
+    screens: ["mannequin", "muscles"],
     kicker: "Technique",
     brief: "Every lift shown in 3D, on your machine",
     title: "See how every lift is done",
@@ -53,7 +53,10 @@ const FEATURES = [
       "Technique videos, a tap away",
     ],
     more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
-    alts: ["An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine"],
+    alts: [
+      "An exercise's details: the mannequin doing a Smith machine RDL, and the muscles it works",
+      "The same exercise with the muscles layer on: the working muscles lit up on the mannequin",
+    ],
   },
   {
     screens: ["progress"],
@@ -396,6 +399,9 @@ for (const { screen, alt } of shown) {
     --dots: radial-gradient(circle, color-mix(in srgb, var(--sl-color-white) 26%, transparent) 1px, transparent 1.6px);
   }
   .phone-still {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     padding: 1.5rem 2rem;
     background: var(--pool);
   }

@@ -81,6 +81,10 @@ have changed: update `scripts/sync-formats.mjs` then.
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
 
+`shot-mannequin-*` and `shot-muscles-*` are one exercise's details at one moment, without and with
+its muscles layer, for the home page's phone to change between. Retake them together, with the
+mannequin paused.
+
 A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:
 
