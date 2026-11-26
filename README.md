@@ -16,6 +16,36 @@ npm test          # checks the built site
 npm run preview   # serves dist/, search included
 ```
 
+## The pages
+
+| Page | File |
+| --- | --- |
+| Home | `src/content/docs/index.mdx` |
+| User docs, `/docs/…` | `src/content/docs/docs/` |
+| FAQ, contact, privacy policy | `src/content/docs/faq.md`, `contact.md`, `privacy.md` |
+
+Write for users, in plain English, from the app as it is. A new page goes in the sidebar
+(`astro.config.mjs`) and in `test/pages.mjs`.
+
+`/privacy/` is the app's privacy policy: its address must not change. Keep its date current.
+
+### The file format pages
+
+`program-format.md` and `gym-format.md` are copies of the app's own notes, so don't edit them here.
+When a note changes:
+
+```sh
+npm run formats -- <path to the app repo>
+```
+
+It stops if a note holds something only the app repo's readers can follow, or if words it rewrites
+have changed: update `scripts/sync-formats.mjs` then.
+
+### Screenshots
+
+`src/assets/shots/shot-*.png`, 640 px wide, from the app on an Android emulator with made-up training.
+No real person's data, and nothing that shows a debug build.
+
 ## Publishing
 
 Push to `main`. The [Publish](.github/workflows/publish.yml) workflow builds the site, tests it and
