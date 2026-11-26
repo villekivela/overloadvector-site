@@ -17,13 +17,10 @@ const TRANSITIONS = {
     lean: ({ yaw, pitch, roll }, { drift }) => ({ yaw: yaw + drift * 0.16, pitch: pitch - drift * 0.04, roll }),
     blend: (t) => ease(t),
   },
-  // The phone swings edge-on, and comes back with the new screen.
+  // The phone turns once all the way round, and the new screen is on when its front comes back.
   turn: {
-    duration: 750,
-    lean: (pose, { t, towards }) => ({
-      ...pose,
-      yaw: lerp(pose.yaw, (towards * Math.PI) / 2, Math.sin(Math.PI * ease(t))),
-    }),
+    duration: 900,
+    lean: (pose, { t, towards }) => ({ ...pose, yaw: pose.yaw + towards * 2 * Math.PI * ease(t) }),
     blend: (t) => (t < 0.5 ? 0 : 1),
   },
 };

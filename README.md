@@ -62,8 +62,8 @@ drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run
 the model or a screenshot the home page shows, and commit what it draws.
 
 While the owner picks how a new screen arrives, the page takes `?transition=fade` (the screens
-crossfade and the phone leans with the scroll; the default) or `?transition=turn` (the phone swings
-edge-on and comes back with the new screen).
+crossfade and the phone leans with the scroll; the default) or `?transition=turn` (the phone turns
+once all the way round, and its front comes back with the new screen).
 
 ### The file format pages
 

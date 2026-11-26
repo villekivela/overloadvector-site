@@ -199,6 +199,43 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
   .home-stage {
     display: none;
   }
+  /* Behind the phone: a pool of light and a grid of dots that fades out around it, so the
+     phone stands in a space, not on a flat page. */
+  .phone-still,
+  .home-stage {
+    --pool: radial-gradient(
+      ellipse 62% 50% at 50% 48%,
+      color-mix(in srgb, var(--sl-color-white) 20%, transparent),
+      transparent 72%
+    );
+    --dots: radial-gradient(circle, color-mix(in srgb, var(--sl-color-white) 26%, transparent) 1px, transparent 1.6px);
+  }
+  .phone-still {
+    padding: 1.5rem 2rem;
+    background: var(--pool);
+  }
+  /* The phone hangs in front of the page, and throws a shadow on it. */
+  .phone-still :global(img),
+  .home-stage :global(.stage-back),
+  canvas {
+    filter: drop-shadow(0 1.75rem 2.25rem rgb(0 0 0 / 0.55));
+  }
+  :global(:root[data-theme="light"]) :is(.phone-still :global(img), .home-stage :global(.stage-back), canvas) {
+    filter: drop-shadow(0 1.75rem 2.25rem rgb(20 20 30 / 0.3));
+  }
+  .home-stage::before,
+  .home-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .home-stage::before {
+    background: var(--pool);
+  }
+  .home-stage::after {
+    background: var(--dots) center / 1.5rem 1.5rem;
+    mask-image: radial-gradient(ellipse 62% 56% at 50% 50%, #000 15%, transparent 78%);
+  }
 
   /* The live phone: the texts scroll past on one side, the phone stays on the other. */
   :global(:root[data-home="live"]) {
@@ -226,24 +263,28 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     }
     .home-stage {
       display: block;
+      /* Pinned where it already stands, below the header and the page's own top margin, so it
+         doesn't ride up with the first of the scroll. */
       position: sticky;
-      top: var(--sl-nav-height);
+      top: calc(var(--sl-nav-height) + 3rem);
       align-self: start;
-      height: calc(100vh - var(--sl-nav-height));
+      height: calc(100vh - var(--sl-nav-height) - 3rem);
     }
     /* The back, drawn ahead of time, holds the place until the model has loaded. */
     .home-stage :global(.stage-back) {
       position: absolute;
-      /* The model fills 0.8 of the stage's height, and 0.9 of this picture's. */
-      top: 5.55%;
+      /* The model fills 0.74 of the stage's height, and 0.9 of this picture's. */
+      z-index: 1;
+      top: 8.9%;
       left: 50%;
       width: auto;
-      height: 88.9%;
+      height: 82.2%;
       translate: -50% 0;
       transition: opacity 0.3s;
     }
     canvas {
       position: absolute;
+      z-index: 1;
       inset: 0;
       width: 100%;
       height: 100%;

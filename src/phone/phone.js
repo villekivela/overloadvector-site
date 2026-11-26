@@ -3,8 +3,10 @@
 // it carries no maker's logo. Lengths are millimetres.
 import {
   BoxGeometry,
+  CanvasTexture,
   CircleGeometry,
   DataTexture,
+  DirectionalLight,
   ExtrudeGeometry,
   Group,
   Mesh,
@@ -13,13 +15,13 @@ import {
   NeutralToneMapping,
   PerspectiveCamera,
   PMREMGenerator,
-  RingGeometry,
   Scene,
   ShaderMaterial,
   Shape,
   ShapeGeometry,
   SRGBColorSpace,
   TextureLoader,
+  TorusGeometry,
   WebGLRenderer,
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -32,7 +34,7 @@ const CORNER = 10.5;
 const BEZEL = 3.2;
 const SCREEN_WIDTH = WIDTH - 2 * BEZEL;
 const SCREEN_HEIGHT = (SCREEN_WIDTH * 1428) / 640;
-const FIELD_OF_VIEW = 22;
+const FIELD_OF_VIEW = 30;
 
 /** How the phone stands, in radians: `back` opens the page, `front` is where it rests. */
 export const POSES = {
@@ -76,68 +78,178 @@ function panel(width, height, radius) {
 
 const SCREEN_VERTEX = `
   varying vec2 vUv;
+  varying float vTurn;
   void main() {
     vUv = uv;
+    vTurn = normalize(normalMatrix * normal).x;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
-// The screen lights itself: no lamp or tone mapping changes the app's colours.
+// The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
+// throws back one soft band of light, which crosses the screen as the phone turns.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
   uniform float blend;
   varying vec2 vUv;
+  varying float vTurn;
   void main() {
-    gl_FragColor = vec4(mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend), 1.0);
+    vec3 shown = mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend);
+    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
+    float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
+    gl_FragColor = vec4(shown + glare * 0.05, 1.0);
     #include <colorspace_fragment>
   }
 `;
 
+/** A camera lens seen from above, painted: the glass's rings, its coating and the light on it. */
+function lensFace(periscope) {
+  const size = 256;
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = size;
+  const pen = canvas.getContext("2d");
+  pen.translate(size / 2, size / 2);
+  const unit = size / 2;
+  const ring = (radius, width, colour) => {
+    pen.beginPath();
+    pen.arc(0, 0, radius * unit, 0, 2 * Math.PI);
+    pen.lineWidth = width * unit;
+    pen.strokeStyle = colour;
+    pen.stroke();
+  };
+  const glow = (x, y, radius, colour) => {
+    const fade = pen.createRadialGradient(x * unit, y * unit, 0, x * unit, y * unit, radius * unit);
+    fade.addColorStop(0, colour);
+    fade.addColorStop(1, "rgba(0, 0, 0, 0)");
+    pen.fillStyle = fade;
+    pen.fillRect(-unit, -unit, size, size);
+  };
+
+  pen.fillStyle = "#030305";
+  pen.fillRect(-unit, -unit, size, size);
+  // The barrel's steps, going down into the lens.
+  ring(0.93, 0.05, "#26282d");
+  ring(0.8, 0.03, "#15161a");
+  ring(0.66, 0.05, "#1d1f25");
+  pen.save();
+  pen.beginPath();
+  if (periscope) pen.roundRect(-0.36 * unit, -0.3 * unit, 0.72 * unit, 0.6 * unit, 0.1 * unit);
+  else pen.arc(0, 0, 0.56 * unit, 0, 2 * Math.PI);
+  pen.clip();
+  pen.fillStyle = "#06070c";
+  pen.fillRect(-unit, -unit, size, size);
+  // The coating throws back blue from one side and violet from the other.
+  glow(-0.22, -0.26, 0.6, "rgba(62, 92, 210, 0.75)");
+  glow(0.3, 0.32, 0.42, "rgba(120, 70, 190, 0.4)");
+  pen.restore();
+  if (!periscope) {
+    ring(0.3, 0.03, "#0c0e16");
+    pen.beginPath();
+    pen.arc(0, 0, 0.2 * unit, 0, 2 * Math.PI);
+    pen.fillStyle = "#010102";
+    pen.fill();
+  }
+  glow(-0.3, -0.36, 0.13, "rgba(255, 255, 255, 0.75)");
+  glow(0.2, 0.26, 0.07, "rgba(200, 210, 255, 0.35)");
+
+  const face = new CanvasTexture(canvas);
+  face.colorSpace = SRGBColorSpace;
+  return face;
+}
+
 function buildBack(frame) {
   // Built facing +z, then turned to face away from the screen.
   const back = new Group();
-  const glass = new MeshStandardMaterial({ color: 0x7d848e, roughness: 0.5, metalness: 0.15 });
-  const visor = new MeshStandardMaterial({ color: 0x050507, roughness: 0.08, metalness: 0.6 });
-  const rim = new MeshStandardMaterial({ color: 0x6a6e76, roughness: 0.25, metalness: 1 });
-  const lens = new MeshStandardMaterial({ color: 0x020204, roughness: 0.02, metalness: 1 });
-  const iris = new MeshStandardMaterial({ color: 0x24345c, roughness: 0.15, metalness: 0.9 });
-  const glint = new MeshBasicMaterial({ color: 0x8f9bb5, transparent: true, opacity: 0.55 });
+  const glass = new MeshStandardMaterial({ color: 0x2d2e31, roughness: 0.4, metalness: 0.25 });
+  const visor = new MeshStandardMaterial({ color: 0x040405, roughness: 0.06, metalness: 0.7 });
+  const rim = new MeshStandardMaterial({ color: 0x4a4d53, roughness: 0.2, metalness: 1 });
+  const dark = new MeshStandardMaterial({ color: 0x0b0c0e, roughness: 0.35, metalness: 0.4 });
 
-  const cover = new Mesh(panel(WIDTH - 2.6, HEIGHT - 2.6, CORNER - 1.3), glass);
-  cover.position.z = 0.02;
+  const cover = new Mesh(slab(WIDTH - 2.4, HEIGHT - 2.4, 0.3, CORNER - 1.2, 0.12), glass);
+  cover.position.z = -0.12;
   back.add(cover);
 
-  // The camera bar: a raised pill across the upper back, with a dark glass visor set in it.
+  // The camera bar: a pill standing well off the upper back. Dark glass covers the lenses, and
+  // the flash and the temperature sensor sit in the metal at its end.
   const bar = new Group();
-  bar.position.y = HEIGHT / 2 - 25;
-  bar.add(new Mesh(slab(55, 21, 2.6, 10.5, 0.7), frame));
-  const pane = new Mesh(slab(50.6, 16.6, 0.5, 8.3, 0.2), visor);
-  pane.position.z = 2.45;
+  const tall = 3.3;
+  bar.position.y = HEIGHT / 2 - 25.5;
+  bar.add(new Mesh(slab(56, 22, tall, 11, 0.55), frame));
+  const pane = new Mesh(slab(42.4, 19.6, 0.4, 9.8, 0.15), visor);
+  pane.position.set(-6, 0, tall - 0.22);
   bar.add(pane);
 
-  const top = 2.97;
+  const onGlass = tall + 0.19;
   const disc = (radius, material, x, y, z) => {
-    const mesh = new Mesh(new CircleGeometry(radius, 48), material);
-    mesh.position.set(x, y, top + z);
+    const mesh = new Mesh(new CircleGeometry(radius, 56), material);
+    mesh.position.set(x, y, z);
     bar.add(mesh);
+    return mesh;
   };
-  for (const [x, radius] of [[-15.4, 5.6], [-2.6, 5.6], [9.6, 4.8]]) {
-    const ring = new Mesh(new RingGeometry(radius - 0.7, radius, 48), rim);
-    ring.position.set(x, 0, top + 0.01);
-    bar.add(ring);
-    disc(radius - 0.7, lens, x, 0, 0.005);
-    disc(radius * 0.5, iris, x, 0, 0.012);
-    disc(radius * 0.26, lens, x, 0, 0.018);
-    disc(radius * 0.07, glint, x - radius * 0.3, radius * 0.32, 0.024);
+  const round = lensFace(false);
+  for (const [x, radius, face] of [[-18.6, 5.3, round], [-6, 6.3, round], [6.4, 5, lensFace(true)]]) {
+    const lens = new MeshStandardMaterial({ map: face, emissiveMap: face, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.08, metalness: 0.2 });
+    disc(radius, lens, x, 0, onGlass + 0.01);
+    const edge = new Mesh(new TorusGeometry(radius, 0.28, 12, 56), rim);
+    edge.position.set(x, 0, onGlass);
+    bar.add(edge);
   }
-  disc(1.9, new MeshStandardMaterial({ color: 0xe9dfc4, roughness: 0.5 }), 19.6, 3.4, 0.01);
-  disc(1.5, rim, 19.6, -3.4, 0.01);
+  // The flash above the sensor.
+  const onMetal = tall + 0.01;
+  disc(2.5, dark, 21.2, 4, onMetal);
+  disc(2.15, new MeshStandardMaterial({ color: 0xf4f1e8, roughness: 0.35, emissive: 0xf4f1e8, emissiveIntensity: 0.35 }), 21.2, 4, onMetal + 0.01);
+  disc(0.75, new MeshStandardMaterial({ color: 0xf3df9a, roughness: 0.5, emissive: 0xf3df9a, emissiveIntensity: 0.4 }), 21.2, 4, onMetal + 0.02);
+  disc(2, dark, 21.6, -3.9, onMetal);
+  disc(1.1, visor, 21.6, -3.9, onMetal + 0.01);
+  // A microphone's pinhole in the glass.
+  disc(0.35, dark, 13.2, 0, onGlass + 0.01);
 
   back.add(bar);
   back.rotation.y = Math.PI;
   back.position.z = -DEPTH / 2;
   return back;
+}
+
+/** What the frame carries: the buttons, the antenna lines, and the port and speakers below. */
+function buildEdges(frame) {
+  const edges = new Group();
+  const line = new MeshStandardMaterial({ color: 0x55585e, roughness: 0.6, metalness: 0.2 });
+  const hollow = new MeshStandardMaterial({ color: 0x050506, roughness: 0.5, metalness: 0.3 });
+  const flat = DEPTH - 1.8;
+
+  // Power above volume, on the right as the screen faces the reader.
+  for (const [y, length] of [[31, 10], [10.5, 21]]) {
+    const button = new Mesh(slab(2.3, length, 1.1, 1.15, 0.3), frame);
+    button.rotation.y = Math.PI / 2;
+    button.position.set(WIDTH / 2 - 0.55, y, 0);
+    edges.add(button);
+  }
+  // Antenna lines: thin bands across the metal, near each corner and on the top edge.
+  for (const side of [-1, 1]) {
+    for (const y of [HEIGHT / 2 - 17, -HEIGHT / 2 + 17]) {
+      const band = new Mesh(new BoxGeometry(0.06, 0.9, flat), line);
+      band.position.set(side * (WIDTH / 2), y, 0);
+      edges.add(band);
+    }
+  }
+  for (const [x, y] of [[-14, HEIGHT / 2], [16, -HEIGHT / 2]]) {
+    const band = new Mesh(new BoxGeometry(0.9, 0.06, flat), line);
+    band.position.set(x, y, 0);
+    edges.add(band);
+  }
+  // Below: the port between a speaker and a microphone slot. On top: one more pinhole.
+  const slot = (width, height, x, y, up) => {
+    const mesh = new Mesh(panel(width, height, height / 2), hollow);
+    mesh.rotation.x = (up * -Math.PI) / 2;
+    mesh.position.set(x, y + up * 0.01, 0);
+    edges.add(mesh);
+  };
+  slot(8.6, 2.7, 0, -HEIGHT / 2, -1);
+  slot(9.5, 1.3, 15, -HEIGHT / 2, -1);
+  slot(9.5, 1.3, -15, -HEIGHT / 2, -1);
+  slot(1, 1, 12, HEIGHT / 2, 1);
+  return edges;
 }
 
 function buildFront(screen) {
@@ -173,7 +285,7 @@ function buildFront(screen) {
  * Draws the phone into `canvas`, on a clear background. `fill` is the share of the canvas's
  * height the phone takes when it faces the reader.
  */
-export function createPhone(canvas, { fill = 0.8, pixelRatio = 1 } = {}) {
+export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(pixelRatio);
   renderer.toneMapping = NeutralToneMapping;
@@ -191,19 +303,19 @@ export function createPhone(canvas, { fill = 0.8, pixelRatio = 1 } = {}) {
     fragmentShader: SCREEN_FRAGMENT,
   });
 
-  const frame = new MeshStandardMaterial({ color: 0xb4b9c1, roughness: 0.22, metalness: 1 });
+  const frame = new MeshStandardMaterial({ color: 0x74777d, roughness: 0.27, metalness: 1 });
   const phone = new Group();
   const body = new Mesh(slab(WIDTH, HEIGHT, DEPTH, CORNER, 0.9), frame);
   body.position.z = -DEPTH / 2;
-  phone.add(body, buildFront(screen), buildBack(frame));
-  // Power above volume, on the right as the screen faces the reader.
-  for (const [y, length] of [[31, 10], [11, 21]]) {
-    const button = new Mesh(new BoxGeometry(0.9, length, 2.2), frame);
-    button.position.set(WIDTH / 2 + 0.15, y, 0);
-    phone.add(button);
-  }
+  phone.add(body, buildFront(screen), buildBack(frame), buildEdges(frame));
   phone.rotation.order = "YXZ";
   scene.add(phone);
+  // A lamp up and to the left for the matte back, and one behind to catch the frame's edge.
+  const key = new DirectionalLight(0xffffff, 2.2);
+  key.position.set(-90, 140, 220);
+  const edge = new DirectionalLight(0xdfe6ff, 1.4);
+  edge.position.set(160, 40, -60);
+  scene.add(key, edge);
 
   const camera = new PerspectiveCamera(FIELD_OF_VIEW, 1, 10, 4000);
   const loader = new TextureLoader();

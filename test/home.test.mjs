@@ -146,6 +146,21 @@ for (const transition of ["fade", "turn"]) {
   });
 }
 
+test("the phone stays where it is when the scroll begins", async () => {
+  await visit(DESK);
+  await phoneShows("back", "today");
+  const tops = [];
+  for (const top of [0, 10, 60, 300]) {
+    tops.push(
+      await site.run((top) => {
+        window.scrollTo({ top, behavior: "instant" });
+        return Math.round(document.querySelector(".home-stage").getBoundingClientRect().top);
+      }, top),
+    );
+  }
+  assert.deepEqual(tops, tops.map(() => tops[0]));
+});
+
 /** How bright the middle of the phone's screen is, 0 to 255. */
 async function screenBrightness() {
   const clip = await site.run(() => {
