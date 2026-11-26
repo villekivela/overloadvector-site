@@ -5,7 +5,7 @@ import { convert } from "../scripts/formats.mjs";
 const spec = {
   title: "Gym file format",
   description: "One gym as a file.",
-  rewrites: [["The app's parser (`app/src/Parser.kt`) is strict.", "The import is strict."]],
+  rewrites: [["The app's parser is strict.", "The import is strict."]],
 };
 
 const source = `# Gym file format
@@ -28,7 +28,7 @@ title: "Gym file format"
 description: "One gym as a file."
 ---
 
-<!-- Copied from the app's own notes by scripts/formats.mjs. Change it there, then copy it again. -->
+<!-- A copy: change the app's note, then run scripts/sync-formats.mjs. -->
 
 The import is strict.
 
@@ -39,6 +39,21 @@ It stays (Program writes it).
 { "format": "hyperlog-gym" }
 \`\`\`
 `,
+  );
+});
+
+test("a bracket that only points into the app's repository is dropped", () => {
+  const note = `# Gym file format
+
+The app's parser (\`app/src/Parser.kt\`) is strict.
+
+An id (\`app/src/main/assets/list.json\`). Shown (\`SPEC.md\`, Coaching → Workout) here (SPEC, Units).
+Yours (not the gym's; ADR 0004), as \`ProgramParser.workout\` checks it (\`docs/programs/a.md\`).
+`;
+  const rewrites = [...spec.rewrites, [/\bas `\w+Parser\.\w+` checks it/, "checked"]];
+  assert.match(
+    convert(note, { ...spec, rewrites }),
+    /An id\. Shown here\.\nYours \(not the gym's\), checked\.\n/,
   );
 });
 
@@ -55,6 +70,9 @@ for (const [what, line] of [
   ["a ticket", "Since #512 this changed."],
   ["another of the app's notes", "As in `docs/programs/starter.md`."],
   ["the old name", "Written for Hyperlog."],
+  ["a decision record", "As ADR 0004 says."],
+  ["the glossary", "See the GLOSSARY."],
+  ["the agents' notes", "See CLAUDE.md."],
 ]) {
   test(`${what} left in a note stops the copy`, () => {
     const note = `${source}\n${line}\n`;

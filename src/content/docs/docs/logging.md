@@ -1,6 +1,6 @@
 ---
 title: Logging a session
-description: Sets, reps in reserve, warm-ups, rest, techniques and swaps during a workout.
+description: Sets, reps in reserve, warm-ups, rest, techniques and swaps during a session.
 ---
 
 Every tap is saved at once. You can leave the app, lock the phone or restart it, and the session is
@@ -36,8 +36,8 @@ Type with the number pad at the bottom. A weight that looks like a typo, such as
 set or one your equipment can't make, is questioned before it's logged: pick a suggested weight, or
 tap the check again to keep yours.
 
-To fix a logged set, tap it, change it and tap the check. Tap a set's number to remove it or change
-its target, and **Add set** to do one more.
+To fix a logged set, tap it, change it and tap the check. Tap the number of a set you haven't logged
+to remove it or change its target, and **Add set** to do one more.
 
 ## Partial reps
 
@@ -70,7 +70,7 @@ session's exercises with a dot for each set.
 <div class="shots">
 
 ![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises.png)
-![An exercise's details: an animated figure showing the movement, its muscles and the machine](../../../assets/shots/shot-exercise.png)
+![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise.png)
 
 </div>
 
@@ -99,8 +99,13 @@ number.
 ## Changing today's plan
 
 Add, remove, reorder or swap exercises and sets as you need. The changes apply to this session only.
-To keep an exercise's change for the rest of the block, tap **Save changes** in its details and
-accept what it shows you. Add an exercise from the **⋮** menu at the top.
+Add an exercise from the **⋮** menu at the top.
+
+In a program's session you can keep some of them for the rest of the block: tap **Save changes** in an
+exercise's details and accept what it shows you. It keeps a swap, the number of sets, an RIR change
+shared by every set, and an exercise you added and logged. Rep targets, techniques and the order stay
+in the session. **Remove** asks whether to remove the exercise for this session or the rest of the
+block.
 
 ## Finish
 

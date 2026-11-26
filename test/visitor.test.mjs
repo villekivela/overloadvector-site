@@ -49,9 +49,9 @@ test("every link within the site leads somewhere", () => {
   const broken = [];
   for (const path of builtFiles().filter((file) => file.endsWith(".html"))) {
     const html = read(path).toString("utf8");
-    for (const [, address] of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
-      const [target, anchor] = address.split("#");
-      const file = decodeURI(target.split("?")[0]).slice(1);
+    for (const [, address] of html.matchAll(/(?:href|src)="([\/#][^"]*)"/g)) {
+      const [target, anchor] = address.startsWith("#") ? [path.replace(/index\.html$/, ""), address.slice(1)] : address.split("#");
+      const file = decodeURI(target.split("?")[0]).replace(/^\//, "");
       const found = file === "" || file.endsWith("/") ? `${file}index.html` : file;
       if (!files.has(found)) broken.push(`${path} → ${address}`);
       else if (anchor && !read(found).toString("utf8").includes(`id="${anchor}"`)) broken.push(`${path} → ${address}`);
@@ -89,11 +89,15 @@ for (const [what, words] of [
   ["what stays on the phone", /What stays on your phone/],
   ["Android's backup to Google", /Android(?:'|&#39;|’)s backup<\/strong> copies/],
   ["the calls to Anthropic with the user's key", /api\.anthropic\.com/],
-  ["the server's sync and proposals", /Connecting Claude to your Overload Vector account[\s\S]*Proposals wait on our server/],
+  ["the server's sync and proposals", /Connecting Claude to your Overload Vector account[\s\S]*A proposal waits on our server/],
   ["the sign-in", /Amazon Cognito/],
   ["where the copy is kept", /eu-north-1/],
   ["how to delete it", /Delete my account data/],
   ["the update check", /api\.github\.com[\s\S]*says nothing about you/],
+  ["the Changes and earlier answers a check-in sends", /Changes in force[\s\S]*earlier check-in/],
+  ["the training days and library the copy holds", /What is copied\.[\s\S]*training\s+days[\s\S]*exercise\s+library[\s\S]*check-ins/],
+  ["what each copy records about the phone", /app version[\s\S]*random device ID|random device ID[\s\S]*app version/],
+  ["the answer to a proposal being kept 30 days", /your answer[\s\S]*deleted 30 days after Claude made/],
   ["no ads and no trackers", /no ads, no analytics and no\s+trackers/],
   ["the contact", /support@overloadvector\.com/],
 ]) {

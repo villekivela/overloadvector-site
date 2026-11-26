@@ -2,8 +2,8 @@
 //
 //   npm run formats -- <path to the app repo>
 //
-// Each rewrite replaces words that only make sense inside the app's own repository. When a note's
-// words change, the copy stops and names the rewrite to update.
+// References into the app's repository are dropped (formats.mjs); each rewrite here rewords what
+// is left. When a note's words change, the copy stops and names the rewrite to update.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,57 +14,20 @@ const NOTES = {
     title: "Program file format",
     description: "Every field of the JSON file a program is imported from.",
     rewrites: [
-      [
-        "The validator\n(`app/src/main/java/com/hyperlog/app/program/ProgramParser.kt`) is strict.",
-        "The import is strict.",
-      ],
-      [
-        "The check-in's context and New program's review read it (`SPEC.md`, Coaching → Training style).",
-        "A check-in and New program's review read it.",
-      ],
-      [
-        "an exercise library id (`app/src/main/assets/exercises.json`).",
-        "an exercise library id. An exported program shows the ids of its exercises.",
-      ],
-      [
-        "A workout from the coach (`SPEC.md`, Coaching → Workout) is",
-        "A workout from the coach is",
-      ],
-      [
-        "above and no week overrides. `ProgramParser.workout` checks it with the same rules and paths,\nunder `workout.`",
-        "above and no week overrides. It is checked with the same rules and paths,\nunder `workout.`",
-      ],
-      [
-        "A new program from a check-in (`SPEC.md`, Coaching → New program) is",
-        "A new program from a check-in is",
-      ],
-      [
-        "skipped (SPEC, Training days and the rotation). A file",
-        "skipped. A file",
-      ],
-      [
-        "Overload Vector Full Body (`docs/programs/full-body-3-day.md`) is:",
-        "Overload Vector Full Body, the app's starter program, is:",
-      ],
+      ["The validator is strict.", "The import is strict."],
+      ["The check-in's context and", "A check-in and"],
+      ["Overload Vector Full Body is:", "Overload Vector Full Body, the app's starter program, is:"],
+      ["an exercise library id.", "an exercise library id. An exported program shows the ids of its exercises."],
+      [/`\w+Parser\.\w+` checks it/, "It is checked"],
       [" A test parses this example against the shipped library, so it stays valid.", ""],
-      [
-        "as Full Body does\n  (`app/src/main/assets/programs/full-body-3-day.json`).",
-        "as the starter program does.",
-      ],
-      [
-        "circuits: out of v1 (`SPEC.md`).",
-        "circuits: not supported.",
-      ],
+      ["as Full Body does.", "as the starter program does."],
+      ["circuits: out of v1.", "circuits: not supported."],
     ],
   },
   "gym-format": {
     title: "Gym file format",
     description: "Every field of the JSON file a gym and its equipment are imported from.",
-    rewrites: [
-      [" `SPEC.md` (Gyms and equipment → Importing a gym) has the product rules.", ""],
-      ["(the weekday plan is yours, not the gym's; ADR 0004)", "(the weekday plan is yours, not the gym's)"],
-      ["read in (SPEC, Units).", "read in."],
-    ],
+    rewrites: [[/ `SPEC\.md` \([^()]*\) has the product rules\./, ""]],
   },
 };
 

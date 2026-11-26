@@ -12,8 +12,8 @@ The app judges your **work sets at the top weight** from the last time you did t
 that exercise. It counts reps and reps in reserve (RIR) together, so 11 reps with 1 in reserve is
 as good as 10 reps with 2 in reserve.
 
-It also keeps one **strength estimate** for each exercise, an estimated one-rep max worked out from
-your sets of 12 reps or fewer. Machines and cables have an estimate for each machine, since their
+It also keeps one **strength estimate** for each exercise: roughly the most you could lift once,
+worked out from your sets of 12 reps or fewer. Machines and cables have an estimate for each machine, since their
 stacks don't compare, and Squat and Deadlift have one for each bar.
 
 An exercise with no history gets no suggestion until you've logged its first set.
@@ -53,9 +53,9 @@ Under the exercise's name, a short line gives the reason: "Up to 62.5 kg, you to
 
 ## Deloads, easy weeks and Changes
 
-A deload week never lowers your estimate, and the app doesn't step the weight down after one. After
-two or more weeks with no training, the first week back is an **easy week**: one set fewer, one more
-rep in reserve and no techniques. A coach's [Change](/docs/coaching/), such as 10% lighter after
+A deload week never lowers your estimate, and the app doesn't step the weight down after one. With
+[training days](/docs/programs/#training-days) set, after two or more weeks with no training the first
+week back is an **easy week**: one set fewer, one more rep in reserve and no techniques. A coach's [Change](/docs/coaching/), such as 10% lighter after
 time off, applies on top of the suggestion for as long as it lasts.
 
 ## Goals and records

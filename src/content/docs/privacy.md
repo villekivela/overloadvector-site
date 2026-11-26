@@ -32,10 +32,11 @@ your key. Nothing goes through our server. Anthropic handles what it receives un
 [terms and privacy policy](https://www.anthropic.com/legal/privacy).
 
 - **When you save the key**, the app checks it with a request that holds no training.
-- **When you check in**, it sends your answers and what Claude needs to answer: your program, your
-  recent sessions and weekly sets, your training days, goals and gyms with their equipment, the
-  exercise library, and your training style, including your age band, aches and anything you typed
-  there, where you've filled them in.
+- **When you check in**, it sends your answers and what Claude needs to answer: your program with its
+  notes, the Changes in force with the earlier check-in that made each one (its questions and your
+  answers, which may mention pain), your recent sessions and weekly sets, your training days, goals
+  and gyms with their equipment, the exercise library, and your training style, including your age
+  band, aches and anything you typed there, where you've filled them in.
 - **When you attach a file** (a spreadsheet, PDF or photo) to build a program, or ask Claude to read
   a weight stack from a photo, that file or photo is sent.
 
@@ -47,9 +48,13 @@ Nothing here happens unless you tap **Connect Claude** and agree.
 
 **What is copied.** So that Claude can read it, the app copies your training to your Overload Vector
 account on our server: sessions, programs, Changes, exercise histories and estimates, lift goals,
-gyms and equipment, bodyweight, your training style and sore spots, and what you typed (such as gym
-names and notes). This is health data, and we keep it only because you agreed. Your Claude key and
-photos are never copied.
+bodyweight, your training days with their gyms and minutes, gyms and equipment, your exercise
+library with your own edits, your training style and sore spots, the check-ins behind your Changes
+(their questions and your answers), and what you typed (such as gym names and notes). This is health
+data, and we keep it only because you agreed. Your Claude key and photos are never copied.
+
+With each copy the server also records the app version, the time, and a random device ID that tells
+your phones apart.
 
 **Sign-in.** You sign in with Google, which handles the sign-in under
 [Google's privacy policy](https://policies.google.com/privacy). Your email address and Google sign-in
@@ -57,14 +62,16 @@ are held by our sign-in service (Amazon Cognito). The training copy is filed und
 still your personal data, because the sign-in service can tie the ID back to you.
 
 **What Claude does with it.** Claude, in its own app and when you ask it, reads the copy and may
-propose a Change, a workout or a program. Proposals wait on our server until the app picks them up and
-you accept or decline them. What Claude reads there is handled under Anthropic's terms. The copy is
-never sent back to a phone.
+propose a Change, a workout or a program. A proposal waits on our server until the app picks it up.
+When you accept or decline it, your answer (or why the app couldn't use the proposal) is sent back
+and kept with it, where Claude can read it. What Claude reads there is handled under Anthropic's
+terms. The copy is never sent back to a phone.
 
 **Where.** On Amazon Web Services, in the EU (region eu-north-1, Stockholm, Sweden). Amazon processes
 it for us. We share it with nobody else.
 
-**How long.** Until you delete it. Proposals expire 30 days after Claude makes them. Server logs,
+**How long.** Until you delete it. A proposal, answered or not, is deleted 30 days after Claude made
+it. Server logs,
 which hold the opaque ID but no training data, are kept for 30 days. The database's recovery copies
 keep deleted data for up to 35 days.
 

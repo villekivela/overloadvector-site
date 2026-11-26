@@ -3,7 +3,7 @@ title: "Gym file format"
 description: "Every field of the JSON file a gym and its equipment are imported from."
 ---
 
-<!-- Copied from the app's own notes by scripts/formats.mjs. Change it there, then copy it again. -->
+<!-- A copy: change the app's note, then run scripts/sync-formats.mjs. -->
 
 A gym file describes one gym and its equipment, so a whole gym can be set up at once: Settings →
 Gyms and equipment → **Import gym** picks the file. Importing adds a new gym and never changes or

@@ -44,7 +44,7 @@ next day you haven't trained.
 ## Changes
 
 The **⋮** menu on Program has the quick levers: **Skip day**, **Repeat week**, **Deload week** and
-**Shift program**. These are **Changes**, as a coach's suggestions are: you see what differs before
+**Shift program**. These are **Changes**, as most of a coach's proposals are: you see what differs before
 you accept, and you can revert them from the Changes page.
 
 ## Training days

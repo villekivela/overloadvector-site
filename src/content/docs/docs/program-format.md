@@ -3,7 +3,7 @@ title: "Program file format"
 description: "Every field of the JSON file a program is imported from."
 ---
 
-<!-- Copied from the app's own notes by scripts/formats.mjs. Change it there, then copy it again. -->
+<!-- A copy: change the app's note, then run scripts/sync-formats.mjs. -->
 
 Overload Vector imports a program as one JSON file (Program → Import program). This note is the format's
 reference, for writing a program by hand or with Claude. The import is strict. It reports every

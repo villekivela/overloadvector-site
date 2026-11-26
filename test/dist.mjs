@@ -7,7 +7,7 @@ export const DIST = fileURLToPath(new URL("../dist/", import.meta.url));
 
 /** Every built file, as a path under dist/. */
 export function builtFiles() {
-  if (!existsSync(DIST)) return [];
+  if (!existsSync(DIST)) throw new Error("nothing is built: run npm run build first");
   return readdirSync(DIST, { recursive: true, withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) => relative(DIST, join(entry.parentPath, entry.name)));

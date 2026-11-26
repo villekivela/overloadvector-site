@@ -3,8 +3,8 @@ title: Coaching with Claude
 description: Check-ins with your own Claude API key, or Claude through the Overload Vector connector.
 ---
 
-When the plan meets real life (a sore wrist, a short evening, a hotel gym), Claude can suggest what
-to do. It reads your program and your recent training, and it suggests one of:
+When the plan meets real life (a sore wrist, a short evening, a hotel gym), Claude can propose what
+to do. It reads your program and your recent training, and it proposes one of:
 
 - **A Change** to your program, for a few days or for good.
 - **A workout** for today, outside the program.
@@ -37,7 +37,7 @@ The [privacy policy](/privacy/) says exactly what is sent.
    program** or **Something else**.
 
 Claude asks a few short questions, one on each screen. Tap an answer or type your own. At the end
-you review what it suggests: accept it, ask for changes or drop it.
+you review what it proposes: accept it, ask for changes or drop it.
 
 <div class="shots">
 
@@ -53,7 +53,7 @@ Settings shows what the month's check-ins have cost, as an estimate. **Remove** 
 
 ## The connector
 
-With the connector, you talk to Claude in its own app, and its suggestions appear in Overload Vector.
+With the connector, you talk to Claude in its own app, and its proposals appear in Overload Vector.
 
 1. In Overload Vector, open **Settings → Connect Claude**. Read what will be copied, tap **Agree**
    and sign in with Google.
