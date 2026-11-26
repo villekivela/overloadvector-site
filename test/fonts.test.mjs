@@ -33,7 +33,7 @@ test("the site's title, the hero title and headings are in Space Grotesk", async
   onlyIn("Space Grotesk", await fontsOf(".site-title span"), "the site's title");
   onlyIn("Space Grotesk", await fontsOf(".hero h1"), "the hero title");
   onlyIn("Space Grotesk", await fontsOf(".sl-markdown-content h2"), "a home page heading");
-  onlyIn("Space Grotesk", await fontsOf(".card .title > span:last-child"), "a card's title");
+  onlyIn("Space Grotesk", await fontsOf(".home-feature h2"), "a feature's heading");
   await site.visit("/docs/logging/");
   onlyIn("Space Grotesk", await fontsOf("h1#_top"), "a page's title");
   onlyIn("Space Grotesk", await fontsOf(".sl-markdown-content h2"), "a heading");

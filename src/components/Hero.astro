@@ -1,0 +1,10 @@
+---
+// The home page's top is its own (Home.astro). Starlight's other page with a hero, the one for a
+// wrong address, keeps Starlight's.
+import Default from "@astrojs/starlight/components/Hero.astro";
+import Home from "./Home.astro";
+
+const home = Astro.locals.starlightRoute.entry.id === "index" || Astro.locals.starlightRoute.entry.id === "";
+---
+
+{home ? <Home /> : <Default />}

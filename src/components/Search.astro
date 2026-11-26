@@ -1,0 +1,34 @@
+---
+// The home page has nothing to search for yet: in the search's place it leads to the docs and
+// the FAQ, where the search is.
+import Default from "@astrojs/starlight/components/Search.astro";
+
+const { id } = Astro.locals.starlightRoute.entry;
+const home = id === "index" || id === "";
+---
+
+{
+  home ? (
+    <nav class="home-links" aria-label="Site">
+      <a href="/docs/getting-started/">Docs</a>
+      <a href="/faq/">FAQ</a>
+    </nav>
+  ) : (
+    <Default />
+  )
+}
+
+<style>
+  .home-links {
+    display: flex;
+    gap: 1.5rem;
+    font-weight: 500;
+  }
+  .home-links a {
+    color: var(--sl-color-gray-2);
+    text-decoration: none;
+  }
+  .home-links a:hover {
+    color: var(--sl-color-white);
+  }
+</style>

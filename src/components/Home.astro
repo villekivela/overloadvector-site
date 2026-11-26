@@ -1,0 +1,508 @@
+---
+// The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
+// phone is a live 3D model (src/phone/) that turns with the scroll and stays pinned while its
+// screen changes. A narrow screen, a visitor who asked for less motion and a browser without
+// WebGL get a still of the same phone under each text, and never load three.js.
+import { getImage, Image } from "astro:assets";
+import { LinkButton } from "@astrojs/starlight/components";
+
+const { data } = Astro.locals.starlightRoute.entry;
+const { tagline, actions = [] } = data.hero ?? {};
+
+// Each thing the app does for the reader: a heading that says what the reader gets, one sentence, three
+// particulars. `kicker` names it in a word, and `brief` is its line in the hero. `screens` are
+// what the phone shows as the section passes, each with its words in `alts`.
+const FEATURES = [
+  {
+    screens: ["new-program"],
+    kicker: "Program",
+    brief: "A plan built for your week and your gym",
+    title: "A program built around you",
+    text: "Tell it your week and your gym, and setup writes a periodized program you can start today.",
+    points: [
+      "Blocks, weeks and days, with set targets for every muscle",
+      "Built for the equipment your gym has",
+      "Or bring your own program and import it",
+    ],
+    more: { text: "How programs work", href: "/docs/programs/" },
+    alts: ["A new program for review, with its weekly sets per muscle shown on the mannequin"],
+  },
+  {
+    screens: ["logging"],
+    kicker: "Logging",
+    brief: "Every set logged in a few taps",
+    title: "Log every set in a few taps",
+    text: "Weight, reps and reps in reserve go in fast, so your attention stays on the lift.",
+    points: [
+      "Warm-ups and plate loading worked out for you",
+      "A rest timer between sets",
+      "Intensity techniques, logged as you do them",
+    ],
+    more: { text: "How logging works", href: "/docs/logging/" },
+    alts: ["Logging a set: weight, reps and reps in reserve, with the rest timer running"],
+  },
+  {
+    screens: ["mannequin", "muscles"],
+    kicker: "Technique",
+    brief: "Every lift shown in 3D, on your machine",
+    title: "See how every lift is done",
+    text: "A 3D mannequin does each exercise on your machine, so you know the movement before you load the bar.",
+    points: [
+      "Step through the rep, phase by phase",
+      "See which muscles each exercise works",
+      "Technique videos, a tap away",
+    ],
+    more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
+    alts: [
+      "An exercise's details: the mannequin doing a Smith machine RDL, and the muscles it works",
+      "The same exercise with the muscles layer on: the working muscles lit up on the mannequin",
+    ],
+  },
+  {
+    screens: ["progress"],
+    kicker: "Progression",
+    brief: "Your next weight, worked out for you",
+    title: "Know what to lift next",
+    text: "Every exercise gets its next weight from what you did last time, so you never have to guess.",
+    points: [
+      "Only weights your gym really has",
+      "Each suggestion tells you why",
+      "Weekly sets per muscle, tracked against your targets",
+    ],
+    more: { text: "How progression works", href: "/docs/progression/" },
+    alts: ["The week's sets per muscle against their targets"],
+  },
+  {
+    screens: ["check-in"],
+    kicker: "Coaching",
+    brief: "A new plan when life gets in the way",
+    title: "Replan when life gets in the way",
+    text: "Sore wrist, short evening, hotel gym: tell Claude what's going on, and it proposes what to change.",
+    points: [
+      "Works around pain, time and missing equipment",
+      "Nothing changes until you accept it",
+      "Bring an Anthropic API key or your Claude account",
+    ],
+    more: { text: "How coaching works", href: "/docs/coaching/" },
+    alts: ["The coach asking what's going on: pain, short on time, another gym and more"],
+  },
+];
+// What a visitor asks first, under the buttons.
+const FACTS = ["Android 8.0 or newer", "Free in the beta", "No account, no ads, no trackers"];
+const TODAY = {
+  screen: "today",
+  alt: "Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works",
+};
+const BACK_ALT = "The back of a phone, its camera bar across the top";
+
+const files = (pattern: Record<string, { default: ImageMetadata }>) => (name: string) => {
+  const found = Object.entries(pattern).find(([path]) => path.endsWith(`/${name}.png`));
+  if (!found) throw new Error(`no image ${name}.png`);
+  return found[1].default;
+};
+const still = files(import.meta.glob("../assets/phone/phone-*.png", { eager: true }));
+const shot = files(import.meta.glob("../assets/shots/shot-*.png", { eager: true }));
+
+// What the live phone puts on its screen: each screenshot's address, per theme.
+const screens: Record<string, { light: string; dark: string; alt: string }> = {};
+const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => screens.map((screen, at) => ({ screen, alt: alts[at] })))];
+for (const { screen, alt } of shown) {
+  const [light, dark] = await Promise.all(
+    ["light", "dark"].map((theme) => getImage({ src: shot(`shot-${screen}-${theme}`), format: "webp", quality: 90 })),
+  );
+  screens[screen] = { light: light.src, dark: dark.src, alt };
+}
+---
+
+{/* Before the first paint, so the page never jumps from one layout to the other. */}
+<script is:inline>
+  (() => {
+    const wide = matchMedia("(min-width: 60rem) and (prefers-reduced-motion: no-preference)");
+    const draws = () => {
+      try {
+        return Boolean(document.createElement("canvas").getContext("webgl2"));
+      } catch {
+        return false;
+      }
+    };
+    let able;
+    // Sets the page to "live", the 3D phone, or "still", the pictures of it, and says whether it
+    // is live. `broken` is passed when the 3D phone failed: the page then keeps to the stills.
+    window.setHomePhone = (broken) => {
+      if (broken) able = false;
+      else if (wide.matches) able ??= draws();
+      const live = wide.matches && able;
+      document.documentElement.dataset.home = live ? "live" : "still";
+      return live;
+    };
+    window.setHomePhone();
+    wide.addEventListener("change", () => window.dispatchEvent(new Event("homephone")));
+  })();
+</script>
+
+<div class="home">
+  <div class="home-copy">
+    <section class="hero">
+      <img class="icon" src="/favicon.svg" alt="" width="72" height="72" />
+      <h1 id="_top" data-page-title>{data.title}</h1>
+      {tagline && <p class="tagline">{tagline}</p>}
+      <div class="actions">
+        {actions.map(({ icon, link, text, variant }) => (
+          <LinkButton href={link} variant={variant} icon={icon?.name}>{text}</LinkButton>
+        ))}
+      </div>
+      {/* The app at a glance: each job in a line, leading to its section below. */}
+      <ul class="glance">
+        {FEATURES.map(({ kicker, brief }, index) => (
+          <li>
+            <a href={`#${kicker.toLowerCase()}`}>
+              <span class="number">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{kicker}</strong>
+              <span>{brief}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <ul class="facts">
+        {FACTS.map((fact) => <li>{fact}</li>)}
+      </ul>
+      <div class="phone-still">
+        <Image src={still("phone-today-light")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
+        <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
+      </div>
+    </section>
+    {FEATURES.map(({ screens, kicker, title, text, points, more, alts }, index) => (
+      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screens.join(" ")}>
+        <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
+        <h2>{title}</h2>
+        <p class="lead">{text}</p>
+        <ul class="points">
+          {points.map((point) => <li>{point}</li>)}
+        </ul>
+        <a class="more" href={more.href}>{more.text}<span aria-hidden="true"> →</span></a>
+        <div class="phone-still">
+          {screens.map((screen, at) => (
+            <Fragment>
+              <Image src={still(`phone-${screen}-light`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
+              <Image src={still(`phone-${screen}-dark`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
+            </Fragment>
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+  <div class="home-stage" data-screens={JSON.stringify(screens)} data-back-alt={BACK_ALT}>
+    <Image class="stage-back" src={still("phone-back-light")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+    <Image class="stage-back" src={still("phone-back-dark")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+    <canvas role="img" aria-label={BACK_ALT}></canvas>
+  </div>
+</div>
+
+<script>
+  // three.js and the phone come in their own file, asked for only when the live phone runs and
+  // only once the page has been drawn.
+  let started = false;
+  function start() {
+    // Set anew each time the window changes, also once the phone runs.
+    const live = window.setHomePhone();
+    if (started || !live) return;
+    started = true;
+    const stage = document.querySelector(".home-stage");
+    const load = () =>
+      import("../phone/stage.js")
+        .then(({ startStage }) => startStage(stage))
+        .catch(() => window.setHomePhone(true));
+    if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 1500 });
+    else setTimeout(load, 200);
+  }
+  window.addEventListener("homephone", start);
+  start();
+</script>
+
+<style>
+  .hero,
+  .home-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    padding-block: 2.5rem;
+    text-align: center;
+  }
+  .icon {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 0 1px var(--sl-color-gray-5);
+  }
+  h1,
+  h2 {
+    font-family: var(--ov-font-title);
+    line-height: var(--sl-line-height-headings);
+    color: var(--sl-color-white);
+    text-wrap: balance;
+  }
+  h1 {
+    font-size: clamp(var(--sl-text-4xl), calc(0.25rem + 6vw), var(--sl-text-6xl));
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  h2 {
+    font-size: clamp(var(--sl-text-2xl), calc(0.5rem + 3vw), var(--sl-text-4xl));
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .tagline,
+  .lead {
+    max-width: 34rem;
+    font-size: clamp(var(--sl-text-base), calc(0.5rem + 1.2vw), var(--sl-text-xl));
+    color: var(--sl-color-gray-2);
+    text-wrap: pretty;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem 2rem;
+  }
+  .phone-still :global(img) {
+    width: min(20rem, 80vw);
+    height: auto;
+  }
+  /* Each still is there in both themes, a moonstone phone for the light one and a charcoal
+     phone for the dark: show the one Starlight's menu picked. */
+  :global(:root[data-theme="dark"]) :is(.phone-still, .home-stage) :global(img[src*="-light."]),
+  :global(:root[data-theme="light"]) :is(.phone-still, .home-stage) :global(img[src*="-dark."]) {
+    display: none;
+  }
+  .facts,
+  .glance,
+  .points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+  }
+  .facts li {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 99rem;
+  }
+  .glance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.6rem;
+    width: min(100%, 36rem);
+    text-align: start;
+  }
+  .glance a {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.1rem 0.7rem;
+    height: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .glance a:hover {
+    border-color: var(--sl-color-gray-3);
+  }
+  .glance .number {
+    grid-row: span 2;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--sl-color-gray-3);
+  }
+  .glance strong {
+    font-family: var(--ov-font-title);
+    font-size: var(--sl-text-base);
+    color: var(--sl-color-white);
+  }
+  /* A feature: its number and name, what it does, three particulars, and where to read on. */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sl-color-gray-3);
+  }
+  .kicker span {
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--sl-color-gray-4);
+    border-radius: 0.4rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--sl-color-white);
+  }
+  .points {
+    display: grid;
+    gap: 0.6rem;
+    width: min(100%, 30rem);
+    text-align: start;
+    color: var(--sl-color-gray-1);
+  }
+  .points li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+  }
+  .points li::before {
+    content: "";
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 0.1rem;
+    background: var(--sl-color-white);
+    translate: 0 -0.1rem;
+  }
+  .more {
+    font-weight: 600;
+    color: var(--sl-color-white);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sl-color-gray-4);
+  }
+  .more:hover {
+    border-color: var(--sl-color-white);
+  }
+  .home-stage {
+    display: none;
+  }
+  /* Behind the phone: a pool of light and a grid of dots that fades out around it, so the
+     phone stands in a space, not on a flat page. */
+  .phone-still,
+  .home-stage {
+    --pool: radial-gradient(
+      ellipse 62% 50% at 50% 48%,
+      color-mix(in srgb, var(--sl-color-white) 20%, transparent),
+      transparent 72%
+    );
+    --dots: radial-gradient(circle, color-mix(in srgb, var(--sl-color-white) 26%, transparent) 1px, transparent 1.6px);
+  }
+  .phone-still {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1.5rem 2rem;
+    background: var(--pool);
+  }
+  /* The phone hangs in front of the page, and throws a shadow on it. */
+  .phone-still :global(img),
+  .home-stage :global(.stage-back),
+  canvas {
+    filter: drop-shadow(0 1.75rem 2.25rem rgb(0 0 0 / 0.55));
+  }
+  :global(:root[data-theme="light"]) :is(.phone-still :global(img), .home-stage :global(.stage-back), canvas) {
+    filter: drop-shadow(0 1.75rem 2.25rem rgb(20 20 30 / 0.3));
+  }
+  .home-stage::before,
+  .home-stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .home-stage::before {
+    background: var(--pool);
+  }
+  .home-stage::after {
+    background: var(--dots) center / 1.5rem 1.5rem;
+    mask-image: radial-gradient(ellipse 62% 56% at 50% 50%, #000 15%, transparent 78%);
+  }
+
+  /* The live phone: the texts scroll past on one side, the phone stays on the other. */
+  :global(:root[data-home="live"]) {
+    .home {
+      display: grid;
+      grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+      column-gap: 2rem;
+    }
+    .hero,
+    .home-feature {
+      align-items: flex-start;
+      justify-content: center;
+      min-height: 56vh;
+      text-align: start;
+    }
+    /* The section whose screen is on the phone stands out from the others. */
+    .home-feature {
+      opacity: 0.38;
+      transition: opacity 0.35s;
+    }
+    .home-feature[data-active],
+    .home-feature:focus-within {
+      opacity: 1;
+    }
+    /* Room below the last section, so the phone is still pinned while it is read. */
+    .home-copy {
+      padding-bottom: 18vh;
+    }
+    .facts {
+      justify-content: flex-start;
+    }
+    .hero {
+      min-height: calc(100vh - var(--sl-nav-height) - 3rem);
+      padding-block: 0 4rem;
+    }
+    .actions {
+      justify-content: flex-start;
+    }
+    .phone-still {
+      display: none;
+    }
+    .home-stage {
+      display: block;
+      /* Pinned where it already stands, below the header and the page's own top margin, so it
+         doesn't ride up with the first of the scroll. */
+      position: sticky;
+      top: calc(var(--sl-nav-height) + 3rem);
+      align-self: start;
+      height: calc(100vh - var(--sl-nav-height) - 3rem);
+    }
+    /* The back, drawn ahead of time, holds the place until the model has loaded. */
+    .home-stage :global(.stage-back) {
+      position: absolute;
+      /* The model fills 0.74 of the stage's height, and 0.9 of this picture's. */
+      z-index: 1;
+      top: 8.9%;
+      left: 50%;
+      width: auto;
+      height: 82.2%;
+      translate: -50% 0;
+      transition: opacity 0.3s;
+    }
+    canvas {
+      position: absolute;
+      z-index: 1;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .home-stage[data-ready] canvas {
+      opacity: 1;
+    }
+    .home-stage[data-ready] :global(.stage-back) {
+      opacity: 0;
+    }
+  }
+</style>
