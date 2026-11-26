@@ -92,14 +92,14 @@ for (const [what, words] of [
   ["the server's sync and proposals", /Connecting Claude to your Overload Vector account[\s\S]*A proposal waits on our server/],
   ["the sign-in", /Amazon Cognito/],
   ["where the copy is kept", /eu-north-1/],
-  ["how to delete it", /Delete my account data/],
+  ["how to delete it", /Deleting it\.[\s\S]*Delete my account data[\s\S]*deletes the copy/],
   ["the update check", /api\.github\.com[\s\S]*says nothing about you/],
   ["the Changes and earlier answers a check-in sends", /Changes in force[\s\S]*earlier check-in/],
   ["the training days and library the copy holds", /What is copied\.[\s\S]*training\s+days[\s\S]*exercise\s+library[\s\S]*check-ins/],
   ["what each copy records about the phone", /app version[\s\S]*random device ID|random device ID[\s\S]*app version/],
   ["the answer to a proposal being kept 30 days", /your answer[\s\S]*deleted 30 days after Claude made/],
   ["no ads and no trackers", /no ads, no analytics and no\s+trackers/],
-  ["the contact", /support@overloadvector\.com/],
+  ["the contact", /Changes and contact[\s\S]*support@overloadvector\.com/],
 ]) {
   test(`the privacy policy covers ${what}`, () => {
     assert.match(page("/privacy/").split('<footer class="site-footer')[0], words);
