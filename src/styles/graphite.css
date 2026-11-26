@@ -63,3 +63,9 @@
 :root[data-theme="light"] .sl-markdown-content .shots img[src*="-dark."] {
   display: none;
 }
+
+/* On a page without a sidebar, the home page above all, the header's logo and menus line up with
+   the edges of the page's content below them. */
+:root:not([data-has-sidebar]) header.header {
+  padding-inline: max(var(--sl-content-pad-x), calc(50% - var(--sl-content-width) / 2));
+}

@@ -9,17 +9,19 @@ import { LinkButton } from "@astrojs/starlight/components";
 const { data } = Astro.locals.starlightRoute.entry;
 const { tagline, actions = [] } = data.hero ?? {};
 
+// Each of the app's four jobs: a heading that says what the reader gets, one sentence, three
+// particulars. `kicker` names it in a word, and `brief` is its line in the hero.
 const FEATURES = [
   {
     screen: "new-program",
     kicker: "Program",
-    brief: "Blocks of weeks, days and set targets",
-    title: "Runs a periodized program",
-    text: "Your training as a program: blocks of weeks, days and set targets.",
+    brief: "A plan built for your week and your gym",
+    title: "A program built around you",
+    text: "Tell it your week and your gym, and setup writes a periodized program you can start today.",
     points: [
-      "Setup writes a first program for your week and your gym",
-      "Or import your own from a file",
-      "Weekly sets per muscle, shown on the mannequin",
+      "Blocks, weeks and days, with set targets for every muscle",
+      "Built for the equipment your gym has",
+      "Or bring your own program and import it",
     ],
     more: { text: "How programs work", href: "/docs/programs/" },
     alt: "A new program for review, with its weekly sets per muscle shown on the mannequin",
@@ -27,13 +29,13 @@ const FEATURES = [
   {
     screen: "logging",
     kicker: "Logging",
-    brief: "Weight, reps and reps in reserve, in a few taps",
-    title: "Logs your sessions",
-    text: "Log a set in a few taps, and let the app do the arithmetic.",
+    brief: "Every set logged in a few taps",
+    title: "Log every set in a few taps",
+    text: "Weight, reps and reps in reserve go in fast, so your attention stays on the lift.",
     points: [
-      "Weight, reps and reps in reserve",
-      "Intensity techniques and a rest timer",
-      "Warm-ups and plates worked out for you",
+      "Warm-ups and plate loading worked out for you",
+      "A rest timer between sets",
+      "Intensity techniques, logged as you do them",
     ],
     more: { text: "How logging works", href: "/docs/logging/" },
     alt: "Logging a set: weight, reps and reps in reserve, with the rest timer running",
@@ -41,13 +43,13 @@ const FEATURES = [
   {
     screen: "progress",
     kicker: "Progression",
-    brief: "The next weight, worked out from what you did",
-    title: "Moves the weights up",
-    text: "Every exercise gets its next weight from what you did.",
+    brief: "Your next weight, worked out for you",
+    title: "Know what to lift next",
+    text: "Every exercise gets its next weight from what you did last time, so you never have to guess.",
     points: [
       "Only weights your gym really has",
-      "Every suggestion says why",
-      "The week's sets per muscle against their targets",
+      "Each suggestion tells you why",
+      "Weekly sets per muscle, tracked against your targets",
     ],
     more: { text: "How progression works", href: "/docs/progression/" },
     alt: "The week's sets per muscle against their targets",
@@ -55,13 +57,13 @@ const FEATURES = [
   {
     screen: "check-in",
     kicker: "Coaching",
-    brief: "Claude adapts the plan when life gets in the way",
-    title: "Coaches with Claude",
-    text: "When life gets in the way, Claude proposes what to change.",
+    brief: "A new plan when life gets in the way",
+    title: "Replan when life gets in the way",
+    text: "Sore wrist, short evening, hotel gym: tell Claude what's going on, and it proposes what to change.",
     points: [
-      "Sore wrist, short evening, hotel gym",
+      "Works around pain, time and missing equipment",
       "Nothing changes until you accept it",
-      "With an Anthropic API key or your Claude account",
+      "Bring an Anthropic API key or your Claude account",
     ],
     more: { text: "How coaching works", href: "/docs/coaching/" },
     alt: "The coach asking what's going on: pain, short on time, another gym and more",
