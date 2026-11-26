@@ -16,6 +16,21 @@ npm test          # checks the built site, in a headless Chrome too (set CHROME 
 npm run preview   # serves dist/, search included
 ```
 
+## The logo
+
+The favicon, the header's logo and the social preview are generated in the app's repository
+(`villekivela/overloadvector`, `brand/README.md`) and copied here. Never edit them here: regenerate
+them there with `python3 -I tools/brand/brand.py`, then copy its `brand/site/` files over:
+
+| From `brand/site/` | To |
+| --- | --- |
+| `favicon.svg`, `favicon.ico` | `public/` |
+| `social-1200x630.png` | `public/social.png` |
+| `logo-light.svg`, `logo-dark.svg` | `src/assets/` |
+
+The header shows the logo in place of the site's title, which stays its accessible name. The
+capitals are logo art only: running text says Overload Vector.
+
 ## The pages
 
 | Page | File |
