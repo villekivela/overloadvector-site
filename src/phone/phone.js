@@ -359,8 +359,10 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     },
     /** The body's colour: "dark" or "light", after the page's theme. */
     setFinish,
-    setPose({ yaw, pitch, roll }) {
+    /** How the phone stands. `size` is 1 at rest; less sets it back from the reader. */
+    setPose({ yaw, pitch, roll, size = 1 }) {
       phone.rotation.set(pitch, yaw, roll);
+      phone.scale.setScalar(size);
     },
     /** Shows `from`, or its blend with `to`: 0 is all `from`, 1 all `to`. */
     setScreen(from, to = from, blend = 0) {

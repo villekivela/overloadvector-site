@@ -1,5 +1,5 @@
 ---
-// The home page: the pitch, then the app's four jobs, beside one phone. On a wide screen the
+// The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
 // phone is a live 3D model (src/phone/) that turns with the scroll and stays pinned while its
 // screen changes. A narrow screen, a visitor who asked for less motion and a browser without
 // WebGL get a still of the same phone under each text, and never load three.js.
@@ -9,11 +9,12 @@ import { LinkButton } from "@astrojs/starlight/components";
 const { data } = Astro.locals.starlightRoute.entry;
 const { tagline, actions = [] } = data.hero ?? {};
 
-// Each of the app's four jobs: a heading that says what the reader gets, one sentence, three
-// particulars. `kicker` names it in a word, and `brief` is its line in the hero.
+// Each thing the app does for the reader: a heading that says what the reader gets, one sentence, three
+// particulars. `kicker` names it in a word, and `brief` is its line in the hero. `screens` are
+// what the phone shows as the section passes, each with its words in `alts`.
 const FEATURES = [
   {
-    screen: "new-program",
+    screens: ["new-program"],
     kicker: "Program",
     brief: "A plan built for your week and your gym",
     title: "A program built around you",
@@ -24,10 +25,10 @@ const FEATURES = [
       "Or bring your own program and import it",
     ],
     more: { text: "How programs work", href: "/docs/programs/" },
-    alt: "A new program for review, with its weekly sets per muscle shown on the mannequin",
+    alts: ["A new program for review, with its weekly sets per muscle shown on the mannequin"],
   },
   {
-    screen: "logging",
+    screens: ["logging"],
     kicker: "Logging",
     brief: "Every set logged in a few taps",
     title: "Log every set in a few taps",
@@ -38,10 +39,24 @@ const FEATURES = [
       "Intensity techniques, logged as you do them",
     ],
     more: { text: "How logging works", href: "/docs/logging/" },
-    alt: "Logging a set: weight, reps and reps in reserve, with the rest timer running",
+    alts: ["Logging a set: weight, reps and reps in reserve, with the rest timer running"],
   },
   {
-    screen: "progress",
+    screens: ["exercise"],
+    kicker: "Technique",
+    brief: "Every lift shown in 3D, on your machine",
+    title: "See how every lift is done",
+    text: "A 3D mannequin does each exercise on your machine, so you know the movement before you load the bar.",
+    points: [
+      "Step through the rep, phase by phase",
+      "See which muscles each exercise works",
+      "Technique videos, a tap away",
+    ],
+    more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
+    alts: ["An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine"],
+  },
+  {
+    screens: ["progress"],
     kicker: "Progression",
     brief: "Your next weight, worked out for you",
     title: "Know what to lift next",
@@ -52,10 +67,10 @@ const FEATURES = [
       "Weekly sets per muscle, tracked against your targets",
     ],
     more: { text: "How progression works", href: "/docs/progression/" },
-    alt: "The week's sets per muscle against their targets",
+    alts: ["The week's sets per muscle against their targets"],
   },
   {
-    screen: "check-in",
+    screens: ["check-in"],
     kicker: "Coaching",
     brief: "A new plan when life gets in the way",
     title: "Replan when life gets in the way",
@@ -66,7 +81,7 @@ const FEATURES = [
       "Bring an Anthropic API key or your Claude account",
     ],
     more: { text: "How coaching works", href: "/docs/coaching/" },
-    alt: "The coach asking what's going on: pain, short on time, another gym and more",
+    alts: ["The coach asking what's going on: pain, short on time, another gym and more"],
   },
 ];
 // What a visitor asks first, under the buttons.
@@ -87,7 +102,8 @@ const shot = files(import.meta.glob("../assets/shots/shot-*.png", { eager: true 
 
 // What the live phone puts on its screen: each screenshot's address, per theme.
 const screens: Record<string, { light: string; dark: string; alt: string }> = {};
-for (const { screen, alt } of [TODAY, ...FEATURES]) {
+const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => screens.map((screen, at) => ({ screen, alt: alts[at] })))];
+for (const { screen, alt } of shown) {
   const [light, dark] = await Promise.all(
     ["light", "dark"].map((theme) => getImage({ src: shot(`shot-${screen}-${theme}`), format: "webp", quality: 90 })),
   );
@@ -152,8 +168,8 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
         <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
       </div>
     </section>
-    {FEATURES.map(({ screen, kicker, title, text, points, more, alt }, index) => (
-      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screen}>
+    {FEATURES.map(({ screens, kicker, title, text, points, more, alts }, index) => (
+      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screens.join(" ")}>
         <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
         <h2>{title}</h2>
         <p class="lead">{text}</p>
@@ -162,8 +178,12 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
         </ul>
         <a class="more" href={more.href}>{more.text}<span aria-hidden="true"> →</span></a>
         <div class="phone-still">
-          <Image src={still(`phone-${screen}-light`)} alt={alt} width={360} densities={[1, 2]} loading="lazy" />
-          <Image src={still(`phone-${screen}-dark`)} alt={alt} width={360} densities={[1, 2]} loading="lazy" />
+          {screens.map((screen, at) => (
+            <Fragment>
+              <Image src={still(`phone-${screen}-light`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
+              <Image src={still(`phone-${screen}-dark`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
+            </Fragment>
+          ))}
         </div>
       </section>
     ))}
@@ -185,10 +205,9 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     if (started || !live) return;
     started = true;
     const stage = document.querySelector(".home-stage");
-    const transition = new URLSearchParams(location.search).get("transition");
     const load = () =>
       import("../phone/stage.js")
-        .then(({ startStage }) => startStage(stage, { transition }))
+        .then(({ startStage }) => startStage(stage))
         .catch(() => window.setHomePhone(true));
     if ("requestIdleCallback" in window) requestIdleCallback(load, { timeout: 1500 });
     else setTimeout(load, 200);

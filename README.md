@@ -47,7 +47,7 @@ Write for users, in plain English, from the app as it is. A new page goes in the
 
 ### The home page
 
-`src/components/Home.astro` is the top of the home page: the pitch, then the app's four jobs, beside
+`src/components/Home.astro` is the top of the home page: the pitch, then what the app does, section by section, beside
 one phone. `index.mdx` holds the pitch's words and buttons, and everything below the phone.
 
 On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it turns from its back
@@ -63,10 +63,6 @@ A narrow screen, a visitor who asked for less motion and a browser without WebGL
 same phone under each text instead, and never load three.js. The stills are in `src/assets/phone/`,
 drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing
 the model or a screenshot the home page shows, and commit what it draws.
-
-While the owner picks how a new screen arrives, the page takes `?transition=fade` (the screens
-crossfade and the phone leans with the scroll; the default) or `?transition=turn` (the phone turns
-once all the way round, and its front comes back with the new screen).
 
 ### The file format pages
 

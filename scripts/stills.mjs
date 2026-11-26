@@ -10,7 +10,7 @@ import { openBrowser, TYPES } from "./chrome.mjs";
 const ROOT = fileURLToPath(new URL("../", import.meta.url));
 const OUT = "src/assets/phone";
 // The screens the home page shows, in its order.
-const SCREENS = ["today", "new-program", "logging", "progress", "check-in"];
+const SCREENS = ["today", "new-program", "logging", "exercise", "progress", "check-in"];
 const [WIDTH, HEIGHT] = [720, 1200];
 
 const server = createServer((request, response) => {

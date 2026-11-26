@@ -8,8 +8,8 @@ const page = {
   viewport: 900,
   turnOver: 600,
   sections: [
-    { screen: "new-program", top: 1000, bottom: 1700 },
-    { screen: "logging", top: 1700, bottom: 2400 },
+    { screens: ["new-program"], top: 1000, bottom: 1700 },
+    { screens: ["logging"], top: 1700, bottom: 2400 },
   ],
 };
 const at = (scrollY) => story({ ...page, scrollY });
@@ -51,6 +51,15 @@ test("the drift is level where one section hands over to the next, so the phone 
   assert.ok(Math.abs(at(1399).drift - at(1400).drift) < 0.01);
   near(at(1400).drift, 0);
   near(at(5000).drift, 0);
+});
+
+test("a section with two screens shows the first through its first half and the second after", () => {
+  const two = { ...page, sections: [{ screens: ["exercise", "exercise-muscles"], top: 1000, bottom: 1700 }] };
+  const shown = (scrollY) => story({ ...two, scrollY }).screen;
+  assert.equal(shown(700), "exercise");
+  assert.equal(shown(1049), "exercise");
+  assert.equal(shown(1050), "exercise-muscles");
+  assert.equal(shown(5000), "exercise-muscles");
 });
 
 test("a bounce above the top doesn't turn the phone past its back", () => {

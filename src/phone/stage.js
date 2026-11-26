@@ -7,32 +7,20 @@ import { story } from "./story.js";
 const ease = (t) => t * t * (3 - 2 * t);
 const lerp = (from, to, t) => from + (to - from) * t;
 
-// How a new screen arrives, by `?transition=`. `lean` moves the resting pose at `t`, 0 to 1
-// through the change, where `towards` is 1 scrolling down and -1 scrolling up and `drift` is the
-// story's. `blend` is how much of the new screen shows at `t`.
-const TRANSITIONS = {
-  // The screens crossfade, and the phone leans a little with the scroll.
-  fade: {
-    duration: 350,
-    lean: ({ yaw, pitch, roll }, { drift }) => ({ yaw: yaw + drift * 0.16, pitch: pitch - drift * 0.04, roll }),
-    blend: (t) => ease(t),
-  },
-  // The phone turns once all the way round, and the new screen is on when its front comes back.
-  turn: {
-    duration: 900,
-    lean: (pose, { t, towards }) => ({ ...pose, yaw: pose.yaw + towards * 2 * Math.PI * ease(t) }),
-    blend: (t) => (t < 0.5 ? 0 : 1),
-  },
-};
+// A new screen arrives over this many milliseconds: the phone swings a little the way the page
+// is going and draws back, the screens crossfade while it is turned, and it settles again.
+const CHANGE = 700;
+const SWING = { yaw: 0.42, size: 0.05 };
+// How far the phone leans with the story's drift, in radians.
+const LEAN = { yaw: 0.16, pitch: -0.04 };
 
 /** Starts the phone in `stage`, an element holding a canvas and the screens' addresses. */
-export function startStage(stage, { transition: named } = {}) {
+export function startStage(stage) {
   const canvas = stage.querySelector("canvas");
   const screens = JSON.parse(stage.dataset.screens);
   const hero = document.querySelector(".home .hero");
   const sections = [...document.querySelectorAll(".home [data-screen]")];
   const root = document.documentElement;
-  const transition = TRANSITIONS[named] ?? TRANSITIONS.fade;
   const phone = createPhone(canvas, { pixelRatio: Math.min(window.devicePixelRatio, 2) });
 
   // Screens by "screen:theme", once loaded.
@@ -56,9 +44,9 @@ export function startStage(stage, { transition: named } = {}) {
 
   let shown = null;
   let change = null;
+  let queued = false;
   let lastScroll = window.scrollY;
   let towards = 1;
-  let queued = false;
   let sized = false;
 
   function redraw() {
@@ -72,18 +60,17 @@ export function startStage(stage, { transition: named } = {}) {
     if (!sized || root.dataset.home !== "live") return;
     if (window.scrollY !== lastScroll) towards = window.scrollY > lastScroll ? 1 : -1;
     lastScroll = window.scrollY;
-
     const { turn, screen, drift } = story({
       scrollY: window.scrollY,
       viewport: window.innerHeight,
       turnOver: hero.offsetHeight * 0.5,
       sections: sections.map((section) => {
         const { top, bottom } = section.getBoundingClientRect();
-        return { screen: section.dataset.screen, top: top + window.scrollY, bottom: bottom + window.scrollY };
+        return { screens: section.dataset.screen.split(" "), top: top + window.scrollY, bottom: bottom + window.scrollY };
       }),
     });
 
-    for (const section of sections) section.toggleAttribute("data-active", section.dataset.screen === screen);
+    for (const section of sections) section.toggleAttribute("data-active", section.dataset.screen.split(" ").includes(screen));
     phone.setFinish(theme());
     const wanted = keyOf(screen);
     ask(wanted);
@@ -95,20 +82,25 @@ export function startStage(stage, { transition: named } = {}) {
     }
     let t = 0;
     if (change) {
-      t = Math.min(1, (now - change.start) / transition.duration);
-      phone.setScreen(loaded.get(change.from), loaded.get(change.to), transition.blend(t));
-      if (transition.blend(t) >= 0.5) shown = change.to;
+      t = Math.min(1, (now - change.start) / CHANGE);
+      // The screens change through the middle half of the swing.
+      const blend = ease(Math.min(1, Math.max(0, (t - 0.25) * 2)));
+      phone.setScreen(loaded.get(change.from), loaded.get(change.to), blend);
+      if (t >= 0.5) shown = change.to;
     } else if (shown) {
       phone.setScreen(loaded.get(shown));
     }
 
+    // The phone leans a little with the scroll, once its front has come round.
     const facing = ease(turn);
-    const resting = {
-      yaw: lerp(POSES.back.yaw, POSES.front.yaw, facing),
-      pitch: lerp(POSES.back.pitch, POSES.front.pitch, facing),
+    const lean = drift * facing;
+    const swing = change ? Math.sin(Math.PI * ease(t)) * change.towards : 0;
+    phone.setPose({
+      size: 1 - Math.abs(swing) * SWING.size,
+      yaw: lerp(POSES.back.yaw, POSES.front.yaw, facing) + lean * LEAN.yaw + swing * SWING.yaw,
+      pitch: lerp(POSES.back.pitch, POSES.front.pitch, facing) + lean * LEAN.pitch,
       roll: lerp(POSES.back.roll, POSES.front.roll, facing),
-    };
-    phone.setPose(transition.lean(resting, { t, towards: change?.towards ?? 1, drift: drift * facing }));
+    });
     phone.render();
 
     // What the canvas shows, for a reader who can't see it and for the tests.

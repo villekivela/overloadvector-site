@@ -5,7 +5,7 @@ import { openSite } from "./browser.mjs";
 import { page, read } from "./dist.mjs";
 
 // The feature sections in page order, by the screen each puts on the phone.
-const SECTIONS = ["new-program", "logging", "progress", "check-in"];
+const SECTIONS = ["new-program", "logging", "exercise", "progress", "check-in"];
 const DESK = { width: 1280, height: 800 };
 const POCKET = { width: 390, height: 800 };
 
@@ -126,9 +126,9 @@ const stillsSeen = () =>
       .map((img) => img.getAttribute("src").match(/phone-[a-z-]+/)[0]);
   });
 
-for (const transition of ["fade", "turn"]) {
-  test(`on a desk the phone turns to its front with the scroll and shows each section's screen (${transition})`, async () => {
-    const requests = await visit(DESK, { route: `/?transition=${transition}` });
+{
+  test("on a desk the phone turns to its front with the scroll and shows each section's screen", async () => {
+    const requests = await visit(DESK);
     await phoneShows("back", "today");
     assert.ok(askedForThree(requests()), "three.js wasn't asked for");
     assert.deepEqual(await stillsSeen().catch(() => "the canvas"), "the canvas");
@@ -137,7 +137,7 @@ for (const transition of ["fade", "turn"]) {
     await site.run(() => window.scrollTo({ top: document.querySelector(".home .hero").offsetHeight * 0.55, behavior: "instant" }));
     await phoneShows("front", "today");
     for (const screen of SECTIONS) {
-      await scrollTo(`.home [data-screen="${screen}"]`);
+      await scrollTo(`.home [data-screen~="${screen}"]`);
       await phoneShows("front", screen);
     }
     // The phone is still pinned in view beside the last section.
