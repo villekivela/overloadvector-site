@@ -61,7 +61,7 @@ time off, applies on top of the suggestion for as long as it lasts.
 
 ## Goals and records
 
-Set a **lift goal** for an exercise's estimate from its trend in **History → Progress**, with a date
+Set a **lift goal** for an exercise's estimate from its trend on the **Progress** tab, with a date
 if you like. A goal shows how far you are; it never changes your program or your suggestions. Goals
 are for free weights and weighted bodyweight exercises.
 

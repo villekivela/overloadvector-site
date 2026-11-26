@@ -123,6 +123,6 @@ from the library; each starts with one set, and **Add set** gives it more.
 
 ## Afterwards
 
-**History** lists your finished sessions. Open one to correct a set you mistyped, and your
-suggestions follow. **Progress** shows your sets per muscle each week, each exercise's trend, your
-lift goals and your bodyweight.
+The **Progress** tab shows your sets per muscle each week, each exercise's trend, your lift goals
+and your bodyweight; estimates appear after a few logged sessions. Its second view, **Sessions**,
+lists your finished sessions. Open one to correct a set you mistyped, and your suggestions follow.
