@@ -83,6 +83,7 @@ export function startStage(stage, { transition: named } = {}) {
       }),
     });
 
+    for (const section of sections) section.toggleAttribute("data-active", section.dataset.screen === screen);
     phone.setFinish(theme());
     const wanted = keyOf(screen);
     ask(wanted);

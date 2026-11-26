@@ -353,7 +353,7 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       // Tall enough for the phone, and wide enough for it at any turn.
-      const tall = Math.max(HEIGHT / fill, (WIDTH * 1.5) / camera.aspect);
+      const tall = Math.max(HEIGHT / fill, (WIDTH * 1.25) / camera.aspect);
       camera.position.z = tall / (2 * Math.tan((FIELD_OF_VIEW * Math.PI) / 360));
       camera.updateProjectionMatrix();
     },

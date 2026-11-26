@@ -25,6 +25,13 @@ test("the home page offers the beta from the releases, and ends with the docs an
   assert.match(end, /href="\/faq\/"/);
 });
 
+test("the home page's header leads to the docs and the FAQ, and the search is on the other pages", () => {
+  const header = (html) => html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+  assert.match(header(page("/")), /href="\/docs\/getting-started\/"[^>]*>Docs<[\s\S]*href="\/faq\/"[^>]*>FAQ</);
+  assert.doesNotMatch(header(page("/")), /site-search/);
+  assert.match(header(page("/faq/")), /site-search/);
+});
+
 test("each still phone is there in both themes, and described", () => {
   const stills = [...page("/").matchAll(/<img\b[^>]*\ssrc="\/_astro\/phone-([a-z-]+)-(light|dark)\.[^>]*>/g)].map(
     ([img, screen, theme]) => ({ screen, theme, alt: img.match(/\salt="([^"]*)"/)?.[1] ?? "" }),

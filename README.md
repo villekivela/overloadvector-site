@@ -56,6 +56,9 @@ own screen on it. `phone.js` is the model, a Pixel 10 Pro's shape built from pla
 maker's logo and nothing downloaded. `story.js` says what the phone shows at a scroll position, and
 `stage.js` drives the model from it.
 
+The home page's header has links to the docs and the FAQ where the other pages have the search
+(`src/components/Search.astro`).
+
 A narrow screen, a visitor who asked for less motion and a browser without WebGL get a still of the
 same phone under each text instead, and never load three.js. The stills are in `src/assets/phone/`,
 drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing

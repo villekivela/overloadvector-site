@@ -12,29 +12,63 @@ const { tagline, actions = [] } = data.hero ?? {};
 const FEATURES = [
   {
     screen: "new-program",
+    kicker: "Program",
+    brief: "Blocks of weeks, days and set targets",
     title: "Runs a periodized program",
-    text: "Blocks of weeks, days and set targets. Setup writes a first program for your week and your gym, or you import your own.",
+    text: "Your training as a program: blocks of weeks, days and set targets.",
+    points: [
+      "Setup writes a first program for your week and your gym",
+      "Or import your own from a file",
+      "Weekly sets per muscle, shown on the mannequin",
+    ],
+    more: { text: "How programs work", href: "/docs/programs/" },
     alt: "A new program for review, with its weekly sets per muscle shown on the mannequin",
   },
   {
     screen: "logging",
+    kicker: "Logging",
+    brief: "Weight, reps and reps in reserve, in a few taps",
     title: "Logs your sessions",
-    text: "Weight, reps, reps in reserve, intensity techniques and rest, with warm-ups and plates worked out for you.",
+    text: "Log a set in a few taps, and let the app do the arithmetic.",
+    points: [
+      "Weight, reps and reps in reserve",
+      "Intensity techniques and a rest timer",
+      "Warm-ups and plates worked out for you",
+    ],
+    more: { text: "How logging works", href: "/docs/logging/" },
     alt: "Logging a set: weight, reps and reps in reserve, with the rest timer running",
   },
   {
     screen: "progress",
+    kicker: "Progression",
+    brief: "The next weight, worked out from what you did",
     title: "Moves the weights up",
-    text: "Every exercise gets its next weight from what you did, using only weights your gym really has, and says why.",
+    text: "Every exercise gets its next weight from what you did.",
+    points: [
+      "Only weights your gym really has",
+      "Every suggestion says why",
+      "The week's sets per muscle against their targets",
+    ],
+    more: { text: "How progression works", href: "/docs/progression/" },
     alt: "The week's sets per muscle against their targets",
   },
   {
     screen: "check-in",
+    kicker: "Coaching",
+    brief: "Claude adapts the plan when life gets in the way",
     title: "Coaches with Claude",
-    text: "Sore wrist, short evening, hotel gym: Claude proposes what to change, and nothing changes until you accept it.",
+    text: "When life gets in the way, Claude proposes what to change.",
+    points: [
+      "Sore wrist, short evening, hotel gym",
+      "Nothing changes until you accept it",
+      "With an Anthropic API key or your Claude account",
+    ],
+    more: { text: "How coaching works", href: "/docs/coaching/" },
     alt: "The coach asking what's going on: pain, short on time, another gym and more",
   },
 ];
+// What a visitor asks first, under the buttons.
+const FACTS = ["Android 8.0 or newer", "Free in the beta", "No account, no ads, no trackers"];
 const TODAY = {
   screen: "today",
   alt: "Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works",
@@ -96,15 +130,35 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
           <LinkButton href={link} variant={variant} icon={icon?.name}>{text}</LinkButton>
         ))}
       </div>
+      {/* The app at a glance: each job in a line, leading to its section below. */}
+      <ul class="glance">
+        {FEATURES.map(({ kicker, brief }, index) => (
+          <li>
+            <a href={`#${kicker.toLowerCase()}`}>
+              <span class="number">{String(index + 1).padStart(2, "0")}</span>
+              <strong>{kicker}</strong>
+              <span>{brief}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <ul class="facts">
+        {FACTS.map((fact) => <li>{fact}</li>)}
+      </ul>
       <div class="phone-still">
         <Image src={still("phone-today-light")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
         <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
       </div>
     </section>
-    {FEATURES.map(({ screen, title, text, alt }) => (
-      <section class="home-feature" data-screen={screen}>
+    {FEATURES.map(({ screen, kicker, title, text, points, more, alt }, index) => (
+      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screen}>
+        <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
         <h2>{title}</h2>
-        <p>{text}</p>
+        <p class="lead">{text}</p>
+        <ul class="points">
+          {points.map((point) => <li>{point}</li>)}
+        </ul>
+        <a class="more" href={more.href}>{more.text}<span aria-hidden="true"> →</span></a>
         <div class="phone-still">
           <Image src={still(`phone-${screen}-light`)} alt={alt} width={360} densities={[1, 2]} loading="lazy" />
           <Image src={still(`phone-${screen}-dark`)} alt={alt} width={360} densities={[1, 2]} loading="lazy" />
@@ -175,7 +229,7 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     letter-spacing: -0.01em;
   }
   .tagline,
-  .home-feature p {
+  .lead {
     max-width: 34rem;
     font-size: clamp(var(--sl-text-base), calc(0.5rem + 1.2vw), var(--sl-text-xl));
     color: var(--sl-color-gray-2);
@@ -196,6 +250,115 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
   :global(:root[data-theme="dark"]) :is(.phone-still, .home-stage) :global(img[src*="-light."]),
   :global(:root[data-theme="light"]) :is(.phone-still, .home-stage) :global(img[src*="-dark."]) {
     display: none;
+  }
+  .facts,
+  .glance,
+  .points {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-2);
+  }
+  .facts li {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 99rem;
+  }
+  .glance {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.6rem;
+    width: min(100%, 36rem);
+    text-align: start;
+  }
+  .glance a {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.1rem 0.7rem;
+    height: 100%;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+    line-height: 1.4;
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+  .glance a:hover {
+    border-color: var(--sl-color-gray-3);
+  }
+  .glance .number {
+    grid-row: span 2;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--sl-color-gray-3);
+  }
+  .glance strong {
+    font-family: var(--ov-font-title);
+    font-size: var(--sl-text-base);
+    color: var(--sl-color-white);
+  }
+  /* A feature: its number and name, what it does, three particulars, and where to read on. */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: var(--sl-text-sm);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sl-color-gray-3);
+  }
+  .kicker span {
+    padding: 0.15rem 0.55rem;
+    border: 1px solid var(--sl-color-gray-4);
+    border-radius: 0.4rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--sl-color-white);
+  }
+  .points {
+    display: grid;
+    gap: 0.6rem;
+    width: min(100%, 30rem);
+    text-align: start;
+    color: var(--sl-color-gray-1);
+  }
+  .points li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+  }
+  .points li::before {
+    content: "";
+    flex: none;
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 0.1rem;
+    background: var(--sl-color-white);
+    translate: 0 -0.1rem;
+  }
+  .more {
+    font-weight: 600;
+    color: var(--sl-color-white);
+    text-decoration: none;
+    border-bottom: 1px solid var(--sl-color-gray-4);
+  }
+  .more:hover {
+    border-color: var(--sl-color-white);
   }
   .home-stage {
     display: none;
@@ -249,8 +412,24 @@ for (const { screen, alt } of [TODAY, ...FEATURES]) {
     .home-feature {
       align-items: flex-start;
       justify-content: center;
-      min-height: 62vh;
+      min-height: 56vh;
       text-align: start;
+    }
+    /* The section whose screen is on the phone stands out from the others. */
+    .home-feature {
+      opacity: 0.38;
+      transition: opacity 0.35s;
+    }
+    .home-feature[data-active],
+    .home-feature:focus-within {
+      opacity: 1;
+    }
+    /* Room below the last section, so the phone is still pinned while it is read. */
+    .home-copy {
+      padding-bottom: 18vh;
+    }
+    .facts {
+      justify-content: flex-start;
     }
     .hero {
       min-height: calc(100vh - var(--sl-nav-height) - 3rem);

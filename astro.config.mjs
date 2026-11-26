@@ -18,8 +18,13 @@ export default defineConfig({
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
       ],
       customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
-      // Hero puts Home.astro at the top of the home page (README, The home page).
-      components: { Footer: "./src/components/Footer.astro", Hero: "./src/components/Hero.astro" },
+      // Hero puts Home.astro at the top of the home page, and Search gives it links in the
+      // search's place (README, The home page).
+      components: {
+        Footer: "./src/components/Footer.astro",
+        Hero: "./src/components/Hero.astro",
+        Search: "./src/components/Search.astro",
+      },
       pagination: false,
       sidebar: [
         {
