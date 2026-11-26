@@ -13,7 +13,8 @@ Basic, Advanced or All) and tap what differs. Setup uses it to pick exercises yo
 
 <div class="shots">
 
-![A gym's gear: a preset, then each kind of equipment, ticked or not](../../../assets/shots/shot-gear.png)
+![A gym's gear: a preset, then each kind of equipment, ticked or not](../../../assets/shots/shot-gear-light.png)
+![A gym's gear: a preset, then each kind of equipment, ticked or not](../../../assets/shots/shot-gear-dark.png)
 
 </div>
 
@@ -31,7 +32,8 @@ Claude key.
 
 <div class="shots">
 
-![Setting up a stack machine from the weights printed on it](../../../assets/shots/shot-stack.png)
+![Setting up a stack machine from the weights printed on it](../../../assets/shots/shot-stack-light.png)
+![Setting up a stack machine from the weights printed on it](../../../assets/shots/shot-stack-dark.png)
 
 </div>
 

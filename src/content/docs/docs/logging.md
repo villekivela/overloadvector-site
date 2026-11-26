@@ -19,7 +19,8 @@ check.
 
 <div class="shots">
 
-![The set table with one set logged, the rest timer at the top and the number pad below](../../../assets/shots/shot-logging.png)
+![The set table with one set logged, the rest timer at the top and the number pad below](../../../assets/shots/shot-logging-light.png)
+![The set table with one set logged, the rest timer at the top and the number pad below](../../../assets/shots/shot-logging-dark.png)
 
 </div>
 
@@ -69,8 +70,10 @@ session's exercises with a dot for each set.
 
 <div class="shots">
 
-![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises.png)
-![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise.png)
+![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises-light.png)
+![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises-dark.png)
+![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise-light.png)
+![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise-dark.png)
 
 </div>
 

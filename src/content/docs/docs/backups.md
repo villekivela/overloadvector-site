@@ -32,7 +32,8 @@ never copied back to a phone.
 
 <div class="shots part">
 
-![Export backup and Restore from a backup in Settings](../../../assets/shots/shot-backups.png)
+![Export backup and Restore from a backup in Settings](../../../assets/shots/shot-backups-light.png)
+![Export backup and Restore from a backup in Settings](../../../assets/shots/shot-backups-dark.png)
 
 </div>
 

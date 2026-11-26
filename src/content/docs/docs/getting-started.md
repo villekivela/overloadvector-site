@@ -42,8 +42,10 @@ nothing is kept until the last step.
 
 <div class="shots">
 
-![Setup's gym step: the gym's name and an equipment preset](../../../assets/shots/shot-setup-gym.png)
-![The first program for review, with its weekly sets per muscle](../../../assets/shots/shot-new-program.png)
+![Setup's gym step: the gym's name and an equipment preset](../../../assets/shots/shot-setup-gym-light.png)
+![Setup's gym step: the gym's name and an equipment preset](../../../assets/shots/shot-setup-gym-dark.png)
+![The first program for review, with its weekly sets per muscle](../../../assets/shots/shot-new-program-light.png)
+![The first program for review, with its weekly sets per muscle](../../../assets/shots/shot-new-program-dark.png)
 
 </div>
 
@@ -82,7 +84,8 @@ program: three days a week for 12 weeks, with few sets taken hard.
 
 <div class="shots">
 
-![Today: the week's calendar and the next day to train, with Start session](../../../assets/shots/shot-today.png)
+![Today: the week's calendar and the next day to train, with Start session](../../../assets/shots/shot-today-light.png)
+![Today: the week's calendar and the next day to train, with Start session](../../../assets/shots/shot-today-dark.png)
 
 </div>
 

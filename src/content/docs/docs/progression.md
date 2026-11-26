@@ -47,7 +47,8 @@ Under the exercise's name, a short line gives the reason: "Up to 62.5 kg, you to
 
 <div class="shots">
 
-![A suggestion's reason under the exercise's name: 55 kg, set 1 was above the range](../../../assets/shots/shot-verdict.png)
+![A suggestion's reason under the exercise's name: 55 kg, set 1 was above the range](../../../assets/shots/shot-verdict-light.png)
+![A suggestion's reason under the exercise's name: 55 kg, set 1 was above the range](../../../assets/shots/shot-verdict-dark.png)
 
 </div>
 

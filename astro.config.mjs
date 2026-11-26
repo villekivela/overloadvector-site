@@ -11,7 +11,7 @@ export default defineConfig({
       description: "A strength-training app for Android: a periodized program, logging, progression and coaching with Claude.",
       logo: { src: "./src/assets/icon.svg" },
       favicon: "/favicon.svg",
-      customCss: ["./src/styles/graphite.css"],
+      customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
       components: { Footer: "./src/components/Footer.astro" },
       pagination: false,
       sidebar: [

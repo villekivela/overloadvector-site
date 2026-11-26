@@ -41,8 +41,10 @@ you review what it proposes: accept it, ask for changes or drop it.
 
 <div class="shots">
 
-![The Coach tab asking what's going on](../../../assets/shots/shot-check-in.png)
-![An example Change for review: the new sets beside the old, with Accept and Ask for changes](../../../assets/shots/shot-change.png)
+![The Coach tab asking what's going on](../../../assets/shots/shot-check-in-light.png)
+![The Coach tab asking what's going on](../../../assets/shots/shot-check-in-dark.png)
+![An example Change for review: the new sets beside the old, with Accept and Ask for changes](../../../assets/shots/shot-change-light.png)
+![An example Change for review: the new sets beside the old, with Accept and Ask for changes](../../../assets/shots/shot-change-dark.png)
 
 </div>
 
@@ -65,7 +67,8 @@ With the connector, you talk to Claude in its own app, and its proposals appear 
 
 <div class="shots part">
 
-![Connect Claude asking you to agree before anything is copied](../../../assets/shots/shot-connect.png)
+![Connect Claude asking you to agree before anything is copied](../../../assets/shots/shot-connect-light.png)
+![Connect Claude asking you to agree before anything is copied](../../../assets/shots/shot-connect-dark.png)
 
 </div>
 

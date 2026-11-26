@@ -46,7 +46,8 @@
   border-radius: 1.25rem;
 }
 
-.sl-markdown-content .shots img:only-child {
+.sl-markdown-content .shots:not(.part) img:first-child:nth-last-child(2),
+.sl-markdown-content .shots:not(.part) img:first-child:nth-last-child(2) + img {
   width: min(15rem, 75%);
 }
 
@@ -54,4 +55,11 @@
 .sl-markdown-content .shots.part img {
   width: min(22rem, 100%);
   border-radius: 0.75rem;
+}
+
+/* Each screen is there in both themes. Starlight's menu sets data-theme, whatever the system's
+   setting: show the matching one. */
+:root[data-theme="dark"] .sl-markdown-content .shots img[src*="-light."],
+:root[data-theme="light"] .sl-markdown-content .shots img[src*="-dark."] {
+  display: none;
 }

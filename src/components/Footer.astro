@@ -13,6 +13,10 @@ import Default from "@astrojs/starlight/components/Footer.astro";
     <a href="/privacy/">Privacy policy</a>
     <a href="/contact/">Contact</a>
   </nav>
+  <p class="credit">
+    Fonts: <a href="/fonts/Inter-OFL.txt">Inter</a> and
+    <a href="/fonts/SpaceGrotesk-OFL.txt">Space Grotesk</a>, under the SIL Open Font License.
+  </p>
 </footer>
 
 <style>
@@ -29,6 +33,10 @@ import Default from "@astrojs/starlight/components/Footer.astro";
   }
   .site-footer p {
     margin: 0;
+  }
+  .site-footer .credit {
+    flex-basis: 100%;
+    font-size: var(--sl-text-xs);
   }
   .site-footer nav {
     display: flex;

@@ -25,7 +25,8 @@ went, with your lifts, the sessions you turned up for, your volume and records.
 
 <div class="shots">
 
-![The Program tab: the blocks, the weeks you're in, a block's days and their exercises](../../../assets/shots/shot-program.png)
+![The Program tab: the blocks, the weeks you're in, a block's days and their exercises](../../../assets/shots/shot-program-light.png)
+![The Program tab: the blocks, the weeks you're in, a block's days and their exercises](../../../assets/shots/shot-program-dark.png)
 
 </div>
 
