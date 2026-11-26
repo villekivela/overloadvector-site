@@ -1,0 +1,77 @@
+/* The app's fonts, served from this site so a visitor asks nobody else for them. As in the app,
+   words in titles are Space Grotesk and everything else, every number included, is Inter. */
+@font-face {
+  font-family: "Inter";
+  font-weight: 400;
+  font-display: swap;
+  src: url("../assets/fonts/inter-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 500;
+  font-display: swap;
+  src: url("../assets/fonts/inter-500.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/inter-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/inter-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/space-grotesk-600.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/space-grotesk-700.woff2") format("woff2");
+}
+
+/* The digits of a title: Inter's, ahead of Space Grotesk in the titles' list. */
+@font-face {
+  font-family: "Title Figures";
+  font-weight: 600;
+  font-display: swap;
+  src: url("../assets/fonts/inter-600.woff2") format("woff2");
+  unicode-range: U+0030-0039;
+}
+
+@font-face {
+  font-family: "Title Figures";
+  font-weight: 700;
+  font-display: swap;
+  src: url("../assets/fonts/inter-700.woff2") format("woff2");
+  unicode-range: U+0030-0039;
+}
+
+:root {
+  --sl-font: "Inter";
+  --ov-font-title: "Title Figures", "Space Grotesk", var(--sl-font-system);
+  font-variant-numeric: tabular-nums;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.site-title,
+.card .title {
+  font-family: var(--ov-font-title);
+}

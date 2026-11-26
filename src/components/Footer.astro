@@ -1,0 +1,48 @@
+---
+import Default from "@astrojs/starlight/components/Footer.astro";
+---
+
+<Default><slot /></Default>
+
+<footer class="site-footer not-content">
+  <p>
+    Support: <a href="mailto:support@overloadvector.com">support@overloadvector.com</a>
+  </p>
+  <nav aria-label="About this site">
+    <a href="/faq/">FAQ</a>
+    <a href="/privacy/">Privacy policy</a>
+    <a href="/contact/">Contact</a>
+  </nav>
+  <p class="credit">
+    Fonts: <a href="/fonts/Inter-OFL.txt">Inter</a> and{" "}
+    <a href="/fonts/SpaceGrotesk-OFL.txt">Space Grotesk</a>, under the SIL Open Font License.
+  </p>
+</footer>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sl-color-hairline);
+    color: var(--sl-color-gray-2);
+    font-size: var(--sl-text-sm);
+  }
+  .site-footer p {
+    margin: 0;
+  }
+  .site-footer .credit {
+    flex-basis: 100%;
+    font-size: var(--sl-text-xs);
+  }
+  .site-footer nav {
+    display: flex;
+    gap: 1.25rem;
+  }
+  .site-footer a {
+    color: var(--sl-color-text);
+  }
+</style>
