@@ -27,12 +27,13 @@ test("the home page offers the beta from the releases, and ends with the docs an
 
 test("each still phone is there in both themes, and described", () => {
   const stills = [...page("/").matchAll(/<img\b[^>]*\ssrc="\/_astro\/phone-([a-z-]+)-(light|dark)\.[^>]*>/g)].map(
-    ([img, screen, theme]) => ({ screen, theme, alt: img.match(/\salt="([^"]*)"/)[1] }),
+    ([img, screen, theme]) => ({ screen, theme, alt: img.match(/\salt="([^"]*)"/)?.[1] ?? "" }),
   );
-  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...SECTIONS]);
+  // After the screens, the back that holds the live phone's place.
+  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...SECTIONS, "back"]);
   for (let i = 0; i < stills.length; i += 2) {
     assert.deepEqual(stills[i + 1], { ...stills[i], theme: "dark" });
-    assert.ok(stills[i].alt.length >= 12, `${stills[i].screen} isn't described`);
+    if (stills[i].screen !== "back") assert.ok(stills[i].alt.length >= 12, `${stills[i].screen} isn't described`);
   }
 });
 

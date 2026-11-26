@@ -38,7 +38,8 @@ export function startStage(stage, { transition: named } = {}) {
   // Screens by "screen:theme", once loaded.
   const loaded = new Map();
   const asked = new Set();
-  const keyOf = (screen) => `${screen}:${root.dataset.theme === "light" ? "light" : "dark"}`;
+  const theme = () => (root.dataset.theme === "light" ? "light" : "dark");
+  const keyOf = (screen) => `${screen}:${theme()}`;
   function ask(key) {
     if (asked.has(key)) return;
     asked.add(key);
@@ -82,6 +83,7 @@ export function startStage(stage, { transition: named } = {}) {
       }),
     });
 
+    phone.setFinish(theme());
     const wanted = keyOf(screen);
     ask(wanted);
     if (!change && wanted !== shown && loaded.has(wanted)) {

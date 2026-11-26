@@ -36,11 +36,21 @@ test("the section across the line a third down the view sets the screen", () => 
   assert.equal(at(5000).screen, "logging");
 });
 
-test("the drift runs from -1 to 1 as a section passes the middle of the view", () => {
-  assert.equal(at(725).drift, -0.5);
-  assert.equal(at(900).drift, 0);
-  assert.equal(at(1075).drift, 0.5);
-  assert.equal(at(5000).drift, 1);
+const near = (actual, expected) => assert.ok(Math.abs(actual - expected) < 1e-9, `${actual} is not ${expected}`);
+
+test("the drift sways once through a section: one way, level at its middle, then the other", () => {
+  near(at(875).drift, -1);
+  near(at(1050).drift, 0);
+  near(at(1225).drift, 1);
+});
+
+test("the drift is level where one section hands over to the next, so the phone never jumps", () => {
+  near(at(699).drift, 0);
+  near(at(700).drift, 0);
+  // A pixel before the handover the sway has all but come back to level.
+  assert.ok(Math.abs(at(1399).drift - at(1400).drift) < 0.01);
+  near(at(1400).drift, 0);
+  near(at(5000).drift, 0);
 });
 
 test("a bounce above the top doesn't turn the phone past its back", () => {

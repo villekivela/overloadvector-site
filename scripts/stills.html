@@ -14,9 +14,10 @@
   import { createPhone, POSES } from "/src/phone/phone.js";
 
   const phone = createPhone(document.querySelector("canvas"), { fill: 0.9 });
-  /** A PNG of the phone in a pose, with the screenshot at `shot` on its screen if one is given. */
-  window.still = async (pose, width, height, shot) => {
+  /** A PNG of a theme's phone in a pose, with the screenshot at `shot` on its screen if one is given. */
+  window.still = async (pose, theme, width, height, shot) => {
     phone.setSize(width, height);
+    phone.setFinish(theme);
     phone.setPose(POSES[pose]);
     if (shot) phone.setScreen(await phone.loadScreen(shot));
     phone.render();

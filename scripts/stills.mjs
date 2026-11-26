@@ -24,15 +24,15 @@ await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
 const browser = await openBrowser();
 try {
   await browser.visit(`http://127.0.0.1:${server.address().port}/scripts/stills.html`);
-  const draw = async (name, pose, shot) => {
-    const url = await browser.run((...args) => window.still(...args), pose, WIDTH, HEIGHT, shot);
+  const draw = async (name, pose, theme, shot) => {
+    const url = await browser.run((...args) => window.still(...args), pose, theme, WIDTH, HEIGHT, shot);
     writeFileSync(join(ROOT, OUT, `${name}.png`), Buffer.from(url.split(",")[1], "base64"));
     console.log(`${OUT}/${name}.png`);
   };
-  await draw("phone-back", "back");
-  for (const screen of SCREENS) {
-    for (const theme of ["light", "dark"]) {
-      await draw(`phone-${screen}-${theme}`, "front", `/src/assets/shots/shot-${screen}-${theme}.png`);
+  for (const theme of ["light", "dark"]) {
+    await draw(`phone-back-${theme}`, "back", theme);
+    for (const screen of SCREENS) {
+      await draw(`phone-${screen}-${theme}`, "front", theme, `/src/assets/shots/shot-${screen}-${theme}.png`);
     }
   }
 } finally {

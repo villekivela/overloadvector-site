@@ -43,6 +43,12 @@ export const POSES = {
   front: { yaw: -0.3, pitch: 0.05, roll: 0 },
 };
 
+/** The body's colours by the page's theme: a charcoal phone on the dark page, a moonstone one on the light. */
+const FINISHES = {
+  dark: { frame: 0x5a5d62, glass: 0x202124, line: 0x55585e },
+  light: { frame: 0xa3abbd, glass: 0x6c7589, line: 0xc4cad8 },
+};
+
 function roundedRect(width, height, radius) {
   const shape = new Shape();
   const x = -width / 2;
@@ -159,10 +165,9 @@ function lensFace(periscope) {
   return face;
 }
 
-function buildBack(frame) {
+function buildBack({ frame, glass }) {
   // Built facing +z, then turned to face away from the screen.
   const back = new Group();
-  const glass = new MeshStandardMaterial({ color: 0x202124, roughness: 0.45, metalness: 0.25 });
   const visor = new MeshStandardMaterial({ color: 0x040405, roughness: 0.06, metalness: 0.7 });
   const rim = new MeshStandardMaterial({ color: 0x121316, roughness: 0.4, metalness: 1 });
   const dark = new MeshStandardMaterial({ color: 0x0b0c0e, roughness: 0.35, metalness: 0.4 });
@@ -226,9 +231,8 @@ function buildBack(frame) {
 }
 
 /** What the frame carries: the buttons, the antenna lines, and the port and speakers below. */
-function buildEdges(frame) {
+function buildEdges({ frame, line }) {
   const edges = new Group();
-  const line = new MeshStandardMaterial({ color: 0x55585e, roughness: 0.6, metalness: 0.2 });
   const hollow = new MeshStandardMaterial({ color: 0x050506, roughness: 0.5, metalness: 0.3 });
   const flat = DEPTH - 1.8;
 
@@ -317,11 +321,20 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     fragmentShader: SCREEN_FRAGMENT,
   });
 
-  const frame = new MeshStandardMaterial({ color: 0x5a5d62, roughness: 0.27, metalness: 1 });
+  // The body's own materials, coloured by setFinish.
+  const body = {
+    frame: new MeshStandardMaterial({ roughness: 0.27, metalness: 1 }),
+    glass: new MeshStandardMaterial({ roughness: 0.45, metalness: 0.25 }),
+    line: new MeshStandardMaterial({ roughness: 0.6, metalness: 0.2 }),
+  };
+  const setFinish = (name) => {
+    for (const [part, colour] of Object.entries(FINISHES[name])) body[part].color.set(colour);
+  };
+  setFinish("dark");
   const phone = new Group();
-  const body = new Mesh(slab(WIDTH, HEIGHT, DEPTH, CORNER, 0.9), frame);
-  body.position.z = -DEPTH / 2;
-  phone.add(body, buildFront(screen), buildBack(frame), buildEdges(frame));
+  const shell = new Mesh(slab(WIDTH, HEIGHT, DEPTH, CORNER, 0.9), body.frame);
+  shell.position.z = -DEPTH / 2;
+  phone.add(shell, buildFront(screen), buildBack(body), buildEdges(body));
   phone.rotation.order = "YXZ";
   scene.add(phone);
   // A lamp up and to the left for the matte back, and one behind to catch the frame's edge.
@@ -344,6 +357,8 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
       camera.position.z = tall / (2 * Math.tan((FIELD_OF_VIEW * Math.PI) / 360));
       camera.updateProjectionMatrix();
     },
+    /** The body's colour: "dark" or "light", after the page's theme. */
+    setFinish,
     setPose({ yaw, pitch, roll }) {
       phone.rotation.set(pitch, yaw, roll);
     },
