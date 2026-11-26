@@ -2,6 +2,7 @@
 // corners, punch-hole camera and camera bar are the phone's; nothing is a downloaded model, and
 // it carries no maker's logo. Lengths are millimetres.
 import {
+  AdditiveBlending,
   BoxGeometry,
   CanvasTexture,
   CircleGeometry,
@@ -15,13 +16,13 @@ import {
   NeutralToneMapping,
   PerspectiveCamera,
   PMREMGenerator,
+  RingGeometry,
   Scene,
   ShaderMaterial,
   Shape,
   ShapeGeometry,
   SRGBColorSpace,
   TextureLoader,
-  TorusGeometry,
   WebGLRenderer,
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -129,9 +130,9 @@ function lensFace(periscope) {
   pen.fillStyle = "#030305";
   pen.fillRect(-unit, -unit, size, size);
   // The barrel's steps, going down into the lens.
-  ring(0.93, 0.05, "#26282d");
+  ring(0.93, 0.05, "#141518");
   ring(0.8, 0.03, "#15161a");
-  ring(0.66, 0.05, "#1d1f25");
+  ring(0.66, 0.05, "#101116");
   pen.save();
   pen.beginPath();
   if (periscope) pen.roundRect(-0.36 * unit, -0.3 * unit, 0.72 * unit, 0.6 * unit, 0.1 * unit);
@@ -140,8 +141,8 @@ function lensFace(periscope) {
   pen.fillStyle = "#06070c";
   pen.fillRect(-unit, -unit, size, size);
   // The coating throws back blue from one side and violet from the other.
-  glow(-0.22, -0.26, 0.6, "rgba(62, 92, 210, 0.75)");
-  glow(0.3, 0.32, 0.42, "rgba(120, 70, 190, 0.4)");
+  glow(-0.22, -0.26, 0.6, "rgba(46, 60, 120, 0.4)");
+  glow(0.3, 0.32, 0.42, "rgba(74, 56, 110, 0.2)");
   pen.restore();
   if (!periscope) {
     ring(0.3, 0.03, "#0c0e16");
@@ -150,8 +151,8 @@ function lensFace(periscope) {
     pen.fillStyle = "#010102";
     pen.fill();
   }
-  glow(-0.3, -0.36, 0.13, "rgba(255, 255, 255, 0.75)");
-  glow(0.2, 0.26, 0.07, "rgba(200, 210, 255, 0.35)");
+  glow(-0.3, -0.36, 0.1, "rgba(255, 255, 255, 0.3)");
+  glow(0.2, 0.26, 0.06, "rgba(200, 210, 255, 0.12)");
 
   const face = new CanvasTexture(canvas);
   face.colorSpace = SRGBColorSpace;
@@ -161,9 +162,9 @@ function lensFace(periscope) {
 function buildBack(frame) {
   // Built facing +z, then turned to face away from the screen.
   const back = new Group();
-  const glass = new MeshStandardMaterial({ color: 0x2d2e31, roughness: 0.4, metalness: 0.25 });
+  const glass = new MeshStandardMaterial({ color: 0x202124, roughness: 0.45, metalness: 0.25 });
   const visor = new MeshStandardMaterial({ color: 0x040405, roughness: 0.06, metalness: 0.7 });
-  const rim = new MeshStandardMaterial({ color: 0x4a4d53, roughness: 0.2, metalness: 1 });
+  const rim = new MeshStandardMaterial({ color: 0x121316, roughness: 0.4, metalness: 1 });
   const dark = new MeshStandardMaterial({ color: 0x0b0c0e, roughness: 0.35, metalness: 0.4 });
 
   const cover = new Mesh(slab(WIDTH - 2.4, HEIGHT - 2.4, 0.3, CORNER - 1.2, 0.12), glass);
@@ -175,9 +176,9 @@ function buildBack(frame) {
   const bar = new Group();
   const tall = 3.3;
   bar.position.y = HEIGHT / 2 - 25.5;
-  bar.add(new Mesh(slab(56, 22, tall, 11, 0.55), frame));
-  const pane = new Mesh(slab(42.4, 19.6, 0.4, 9.8, 0.15), visor);
-  pane.position.set(-6, 0, tall - 0.22);
+  bar.add(new Mesh(slab(64, 22, tall, 11, 0.55), frame));
+  const pane = new Mesh(slab(48.4, 19.6, 0.4, 9.8, 0.15), visor);
+  pane.position.set(-6.8, 0, tall - 0.22);
   bar.add(pane);
 
   const onGlass = tall + 0.19;
@@ -188,22 +189,35 @@ function buildBack(frame) {
     return mesh;
   };
   const round = lensFace(false);
-  for (const [x, radius, face] of [[-18.6, 5.3, round], [-6, 6.3, round], [6.4, 5, lensFace(true)]]) {
-    const lens = new MeshStandardMaterial({ map: face, emissiveMap: face, emissive: 0xffffff, emissiveIntensity: 0.5, roughness: 0.08, metalness: 0.2 });
+  for (const [x, radius, face] of [[-21, 4.3, round], [-7.2, 5, round], [6.4, 4, lensFace(true)]]) {
+    const lens = new MeshStandardMaterial({ map: face, emissiveMap: face, emissive: 0xffffff, emissiveIntensity: 0.07, roughness: 0.08, metalness: 0.2 });
     disc(radius, lens, x, 0, onGlass + 0.01);
-    const edge = new Mesh(new TorusGeometry(radius, 0.28, 12, 56), rim);
-    edge.position.set(x, 0, onGlass);
+    const edge = new Mesh(new RingGeometry(radius, radius + 0.25, 56), rim);
+    edge.position.set(x, 0, onGlass + 0.01);
     bar.add(edge);
   }
+  // The lenses lie under the glass, which throws the room back over them.
+  const shine = new MeshStandardMaterial({
+    color: 0xffffff,
+    roughness: 0.04,
+    metalness: 1,
+    transparent: true,
+    opacity: 0.07,
+    blending: AdditiveBlending,
+    depthWrite: false,
+  });
+  const sheet = new Mesh(panel(48, 19.2, 9.6), shine);
+  sheet.position.set(-6.8, 0, onGlass + 0.03);
+  bar.add(sheet);
   // The flash above the sensor.
   const onMetal = tall + 0.01;
-  disc(2.5, dark, 21.2, 4, onMetal);
-  disc(2.15, new MeshStandardMaterial({ color: 0xf4f1e8, roughness: 0.35, emissive: 0xf4f1e8, emissiveIntensity: 0.35 }), 21.2, 4, onMetal + 0.01);
-  disc(0.75, new MeshStandardMaterial({ color: 0xf3df9a, roughness: 0.5, emissive: 0xf3df9a, emissiveIntensity: 0.4 }), 21.2, 4, onMetal + 0.02);
-  disc(2, dark, 21.6, -3.9, onMetal);
-  disc(1.1, visor, 21.6, -3.9, onMetal + 0.01);
+  disc(2.5, dark, 24.6, 4, onMetal);
+  disc(2.15, new MeshStandardMaterial({ color: 0xf4f1e8, roughness: 0.35, emissive: 0xf4f1e8, emissiveIntensity: 0.35 }), 24.6, 4, onMetal + 0.01);
+  disc(0.75, new MeshStandardMaterial({ color: 0xf3df9a, roughness: 0.5, emissive: 0xf3df9a, emissiveIntensity: 0.4 }), 24.6, 4, onMetal + 0.02);
+  disc(2, dark, 25, -3.9, onMetal);
+  disc(1.1, visor, 25, -3.9, onMetal + 0.01);
   // A microphone's pinhole in the glass.
-  disc(0.35, dark, 13.2, 0, onGlass + 0.01);
+  disc(0.35, dark, 14.6, 0, onGlass + 0.01);
 
   back.add(bar);
   back.rotation.y = Math.PI;
@@ -303,7 +317,7 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     fragmentShader: SCREEN_FRAGMENT,
   });
 
-  const frame = new MeshStandardMaterial({ color: 0x74777d, roughness: 0.27, metalness: 1 });
+  const frame = new MeshStandardMaterial({ color: 0x5a5d62, roughness: 0.27, metalness: 1 });
   const phone = new Group();
   const body = new Mesh(slab(WIDTH, HEIGHT, DEPTH, CORNER, 0.9), frame);
   body.position.z = -DEPTH / 2;
@@ -311,9 +325,9 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
   phone.rotation.order = "YXZ";
   scene.add(phone);
   // A lamp up and to the left for the matte back, and one behind to catch the frame's edge.
-  const key = new DirectionalLight(0xffffff, 2.2);
+  const key = new DirectionalLight(0xffffff, 1.1);
   key.position.set(-90, 140, 220);
-  const edge = new DirectionalLight(0xdfe6ff, 1.4);
+  const edge = new DirectionalLight(0xdfe6ff, 1.0);
   edge.position.set(160, 40, -60);
   scene.add(key, edge);
 
