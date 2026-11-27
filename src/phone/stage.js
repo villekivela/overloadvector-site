@@ -10,6 +10,8 @@ const lerp = (from, to, t) => from + (to - from) * t;
 
 // A new screen crossfades in over this many milliseconds.
 const CHANGE = 300;
+// What the clips are encoded as (scripts/clips.mjs): VP9, and H.264 High at level 3.1.
+const CODECS = { webm: 'video/webm; codecs="vp9"', mp4: 'video/mp4; codecs="avc1.64001F"' };
 
 /** Starts the phone in `stage`, an element holding a canvas and the screens' addresses. */
 export function startStage(stage) {
@@ -45,12 +47,14 @@ export function startStage(stage) {
   function clipOf(key) {
     const [screen, theme] = key.split(":");
     const sources = screens[screen].clip?.[theme];
-    if (!sources) return null;
+    // A browser that can't say when a frame is ready keeps the still.
+    if (!sources || !("requestVideoFrameCallback" in HTMLVideoElement.prototype)) return null;
     if (!clips.has(key)) {
       const video = document.createElement("video");
       Object.assign(video, { muted: true, loop: true, playsInline: true, preload: "auto" });
+      // VP9 first, and H.264 for a browser without it, which the codecs let skip the WebM unloaded.
       for (const [kind, src] of Object.entries(sources)) {
-        video.append(Object.assign(document.createElement("source"), { src, type: `video/${kind}` }));
+        video.append(Object.assign(document.createElement("source"), { src, type: CODECS[kind] }));
       }
       const clip = { video, texture: phone.videoScreen(video), drawn: false };
       // Each new frame draws the phone again.
@@ -68,11 +72,11 @@ export function startStage(stage) {
   function play(key) {
     for (const [other, { video }] of clips) if (other !== key && !video.paused) video.pause();
     const clip = key && clipOf(key);
-    if (!clip?.video.paused) return;
+    if (!clip?.video.paused || clip.refused) return;
     clip.drawn = false;
     clip.video.currentTime = 0;
-    // Refused, as by a browser that saves power: the still stays.
-    clip.video.play().catch(() => {});
+    // Refused, as by a browser that saves power: the still stays, and it isn't asked again.
+    clip.video.play().catch(() => (clip.refused = true));
   }
   const screenOf = (key) => {
     const clip = clips.get(key);

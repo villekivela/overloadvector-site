@@ -114,10 +114,9 @@ const screens: Record<string, { light: string; dark: string; alt: string; clip?:
 const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => screens.map((screen, at) => ({ screen, alt: alts[at] })))];
 for (const { screen, alt } of shown) {
   const played = Boolean(video(`clip-${screen}-light.webm`));
+  const picture = (theme: string) => (played ? poster(`clip-${screen}-${theme}`) : shot(`shot-${screen}-${theme}`));
   const [light, dark] = await Promise.all(
-    ["light", "dark"].map((theme) =>
-      getImage({ src: (played ? poster : shot)(`${played ? "clip" : "shot"}-${screen}-${theme}`), format: "webp", quality: 90 }),
-    ),
+    ["light", "dark"].map((theme) => getImage({ src: picture(theme), format: "webp", quality: 90 })),
   );
   screens[screen] = { light: light.src, dark: dark.src, alt };
   if (!played) continue;

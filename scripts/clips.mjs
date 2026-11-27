@@ -18,26 +18,29 @@ const OUT = fileURLToPath(new URL("../src/assets/clips/", import.meta.url));
 const SCALE = "scale=640:1428:flags=lanczos,fps=30,format=yuv420p";
 const FRAME = 1 / 30;
 
-const [recording, screen, theme, from, to, fade = "0.6"] = process.argv.slice(2);
-if (!recording || !screen || !["light", "dark"].includes(theme) || !(Number(to) > Number(from))) {
+const [recording, screen, theme, ...times] = process.argv.slice(2);
+const [from, to, fade = 0.6] = times.map(Number);
+const length = to - from;
+// The opening the end dissolves into comes off the clip, so the cut holds two of them. The last
+// frame is held 3 s past the recording's end, and no more.
+if (!recording || !screen || !["light", "dark"].includes(theme) || !(fade > FRAME && length > 2 * fade)) {
   console.error("usage: npm run clips -- <recording> <screen> <light|dark> <from s> <to s> [<fade s>]");
   process.exit(1);
 }
 const name = join(OUT, `clip-${screen}-${theme}`);
 const ffmpeg = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-const length = Number(to) - Number(from);
 // screenrecord writes a frame only when the screen changes, so its last is held to fill the cut.
 const loop = [
   `[0:v]fps=30,tpad=stop_mode=clone:stop_duration=3,trim=start=${from}:end=${to},setpts=PTS-STARTPTS,${SCALE},split[a][b]`,
   `[a]trim=start=${fade},setpts=PTS-STARTPTS[body]`,
   `[b]trim=end=${fade},setpts=PTS-STARTPTS[head]`,
   // The dissolve ends a frame early, so that the last frame is wholly the opening's.
-  `[body][head]xfade=transition=fade:duration=${Number(fade) - FRAME}:offset=${length - 2 * Number(fade) + FRAME},format=yuv420p`,
+  `[body][head]xfade=transition=fade:duration=${fade - FRAME}:offset=${length - 2 * fade + FRAME},format=yuv420p`,
 ].join(";");
 const cut = ["-i", recording, "-an", "-filter_complex", loop];
 
 ffmpeg(...cut, "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", "30", "-row-mt", "1", "-deadline", "good", "-cpu-used", "1", "-g", "300", `${name}.webm`);
-ffmpeg(...cut, "-c:v", "libx264", "-crf", "23", "-preset", "slow", "-profile:v", "high", "-movflags", "+faststart", `${name}.mp4`);
+ffmpeg(...cut, "-c:v", "libx264", "-crf", "23", "-preset", "slow", "-profile:v", "high", "-level", "3.1", "-movflags", "+faststart", `${name}.mp4`);
 ffmpeg("-i", `${name}.webm`, "-frames:v", "1", "-update", "1", `${name}.png`);
 
 // The loop's seam: the last frame against the first, as PSNR in dB (higher is closer; 40 and up
@@ -50,6 +53,6 @@ const psnr = (...inputs) =>
 const seam = psnr("-i", last, "-i", `${name}.png`);
 const step = psnr("-ss", "0.034", "-i", `${name}.webm`, "-i", `${name}.png`);
 rmSync(last);
-console.log(`${name}: ${(length - Number(fade) + FRAME).toFixed(2)} s`);
+console.log(`${name}: ${(length - fade + FRAME).toFixed(2)} s`);
 for (const kind of ["webm", "mp4", "png"]) console.log(`  .${kind} ${(statSync(`${name}.${kind}`).size / 1e6).toFixed(2)} MB`);
 console.log(`  seam ${seam} dB, a step ${step} dB`);

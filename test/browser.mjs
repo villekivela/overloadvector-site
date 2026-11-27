@@ -17,9 +17,9 @@ async function serve() {
     // A part of a file, as a video asks for to seek and to loop.
     const range = request.headers.range?.match(/^bytes=(\d*)-(\d*)$/);
     if (!range) return response.writeHead(200, type).end(body);
-    const start = range[1] ? Number(range[1]) : body.length - Number(range[2]);
+    const start = range[1] ? Number(range[1]) : Math.max(0, body.length - Number(range[2]));
     const end = range[1] && range[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1;
-    if (start >= body.length) return response.writeHead(416, { "content-range": `bytes */${body.length}` }).end();
+    if (start >= body.length || start > end) return response.writeHead(416, { "content-range": `bytes */${body.length}` }).end();
     response.writeHead(206, { ...type, "content-range": `bytes ${start}-${end}/${body.length}` });
     response.end(body.subarray(start, end + 1));
   });
