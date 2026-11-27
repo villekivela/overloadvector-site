@@ -459,9 +459,10 @@ test("a clip on the phone has the colours of its first frame's still, in both th
       await visit(DESK);
       await pickTheme(theme);
       await phoneShows("today");
-      await bring("mannequin", "end");
-      await phoneShows("mannequin");
-      if (clips) await playing("mannequin");
+      // Logging, whose opening changes no more than a few digits.
+      await bring("logging", "end");
+      await phoneShows("logging");
+      if (clips) await playing("logging");
       await pause(700);
       return screenBrightness();
     } finally {
