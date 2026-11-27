@@ -9,8 +9,10 @@ import { page, read } from "./dist.mjs";
 const SECTIONS = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
 const DESK = { width: 1280, height: 800 };
 const POCKET = { width: 390, height: 800 };
-// A desk's window tall enough to hold a whole section below its middle.
-const TALL = { width: 1440, height: 1100 };
+// A desk's tall window, where a section can be whole in view and still low in it.
+const HIGH_DESK = { width: 1440, height: 1100 };
+// A window taller than it is wide, where the phone is sized by its side's width.
+const NARROW_DESK = { width: 1000, height: 1200 };
 
 test("the home page names Overload Vector", () => {
   assert.match(page("/"), /<h1[^>]*>\s*Overload Vector\s*<\/h1>/);
@@ -41,10 +43,9 @@ test("each still phone is there in both themes, and described", () => {
   );
   // After the screens, Today again: it holds the live phone's place, where the canvas speaks for it.
   assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...SECTIONS, "today"]);
-  for (let i = 0; i < stills.length; i += 2) {
-    assert.deepEqual(stills[i + 1], { ...stills[i], theme: "dark" });
-    if (i < stills.length - 2) assert.ok(stills[i].alt.length >= 12, `${stills[i].screen} isn't described`);
-  }
+  for (let i = 0; i < stills.length; i += 2) assert.deepEqual(stills[i + 1], { ...stills[i], theme: "dark" });
+  for (const { screen, alt } of stills.slice(0, -2)) assert.ok(alt.length >= 12, `${screen} isn't described`);
+  assert.deepEqual(stills.slice(-2).map(({ alt }) => alt), ["", ""]);
 });
 
 test("the page for a wrong address has no phone", () => {
@@ -132,12 +133,20 @@ const stillsSeen = () =>
       .map((img) => img.getAttribute("src").match(/phone-[a-z-]+/)[0]);
   });
 
-/** Scrolls a section against an edge of the view: "end" has it whole in view as it comes up. */
-const bring = (screen, block) =>
+/**
+ * Scrolls a section to the view's foot ("end"), where it is whole in view as it comes up, or to
+ * just under the header ("top").
+ */
+const bring = (screen, to) =>
   site.run(
-    (screen, block) => document.querySelector(`.home [data-screen~="${screen}"]`).scrollIntoView({ block, behavior: "instant" }),
+    (screen, to) => {
+      const section = document.querySelector(`.home [data-screen~="${screen}"]`);
+      if (to === "end") return section.scrollIntoView({ block: "end", behavior: "instant" });
+      const header = document.querySelector("header.header").offsetHeight;
+      window.scrollBy({ top: section.getBoundingClientRect().top - header, behavior: "instant" });
+    },
     screen,
-    block,
+    to,
   );
 
 test("on a desk the phone shows each section's screen as the reader scrolls, and back again", async () => {
@@ -153,7 +162,7 @@ test("on a desk the phone shows each section's screen as the reader scrolls, and
       const section = document.querySelector(`.home [data-screen~="${screen}"]`);
       return section.dataset.screen.split(" ").indexOf(screen) > 0;
     }, screen);
-    await bring(screen, second ? "start" : "end");
+    await bring(screen, second ? "top" : "end");
     await phoneShows(screen);
   }
   // The phone is still pinned in view beside the last section.
@@ -170,16 +179,26 @@ test("on a desk the phone shows each section's screen as the reader scrolls, and
 });
 
 test("a section whole in view reads beside its own screen, also while it is low in the view", async () => {
-  await visit(TALL);
+  await visit(HIGH_DESK);
   await phoneShows("today");
   await bring(SECTIONS[0], "end");
   const whole = await site.run((screen) => {
     const { top, bottom } = document.querySelector(`.home [data-screen~="${screen}"]`).getBoundingClientRect();
-    return { below: top - document.querySelector("header.header").offsetHeight, above: window.innerHeight - bottom };
+    return { underHeader: top - document.querySelector("header.header").offsetHeight, overFoot: window.innerHeight - bottom };
   }, SECTIONS[0]);
-  assert.ok(whole.below >= 0 && whole.above >= -1, `not whole in view: ${JSON.stringify(whole)}`);
+  assert.ok(whole.underHeader >= 0 && whole.overFoot >= -1, `not whole in view: ${JSON.stringify(whole)}`);
   await phoneShows(SECTIONS[0]);
 });
+
+for (const [where, size] of [["a desk", DESK], ["a tall desk", HIGH_DESK]]) {
+  test(`on ${where} the hero's link to a section with two screens lands on its first`, async () => {
+    await visit(size);
+    await phoneShows("today");
+    await site.run(() => document.querySelector('.home .glance a[href="#technique"]').click());
+    await pause(1500);
+    assert.equal(await site.run(() => document.querySelector(".home-stage").dataset.screen), "mannequin");
+  });
+}
 
 test("no section's words are dimmed, wherever the page is scrolled", async () => {
   await visit(DESK);
@@ -199,6 +218,34 @@ test("no section's words are dimmed, wherever the page is scrolled", async () =>
   }
 });
 
+/** How bright the middle of the phone's screen is, 0 to 255. */
+async function screenBrightness() {
+  const { pixels, width, height } = await seeStage();
+  const middle = { left: Math.round(width / 2) - 40, top: Math.round(height / 2) - 40, width: 80, height: 80 };
+  const { channels } = await sharp(await sharp(pixels, { raw: { width, height, channels: 3 } }).extract(middle).png().toBuffer()).stats();
+  return (channels[0].mean + channels[1].mean + channels[2].mean) / 3;
+}
+
+/** Runs `body` on a page whose screens are first rewritten by `rewrite`, a function in the page. */
+async function withScreens(rewrite, body) {
+  const { identifier } = await site.send("Page.addScriptToEvaluateOnNewDocument", {
+    source: `new MutationObserver((_, observer) => {
+      const stage = document.querySelector(".home-stage[data-screens]");
+      if (!stage) return;
+      observer.disconnect();
+      const screens = JSON.parse(stage.dataset.screens);
+      (${rewrite})(screens);
+      stage.dataset.screens = JSON.stringify(screens);
+    }).observe(document, { childList: true, subtree: true });`,
+  });
+  try {
+    await visit(DESK);
+  } finally {
+    await site.send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
+  }
+  await body();
+}
+
 /** The live phone's side of the page as a visitor sees it now, as raw pixels. */
 async function seeStage() {
   const box = await site.run(() => {
@@ -206,11 +253,12 @@ async function seeStage() {
     return { left: Math.round(left), top: Math.round(top), width: Math.floor(width), height: Math.floor(height) };
   });
   const { data } = await site.send("Page.captureScreenshot", { format: "png" });
-  return sharp(Buffer.from(data, "base64")).extract(box).removeAlpha().raw().toBuffer();
+  const pixels = await sharp(Buffer.from(data, "base64")).extract(box).removeAlpha().raw().toBuffer();
+  return { pixels, width: box.width, height: box.height };
 }
 
 /** The share of two pictures' values that differ by more than a rounding's worth. */
-function differing(one, other) {
+function differing({ pixels: one }, { pixels: other }) {
   assert.equal(one.length, other.length, "the phone's side changed its size");
   let count = 0;
   for (let i = 0; i < one.length; i++) if (Math.abs(one[i] - other[i]) > 8) count++;
@@ -220,21 +268,11 @@ function differing(one, other) {
 test("the phone turns into place as the scroll begins, then stands still through every change of screen", async () => {
   // Every screen is given Today's picture, so whatever changes on the phone's side is the phone
   // moving, not its screen.
-  const { identifier } = await site.send("Page.addScriptToEvaluateOnNewDocument", {
-    source: `new MutationObserver((_, observer) => {
-      const stage = document.querySelector(".home-stage[data-screens]");
-      if (!stage) return;
-      observer.disconnect();
-      const screens = JSON.parse(stage.dataset.screens);
+  await withScreens(
+    (screens) => {
       for (const name in screens) screens[name] = screens.today;
-      stage.dataset.screens = JSON.stringify(screens);
-    }).observe(document, { childList: true, subtree: true });`,
-  });
-  try {
-    await visit(DESK);
-  } finally {
-    await site.send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
-  }
+    },
+    async () => {
   await phoneShows("today");
   await pause(700);
   const opening = await seeStage();
@@ -244,42 +282,109 @@ test("the phone turns into place as the scroll begins, then stands still through
   assert.ok(differing(opening, placed) > 0.005, "the phone didn't turn");
 
   // The last section at its foot only: beyond that the phone rides up with the end of the page.
+  const seen = new Set();
+  // The last section at its foot only: beyond that the phone rides up with the end of the page.
   for (const screen of SECTIONS) {
-    for (const block of screen === SECTIONS.at(-1) ? ["end"] : ["end", "start"]) {
-      await bring(screen, block);
+    for (const to of screen === SECTIONS.at(-1) ? ["end"] : ["end", "top"]) {
+      await bring(screen, to);
       // Through the change of screen, and after it.
       for (const wait of [60, 100, 100, 100, 100, 500]) {
         await pause(wait);
         const moved = differing(placed, await seeStage());
-        assert.ok(moved < 0.001, `the phone moved at ${screen}, ${block}: ${moved}`);
+        assert.ok(moved < 0.001, `the phone moved at ${screen}, ${to}: ${moved}`);
       }
+      seen.add(await site.run(() => document.querySelector(".home-stage").dataset.screen));
     }
+  }
+  assert.deepEqual([...seen].filter((screen) => screen !== "today"), SECTIONS, "the screens didn't all come");
+    },
+  );
+});
+
+test("a new screen fades in over the old one", async () => {
+  // The page's frames are told an eighth of the time, so the fade lasts long enough to be seen.
+  const { identifier } = await site.send("Page.addScriptToEvaluateOnNewDocument", {
+    source: `{
+      const frame = window.requestAnimationFrame.bind(window);
+      window.requestAnimationFrame = (draw) => frame((now) => draw(now / 8));
+    }`,
+  });
+  try {
+    // Today black and the first section's screen white, so a frame between them is neither.
+    await withScreens(
+      (screens) => {
+        for (const [name, colour] of [["today", "black"], ["new-program", "white"]]) {
+          const canvas = Object.assign(document.createElement("canvas"), { width: 64, height: 142 });
+          const pen = canvas.getContext("2d");
+          pen.fillStyle = colour;
+          pen.fillRect(0, 0, 64, 142);
+          screens[name].dark = screens[name].light = canvas.toDataURL();
+        }
+      },
+      async () => {
+        await pickTheme("dark");
+        await site.run(() => window.scrollTo({ top: window.innerHeight / 4, behavior: "instant" }));
+        await phoneShows("today");
+        await pause(700);
+        await bring("new-program", "end");
+        const levels = [];
+        for (const started = Date.now(); Date.now() - started < 3500; ) levels.push(Math.round(await screenBrightness()));
+        assert.ok(levels.at(-1) > 215, `the new screen never arrived: ${levels.join(" ")}`);
+        assert.ok(levels.some((level) => level > 70 && level < 200), `no frame between the two: ${levels.join(" ")}`);
+      },
+    );
+  } finally {
+    await site.send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
   }
 });
 
-test("the picture holding the phone's place is the phone as the page first shows it", async () => {
-  await visit(DESK);
-  for (const theme of ["dark", "light"]) {
-    await pickTheme(theme);
-    await phoneShows("today");
-    await pause(700);
-    // Shrunk, so that only where the phone stands and which way it faces count.
-    const shrunk = async () => {
-      const box = await site.run(() => {
-        const { width, height } = document.querySelector(".home-stage").getBoundingClientRect();
-        return { width: Math.floor(width), height: Math.floor(height) };
-      });
-      return sharp(await seeStage(), { raw: { ...box, channels: 3 } }).resize(60).raw().toBuffer();
-    };
-    const model = await shrunk();
-    await site.run(() => document.querySelector(".home-stage").removeAttribute("data-ready"));
-    await pause(700);
-    const picture = await shrunk();
-    await site.run(() => document.querySelector(".home-stage").setAttribute("data-ready", ""));
-    const apart = differing(model, picture);
-    assert.ok(apart < 0.08, `${theme}: the picture and the model differ in ${apart} of the values`);
+test("the picture holding the phone's place stays until the model has a screen to show", async () => {
+  await site.send("Network.setBlockedURLs", { urls: ["*shot-*"] });
+  try {
+    await visit(DESK);
+    await pause(2500);
+    const seen = await site.run(() => ({
+      model: getComputedStyle(document.querySelector(".home-stage canvas")).opacity,
+      picture: [...document.querySelectorAll(".home-stage img")]
+        .filter((img) => img.getClientRects().length)
+        .map((img) => getComputedStyle(img).opacity),
+    }));
+    assert.deepEqual(seen, { model: "0", picture: ["1"] });
+  } finally {
+    await site.send("Network.setBlockedURLs", { urls: [] });
   }
 });
+
+for (const [where, size] of [["a desk", DESK], ["a window taller than wide", NARROW_DESK]]) {
+  test(`on ${where} the picture holding the phone's place is the phone as the page first shows it`, async () => {
+    await visit(size);
+    for (const theme of ["dark", "light"]) {
+      await pickTheme(theme);
+      await phoneShows("today");
+      await pause(700);
+      // Shrunk, so that only where the phone stands and which way it faces count.
+      const shrunk = async () => {
+        const { pixels, width, height } = await seeStage();
+        return { pixels: await sharp(pixels, { raw: { width, height, channels: 3 } }).resize(60).raw().toBuffer() };
+      };
+      const model = await shrunk();
+      // The picture alone, as before the model had loaded.
+      const hidden = await site.run(async () => {
+        const style = document.head.appendChild(document.createElement("style"));
+        style.id = "picture-alone";
+        style.textContent = ".home-stage canvas { visibility: hidden } .home-stage img { opacity: 1 !important }";
+        await Promise.all([...document.querySelectorAll(".home-stage img")].filter((img) => img.getClientRects().length).map((img) => img.decode()));
+        return true;
+      });
+      assert.ok(hidden);
+      await pause(300);
+      const picture = await shrunk();
+      await site.run(() => document.getElementById("picture-alone").remove());
+      const apart = differing(model, picture);
+      assert.ok(apart < 0.08, `${theme}: the picture and the model differ in ${apart} of the values`);
+    }
+  });
+}
 
 test("the phone stays where it is when the scroll begins", async () => {
   await visit(DESK);
@@ -295,17 +400,6 @@ test("the phone stays where it is when the scroll begins", async () => {
   }
   assert.deepEqual(tops, tops.map(() => tops[0]));
 });
-
-/** How bright the middle of the phone's screen is, 0 to 255. */
-async function screenBrightness() {
-  const clip = await site.run(() => {
-    const { left, top, width, height } = document.querySelector(".home-stage").getBoundingClientRect();
-    return { x: left + width / 2 - 40, y: top + height / 2 - 40, width: 80, height: 80, scale: 1 };
-  });
-  const { data } = await site.send("Page.captureScreenshot", { format: "png", clip });
-  const { channels } = await sharp(Buffer.from(data, "base64")).stats();
-  return (channels[0].mean + channels[1].mean + channels[2].mean) / 3;
-}
 
 test("the theme menu changes the phone's screen, both ways", async () => {
   await visit(DESK);
@@ -329,6 +423,7 @@ const STILLS = ["today", ...SECTIONS];
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
   await visit(DESK);
   await phoneShows("today");
+  await pickTheme("dark");
   await site.send("Emulation.setDeviceMetricsOverride", { ...POCKET, deviceScaleFactor: 1, mobile: false });
   assert.deepEqual(await stillsSeen(), STILLS.map((screen) => `phone-${screen}-dark`));
   await site.send("Emulation.setDeviceMetricsOverride", { ...DESK, deviceScaleFactor: 1, mobile: false });

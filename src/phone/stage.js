@@ -86,13 +86,14 @@ export function startStage(stage) {
     });
     phone.render();
 
-    // What the canvas shows, for a reader who can't see it and for the tests.
+    // What the canvas shows, for a reader who can't see it and for the tests. It is ready to take
+    // the picture's place only once it has a screen.
     const showing = shown?.split(":")[0];
     if (showing) {
       stage.dataset.screen = showing;
       canvas.setAttribute("aria-label", screens[showing].alt);
+      stage.dataset.ready = "";
     }
-    stage.dataset.ready = "";
 
     if (change && t >= 1) change = null;
     if (change || (wanted !== shown && loaded.has(wanted))) redraw();

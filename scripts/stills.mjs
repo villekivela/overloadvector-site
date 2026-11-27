@@ -1,6 +1,6 @@
 // Draws the home page's still phones: the page's own model (src/phone/phone.js), rendered in a
-// headless Chrome with each screenshot on its screen. Run it after the model or a screenshot the
-// home page shows changes: npm run stills.
+// headless Chrome with each screenshot on its screen. Run it after the model, a pose or a
+// screenshot the home page shows changes: npm run stills.
 import { createServer } from "node:http";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { extname, join, normalize } from "node:path";

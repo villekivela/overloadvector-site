@@ -36,11 +36,13 @@ const BEZEL = 3.2;
 const SCREEN_WIDTH = WIDTH - 2 * BEZEL;
 const SCREEN_HEIGHT = (SCREEN_WIDTH * 1428) / 640;
 const FIELD_OF_VIEW = 30;
+/** The share of the canvas's height the phone takes when it faces the reader. */
+export const FILL = 0.74;
 
 /** How the phone stands, in radians: `open` is how the page opens, `front` is where it rests. */
 export const POSES = {
-  open: { yaw: -0.5, pitch: 0.1, roll: -0.04 },
-  front: { yaw: 0, pitch: 0, roll: 0 },
+  open: { yaw: -0.7, pitch: 0.1, roll: -0.04 },
+  front: { yaw: -0.3, pitch: 0.05, roll: 0 },
 };
 
 /** The body's colours by the page's theme: a charcoal phone on the dark page, a moonstone one on the light. */
@@ -94,8 +96,7 @@ const SCREEN_VERTEX = `
 `;
 
 // The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
-// throws back one soft band of light, which comes onto the screen from its upper right as the
-// phone turns into place, and rests there.
+// throws back one soft band of light, which crosses the screen as the phone turns.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
@@ -104,7 +105,7 @@ const SCREEN_FRAGMENT = `
   varying float vTurn;
   void main() {
     vec3 shown = mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend);
-    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.85 + vTurn * 2.2;
+    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
     float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
     gl_FragColor = vec4(shown + glare * 0.028, 1.0);
     #include <colorspace_fragment>
@@ -300,11 +301,8 @@ function buildFront(screen) {
   return front;
 }
 
-/**
- * Draws the phone into `canvas`, on a clear background. `fill` is the share of the canvas's
- * height the phone takes when it faces the reader.
- */
-export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
+/** Draws the phone into `canvas`, on a clear background. */
+export function createPhone(canvas, { pixelRatio = 1 } = {}) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(pixelRatio);
   renderer.toneMapping = NeutralToneMapping;
@@ -338,7 +336,7 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
   phone.add(shell, buildFront(screen), buildBack(body), buildEdges(body));
   phone.rotation.order = "YXZ";
   scene.add(phone);
-  // A lamp up and to the left for the matte back, and one behind to catch the frame's edge.
+  // A lamp up and to the left, and one behind to catch the frame's edge.
   const key = new DirectionalLight(0xffffff, 1.1);
   key.position.set(-90, 140, 220);
   const edge = new DirectionalLight(0xdfe6ff, 1.0);
@@ -353,9 +351,11 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     setSize(width, height) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      // Tall enough for the phone, and wide enough for it at any turn.
-      const tall = Math.max(HEIGHT / fill, (WIDTH * 1.25) / camera.aspect);
+      // Tall enough for the phone, and wide enough for it at any turn. A narrow canvas zooms out
+      // from the same spot, so the phone keeps the perspective of the picture drawn ahead of time.
+      const tall = HEIGHT / FILL;
       camera.position.z = tall / (2 * Math.tan((FIELD_OF_VIEW * Math.PI) / 360));
+      camera.zoom = Math.min(1, (tall * camera.aspect) / (WIDTH * 1.25));
       camera.updateProjectionMatrix();
     },
     /** The body's colour: "dark" or "light", after the page's theme. */

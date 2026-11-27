@@ -11,25 +11,25 @@
 </script>
 <canvas></canvas>
 <script type="module">
-  import { createPhone, POSES } from "/src/phone/phone.js";
+  import { createPhone, FILL, POSES } from "/src/phone/phone.js";
 
-  // The home page's camera (`fill`), so a still has the live phone's perspective and the one
-  // holding its place doesn't jump when the model arrives. A still is the middle of that picture,
-  // with the phone taking `TALL` of the still's height (Home.astro sizes the holding one by both).
-  const FILL = 0.74;
-  const TALL = 0.9;
+  // A still is the middle of the picture the home page's camera takes, so it has the live phone's
+  // perspective and the one holding its place doesn't jump when the model arrives. The phone takes
+  // `SHARE` of a still's height (Home.astro sizes the holding one by this and `FILL`).
+  const SHARE = 0.9;
   const drawn = document.querySelector("canvas");
-  const phone = createPhone(drawn, { fill: FILL });
+  const phone = createPhone(drawn);
   /** A PNG of a theme's phone in a pose, with the screenshot at `shot` on its screen. */
   window.still = async (pose, theme, width, height, shot) => {
-    const [wide, high] = [width, height].map((side) => Math.round((side * TALL) / FILL));
+    const [wide, high] = [width, height].map((side) => Math.round((side * SHARE) / FILL));
     phone.setSize(wide, high);
     phone.setFinish(theme);
     phone.setPose(POSES[pose]);
     phone.setScreen(await phone.loadScreen(shot));
     phone.render();
     const still = Object.assign(document.createElement("canvas"), { width, height });
-    still.getContext("2d").drawImage(drawn, (width - wide) / 2, (height - high) / 2);
+    // On whole pixels, so nothing is resampled.
+    still.getContext("2d").drawImage(drawn, Math.round((width - wide) / 2), Math.round((height - high) / 2));
     return still.toDataURL("image/png");
   };
 </script>
