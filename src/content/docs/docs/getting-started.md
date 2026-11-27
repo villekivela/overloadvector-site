@@ -63,7 +63,7 @@ physio before you start.
 **Moving from another phone?** On the first screen, tap **Restore from a backup** under **Before
 you start** instead. See [Backups and moving to a new phone](/docs/backups/).
 
-**Coming from Hevy or Strong?** Tap **Import your history** just below it, then go through
+**Coming from Hevy or Strong?** Tap **Import your history** below it, then go through
 Setup. See [Coming from Hevy or Strong](/docs/import/).
 
 To go through Setup again, tap **Settings → Run setup again**. Answers you don't change stay as
@@ -77,7 +77,7 @@ At the end of Setup, choose one:
   network. It shows the whole program with its weekly sets per muscle, and you tap **Start
   program**, **Save for later** or **Reject**.
 - **Import a program file.** A program you or Claude wrote. See [Programs](/docs/programs/).
-- **Train ad hoc for now.** Start a session whenever you like and add exercises as you go.
+- **Train ad hoc for now.** Start a session at any time and add exercises as you go.
 - **Build it with Claude**, if you connected Claude. Claude proposes the program in the Claude app,
   and the proposal appears on Today for you to review.
 

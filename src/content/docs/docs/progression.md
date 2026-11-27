@@ -67,5 +67,5 @@ Set a **lift goal** for an exercise's estimate from its trend on the **Progress*
 if you like. A goal shows how far you are. It never changes your program or your suggestions. Goals
 are for free weights and weighted bodyweight exercises.
 
-A set that beats your earlier ones is marked as a **record**: a new best estimate, or more reps than
-before at a weight you've lifted.
+A set that beats your earlier ones is marked as a **record**. A record is a new best estimate, or
+more reps than before at a weight you've lifted.

@@ -21,7 +21,7 @@ One program runs at a time. Starting another keeps the old one and its sessions.
 
 The tabs under the title are the blocks. Pick one to see its weeks, its days and each day's
 exercises. Tap an exercise to edit it. Finished blocks have **Review**, a page on how the
-block went. It shows your lifts, the sessions you turned up for, your volume and your records.
+block went. It shows your lifts, the sessions you did, your volume and your records.
 
 <div class="shots">
 
