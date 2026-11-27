@@ -22,6 +22,13 @@ After that the app updates itself. When a newer version is out, a banner on **To
 tap it, and confirm Android's "Update this app?". You can switch the check off in **Settings →
 Check for updates**.
 
+### From Google Play
+
+Invited to the test on Google Play? Open the invitation link on the phone, accept, and install
+Overload Vector from the Play Store. Google Play then keeps it up to date, so the app has no update
+banner and no **Check for updates**. Allow its exact alarms too, so the rest buzz is on time
+([Rest](/docs/logging/#rest)).
+
 ## Setup
 
 On its first start the app asks a few questions, one on each screen. You can skip most of them, and

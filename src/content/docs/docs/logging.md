@@ -57,6 +57,10 @@ Rest starts when you log a set and runs at the top of the screen. Tap it to add 
 seconds, or to end it. The phone vibrates when rest is over, also with the screen off, and a
 notification shows the next set. Allow notifications to see it on the lock screen.
 
+If you installed from Google Play, Android may hold the buzz back while the phone sleeps until you
+allow exact alarms: in the app, open **Settings**, tap **Alarms & reminders** and allow it. The row
+is there only while it's off.
+
 There's no rest between the two exercises of a superset, before a drop, or after an exercise's last
 set.
 
