@@ -9,11 +9,13 @@ export const TYPES = {
   ".css": "text/css",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
+  ".mp4": "video/mp4",
   ".json": "application/json",
   ".png": "image/png",
   ".svg": "image/svg+xml",
   ".txt": "text/plain; charset=utf-8",
   ".wasm": "application/wasm",
+  ".webm": "video/webm",
   ".webp": "image/webp",
   ".woff2": "font/woff2",
 };

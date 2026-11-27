@@ -5,15 +5,23 @@ import { extname } from "node:path";
 import { openBrowser, TYPES } from "../scripts/chrome.mjs";
 import { builtFiles, read } from "./dist.mjs";
 
-/** Serves dist/ as GitHub Pages would: a folder's address answers with its index.html. */
+/** Serves dist/ as GitHub Pages would: a folder's address answers with its index.html, and a range with its part. */
 async function serve() {
   const files = new Set(builtFiles());
   const server = createServer((request, response) => {
     let path = decodeURI(new URL(request.url, "http://site").pathname).slice(1);
     if (path === "" || path.endsWith("/")) path += "index.html";
     if (!files.has(path)) return response.writeHead(404).end();
-    response.writeHead(200, { "content-type": TYPES[extname(path)] ?? "application/octet-stream" });
-    response.end(read(path));
+    const body = read(path);
+    const type = { "content-type": TYPES[extname(path)] ?? "application/octet-stream", "accept-ranges": "bytes" };
+    // A part of a file, as a video asks for to seek and to loop.
+    const range = request.headers.range?.match(/^bytes=(\d*)-(\d*)$/);
+    if (!range) return response.writeHead(200, type).end(body);
+    const start = range[1] ? Number(range[1]) : body.length - Number(range[2]);
+    const end = range[1] && range[2] ? Math.min(Number(range[2]), body.length - 1) : body.length - 1;
+    if (start >= body.length) return response.writeHead(416, { "content-range": `bytes */${body.length}` }).end();
+    response.writeHead(206, { ...type, "content-range": `bytes ${start}-${end}/${body.length}` });
+    response.end(body.subarray(start, end + 1));
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   return server;

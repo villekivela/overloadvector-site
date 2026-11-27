@@ -1,6 +1,7 @@
 // Drives the home page's phone from the scroll: it turns a little into place as the scroll begins,
-// then stands still, pinned, while each feature section puts its own screen on it. Loaded only
-// when the animated page runs, so three.js is never fetched for the stills.
+// then stands still, pinned, while each feature section puts its own screen on it, or plays its
+// clip there. Loaded only when the animated page runs, so neither three.js nor a clip is ever
+// fetched for the stills.
 import { createPhone, POSES } from "./phone.js";
 import { story } from "./story.js";
 
@@ -37,6 +38,47 @@ export function startStage(stage) {
     );
   }
 
+  // Clips by "screen:theme", made the first time their screen is shown. Muted and looping, a
+  // clip plays only while its screen is the one shown, from its start each time. Until its first
+  // frame is drawn the phone shows the still of that frame, and once paused, the frame it stopped on.
+  const clips = new Map();
+  function clipOf(key) {
+    const [screen, theme] = key.split(":");
+    const sources = screens[screen].clip?.[theme];
+    if (!sources) return null;
+    if (!clips.has(key)) {
+      const video = document.createElement("video");
+      Object.assign(video, { muted: true, loop: true, playsInline: true, preload: "auto" });
+      for (const [kind, src] of Object.entries(sources)) {
+        video.append(Object.assign(document.createElement("source"), { src, type: `video/${kind}` }));
+      }
+      const clip = { video, texture: phone.videoScreen(video), drawn: false };
+      // Each new frame draws the phone again.
+      const next = () => {
+        if (!video.paused) clip.drawn = true;
+        redraw();
+        video.requestVideoFrameCallback(next);
+      };
+      video.requestVideoFrameCallback(next);
+      clips.set(key, clip);
+    }
+    return clips.get(key);
+  }
+  /** Plays the clip of `key` if it has one, and stops every other. */
+  function play(key) {
+    for (const [other, { video }] of clips) if (other !== key && !video.paused) video.pause();
+    const clip = key && clipOf(key);
+    if (!clip?.video.paused) return;
+    clip.drawn = false;
+    clip.video.currentTime = 0;
+    // Refused, as by a browser that saves power: the still stays.
+    clip.video.play().catch(() => {});
+  }
+  const screenOf = (key) => {
+    const clip = clips.get(key);
+    return clip?.drawn ? clip.texture : loaded.get(key);
+  };
+
   let shown = null;
   let change = null;
   let queued = false;
@@ -72,10 +114,10 @@ export function startStage(stage) {
     let t = 0;
     if (change) {
       t = Math.min(1, (now - change.start) / CHANGE);
-      phone.setScreen(loaded.get(change.from), loaded.get(change.to), ease(t));
+      phone.setScreen(screenOf(change.from), screenOf(change.to), ease(t));
       if (t >= 0.5) shown = change.to;
     } else if (shown) {
-      phone.setScreen(loaded.get(shown));
+      phone.setScreen(screenOf(shown));
     }
 
     const placed = ease(turn);
@@ -96,6 +138,12 @@ export function startStage(stage) {
     }
 
     if (change && t >= 1) change = null;
+    // A clip starts once its screen has faded in, and stops as another begins to.
+    play(change ? null : shown);
+    // Which clip is playing, for the tests.
+    const running = [...clips].find(([, { video }]) => !video.paused)?.[0].split(":")[0];
+    if (running) stage.dataset.playing = running;
+    else delete stage.dataset.playing;
     if (change || (wanted !== shown && loaded.has(wanted))) redraw();
   }
 
