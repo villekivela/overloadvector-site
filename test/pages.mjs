@@ -1,6 +1,7 @@
 /** Every page the site promises besides the home page, by its address and its heading. */
 export const PAGES = {
   "/docs/getting-started/": "Getting started",
+  "/docs/import/": "Coming from Hevy or Strong",
   "/docs/logging/": "Logging a session",
   "/docs/progression/": "Progression and suggestions",
   "/docs/programs/": "Programs",
