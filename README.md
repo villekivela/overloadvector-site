@@ -20,7 +20,7 @@ npm run clips     # makes one of the phone's clips from a screen recording (Clip
 
 ## The logo
 
-The favicon, the header's logo and the social preview are generated in the app's repository
+The favicon and the social preview are generated in the app's repository
 (`villekivela/overloadvector`, `brand/README.md`) and copied here. Never edit them here: regenerate
 them there with `python3 -I tools/brand/brand.py`, then copy its `brand/site/` files over:
 
@@ -28,10 +28,29 @@ them there with `python3 -I tools/brand/brand.py`, then copy its `brand/site/` f
 | --- | --- |
 | `favicon.svg`, `favicon.ico` | `public/` |
 | `social-1200x630.png` | `public/social.png` |
-| `logo-light.svg`, `logo-dark.svg` | `src/assets/` |
 
-The header shows the logo in place of the site's title, which stays its accessible name. The
-capitals are logo art only: running text says Overload Vector.
+The header and the footer draw the mark themselves (`src/components/Mark.astro`), in the text's
+colour, beside the name in Mona Sans capitals. Running text says Overload Vector.
+
+## The look
+
+`src/styles/graphite.css` holds the look, as `--ov-` variables that Starlight's own are set from:
+the app's Graphite greys, dark and light, and one signal colour, the orange `#e8571c` with `#111` on
+it. The signal is for the primary action and "you are here"; a lit muscle is the same orange, as in
+the app. Plates and reps-in-reserve chips keep the app's colours.
+
+What you press, the home page's closing band and the pressed answer in Progression have the mark's
+stepped corner, cut from their lower right.
+
+Both themes meet WCAG AA, which `test/contrast.test.mjs` checks on the home page, three docs pages
+and the FAQ: text at 4.5:1, large text and the rim or line that tells a control's state at 3:1.
+Orange text smaller than large would fail on the light theme: darken `--ov-signal-ink` there if a
+page ever needs it.
+
+Every page has the site's own header (`src/components/Header.astro`): the mark and the name, Docs
+and FAQ, Starlight's search on every page but the home page, and Starlight's theme menu. The docs,
+the FAQ and the other reading pages are Starlight's, with its sidebar and its list of the page's
+headings, restyled in `graphite.css`.
 
 ## The pages
 
@@ -48,24 +67,29 @@ Write for users, in plain English, from the app as it is. A new page goes in the
 
 ### The home page
 
-`src/components/Home.astro` is the top of the home page: the pitch, then what the app does, section by section, beside
-one phone. `index.mdx` holds the pitch's words and buttons, and everything below the phone.
+`src/components/Home.astro` is the whole home page: the name and the pitch, then what the app
+does, section by section, beside one phone, then privacy and the band that offers the beta.
+`index.mdx` only gives the page its title and description.
+
+Each section has a small working model of what it describes, drawn by the page: Program's 12-week
+block, Logging's set and its reps-in-reserve chips, Technique's muscles and their switch,
+Progression's three steps and plates, Coaching's proposed Change. They show made-up training, and
+read whole without JavaScript.
 
 On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it opens turned a
 little further away, turns into place, slightly side on, over the first quarter of a view of
 scroll, and from there on stands still, pinned, while each section's screen crossfades onto it as
 the section reaches the middle of the view. Logging, Technique and Coaching play a clip of the app
-there instead (Clips). Every section's words read at full strength.
+there instead (Clips). Every section's words read at full strength. Behind the phone, at the top of
+the page, stands the mark, as big as the window allows.
 `phone.js` is the model, a Pixel 10 Pro's shape built from plain geometry, with no maker's logo and
 nothing downloaded, and holds its two poses. `story.js` says what the phone shows at a scroll
 position, how long its turn takes and where a section takes the screen, and `stage.js` drives the
 model from it.
 
-The home page's header has links to the docs and the FAQ where the other pages have the search
-(`src/components/Search.astro`).
-
 A narrow screen, a visitor who asked for less motion and a browser without WebGL get a still of the
-same phone under each text instead, and never load three.js. The stills are in `src/assets/phone/`,
+same phone with each text instead, under it on a narrow screen and beside it on a wide one, and
+never load three.js. Technique's still is the mannequin, and its muscles once the switch is on. The stills are in `src/assets/phone/`,
 drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing
 the model, a pose or a screenshot the home page shows, and commit what it draws. Today's still stands
 as the page opens, and holds the live phone's place until the model has loaded; the others stand as
@@ -136,11 +160,23 @@ shows its own:
 
 ## Fonts
 
-The app's own: Space Grotesk for words in titles, Inter for everything else and every number
-(`src/styles/fonts.css`). They are served from this site, never from a font service, and their
-licences are published beside them (`public/fonts/`) and linked in the footer. `src/assets/fonts/`
-holds the app's font files, whole, packed with `woff2_compress`; Inter's keep the hyphen
-proportional under tabular figures, as the app patches them.
+Mona Sans, condensed to 75% at weight 800 and set in capitals, for the name, the headings and large
+figures; Inter for everything else (`src/styles/fonts.css`). They are served from this site, never
+from a font service, and their licences are published beside them (`public/fonts/`) and linked in
+the footer.
+
+`src/assets/fonts/` holds them as woff2. Mona Sans is the app's one cut, whole, packed with
+`woff2_compress`. Inter's three weights are the app's files, which keep the hyphen proportional
+under tabular figures, cut down to the letters the site can need:
+
+```sh
+pyftsubset inter-400.woff2 --flavor=woff2 --layout-features='*' --output-file=inter-400.woff2 \
+  --unicodes="U+0020-007E,U+00A0-017F,U+2010-2027,U+2030-203A,U+20AC,U+2122,U+2190-2199,U+2212,U+2248,U+2260-2265,U+22EE,U+2713"
+```
+
+That is Basic Latin, Latin-1 and Latin Extended-A, the dashes, quotes and arrows, and a few signs.
+`npm test` fails if a page draws any text in a font of the visitor's own, so a letter outside these
+shows there. The app's ⋮ is the exception: Inter doesn't have it.
 
 ## Publishing
 

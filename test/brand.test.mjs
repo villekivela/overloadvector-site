@@ -10,13 +10,27 @@ test("the favicon is the logo, as SVG and as ICO", () => {
   assert.deepEqual([...read("favicon.ico").subarray(0, 6)], [0, 0, 1, 0, 3, 0]);
 });
 
-test("the header shows the logo for each theme, and reads as Overload Vector", () => {
-  const [, title] = page("/").match(/<a href="\/" class="site-title[^>]*>(.*?)<\/a>/s);
-  // Starlight hides the dark theme's logo in the light theme, and the light theme's in the dark.
-  assert.match(title, /<img class="light:sl-hidden[^"]*" alt src="\/_astro\/logo-dark\.[^"]+\.svg"/);
-  assert.match(title, /<img class="dark:sl-hidden[^"]*" alt src="\/_astro\/logo-light\.[^"]+\.svg"/);
-  // The capitals are art: a screen reader hears the name as it is written.
-  assert.match(title, /<span class="sr-only"[^>]*>Overload Vector<\/span>/);
+test("every page's header shows the mark beside the name, and leads to the docs and the FAQ", () => {
+  for (const route of ["/", "/docs/logging/", "/faq/"]) {
+    const html = page(route);
+    const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+    // The mark is drawn in the text's colour, so it follows the theme. The name is text beside it.
+    assert.match(header, /<a href="\/" class="site-title[^>]*>\s*<svg[^>]*aria-hidden="true"[^>]*>\s*<path fill="currentColor"[^>]*><\/path>\s*<\/svg>\s*Overload Vector\s*<\/a>/, route);
+    assert.match(header, /href="\/docs\/getting-started\/"[^>]*>Docs<[\s\S]*href="\/faq\/"[^>]*>FAQ</, route);
+    assert.match(header, /starlight-theme-select/, route);
+  }
+});
+
+test("the header marks the part of the site the reader is in", () => {
+  const current = (route) => {
+    const html = page(route);
+    const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
+    return [...header.matchAll(/<a href="([^"]*)" aria-current="page"/g)].map(([, href]) => href);
+  };
+  assert.deepEqual(current("/"), []);
+  assert.deepEqual(current("/docs/logging/"), ["/docs/getting-started/"]);
+  assert.deepEqual(current("/faq/"), ["/faq/"]);
+  assert.deepEqual(current("/privacy/"), []);
 });
 
 test("a shared link shows the 1200 x 630 social preview", () => {

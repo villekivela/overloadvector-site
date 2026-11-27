@@ -1,5 +1,6 @@
-/* The app's fonts, served from this site so a visitor asks nobody else for them. As in the app,
-   words in titles are Space Grotesk and everything else, every number included, is Inter. */
+/* The site's two faces, served from this site so a visitor asks nobody else for them: Mona Sans,
+   condensed to 75% at weight 800, for the name, the headings and every large figure, and Inter for
+   the rest. */
 @font-face {
   font-family: "Inter";
   font-weight: 400;
@@ -16,62 +17,22 @@
 
 @font-face {
   font-family: "Inter";
-  font-weight: 600;
+  font-weight: 600 700;
   font-display: swap;
   src: url("../assets/fonts/inter-600.woff2") format("woff2");
 }
 
+/* One cut, already condensed: the width and the weight it is asked for are the ones it has. */
 @font-face {
-  font-family: "Inter";
-  font-weight: 700;
+  font-family: "Mona Sans";
+  font-weight: 800;
+  font-stretch: 75%;
   font-display: swap;
-  src: url("../assets/fonts/inter-700.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Space Grotesk";
-  font-weight: 600;
-  font-display: swap;
-  src: url("../assets/fonts/space-grotesk-600.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Space Grotesk";
-  font-weight: 700;
-  font-display: swap;
-  src: url("../assets/fonts/space-grotesk-700.woff2") format("woff2");
-}
-
-/* The digits of a title: Inter's, ahead of Space Grotesk in the titles' list. */
-@font-face {
-  font-family: "Title Figures";
-  font-weight: 600;
-  font-display: swap;
-  src: url("../assets/fonts/inter-600.woff2") format("woff2");
-  unicode-range: U+0030-0039;
-}
-
-@font-face {
-  font-family: "Title Figures";
-  font-weight: 700;
-  font-display: swap;
-  src: url("../assets/fonts/inter-700.woff2") format("woff2");
-  unicode-range: U+0030-0039;
+  src: url("../assets/fonts/mona-sans-condensed-800.woff2") format("woff2");
 }
 
 :root {
   --sl-font: "Inter";
-  --ov-font-title: "Title Figures", "Space Grotesk", var(--sl-font-system);
+  --ov-font-title: "Mona Sans", var(--sl-font-system);
   font-variant-numeric: tabular-nums;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.site-title,
-.card .title {
-  font-family: var(--ov-font-title);
 }

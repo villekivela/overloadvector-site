@@ -1,21 +1,24 @@
 ---
 import Default from "@astrojs/starlight/components/Footer.astro";
+import Mark from "./Mark.astro";
 ---
 
 <Default><slot /></Default>
 
 <footer class="site-footer not-content">
+  <div class="name"><Mark />Overload Vector</div>
+  <nav aria-label="About this site">
+    <a href="/docs/getting-started/">Docs</a>
+    <a href="/faq/">FAQ</a>
+    <a href="/contact/">Contact</a>
+    <a href="/privacy/">Privacy policy</a>
+  </nav>
   <p>
     Support: <a href="mailto:support@overloadvector.com">support@overloadvector.com</a>
   </p>
-  <nav aria-label="About this site">
-    <a href="/faq/">FAQ</a>
-    <a href="/privacy/">Privacy policy</a>
-    <a href="/contact/">Contact</a>
-  </nav>
   <p class="credit">
     Fonts: <a href="/fonts/Inter-OFL.txt">Inter</a> and{" "}
-    <a href="/fonts/SpaceGrotesk-OFL.txt">Space Grotesk</a>, under the SIL Open Font License.
+    <a href="/fonts/MonaSans-OFL.txt">Mona Sans</a>, under the SIL Open Font License.
   </p>
 </footer>
 
@@ -24,12 +27,35 @@ import Default from "@astrojs/starlight/components/Footer.astro";
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-    gap: 0.5rem 1.5rem;
-    margin-top: 2rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--sl-color-hairline);
-    color: var(--sl-color-gray-2);
-    font-size: var(--sl-text-sm);
+    align-items: center;
+    gap: 0.75rem 2rem;
+    margin-top: 4rem;
+    padding-block: 2rem 1rem;
+    border-top: 1px solid var(--ov-line);
+    color: var(--ov-muted);
+    font-size: 0.9375rem;
+  }
+  /* The home page ends on its band, and the footer follows it with the page's own margins. */
+  :global(:root[data-home]) .site-footer {
+    margin-top: 0;
+    padding-inline: var(--ov-m);
+    padding-bottom: 3rem;
+    border-top: 0;
+  }
+  .name {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    font: 800 1.25rem / 1 var(--ov-font-title);
+    font-stretch: 75%;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .name :global(svg) {
+    flex: none;
+    width: auto;
+    height: 1.15em;
   }
   .site-footer p {
     margin: 0;
@@ -40,9 +66,19 @@ import Default from "@astrojs/starlight/components/Footer.astro";
   }
   .site-footer nav {
     display: flex;
-    gap: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin-inline-start: auto;
   }
   .site-footer a {
-    color: var(--sl-color-text);
+    color: inherit;
+    text-decoration: none;
+  }
+  .site-footer a:hover {
+    color: var(--ov-ink);
+  }
+  .site-footer p a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>

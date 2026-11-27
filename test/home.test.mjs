@@ -2,13 +2,13 @@ import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import sharp from "sharp";
 import { openSite } from "./browser.mjs";
-import { page, read } from "./dist.mjs";
+import { builtFiles, page, read } from "./dist.mjs";
 
 // The feature sections in page order, by the screen each puts on the live phone. Technique's is
 // the mannequin's clip, which shows its muscles too.
 const SECTIONS = ["new-program", "logging", "mannequin", "progress", "check-in"];
 // The pictures of the phone in the sections, where there is no live phone: Technique's are two,
-// the mannequin, then its muscles.
+// the mannequin, then its muscles, which its switch puts in the mannequin's place.
 const PICTURED = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
 // The screens the phone plays a clip of, in place of their still.
 const CLIPS = ["logging", "mannequin", "check-in"];
@@ -19,27 +19,53 @@ const HIGH_DESK = { width: 1440, height: 1100 };
 // A window taller than it is wide, where the phone is sized by its side's width.
 const NARROW_DESK = { width: 1000, height: 1200 };
 
-test("the home page names Overload Vector", () => {
-  assert.match(page("/"), /<h1[^>]*>\s*Overload Vector\s*<\/h1>/);
+test("the home page names Overload Vector, a word a line", () => {
+  const [, name] = page("/").match(/<h1[^>]*>(.*?)<\/h1>/s);
+  assert.match(name, /^\s*<span[^>]*>Overload<\/span>\s+<span[^>]*>Vector<\/span>\s*$/);
 });
 
 test("the home page's address is on overloadvector.com", () => {
   assert.match(page("/"), /<link rel="canonical" href="https:\/\/overloadvector\.com\/"\s*\/?>/);
 });
 
-test("the home page offers the beta from the releases, and ends with the docs and the FAQ", () => {
+const BETA = /href="https:\/\/github\.com\/villekivela\/overloadvector-releases\/releases\/latest"[^>]*>\s*Get the beta/;
+
+test("the home page offers the beta and the docs under its name, and again in the band it ends with", () => {
   const html = page("/");
-  assert.match(html, /href="https:\/\/github\.com\/villekivela\/overloadvector-releases\/releases\/latest"[^>]*>\s*Get the beta/);
-  const end = html.slice(html.lastIndexOf("<h2"), html.indexOf('<footer class="site-footer'));
-  assert.match(end, /href="\/docs\/getting-started\/"/);
-  assert.match(end, /href="\/faq\/"/);
+  const hero = html.slice(html.indexOf("<h1"), html.indexOf('class="facts'));
+  assert.match(hero, BETA);
+  assert.match(hero, /href="\/docs\/getting-started\/"[^>]*>\s*Read the docs/);
+  const band = html.slice(html.indexOf('id="start"'), html.indexOf('<footer class="site-footer'));
+  assert.match(band, /<h2[^>]*>\s*Start training\s*<\/h2>/);
+  assert.match(band, BETA);
+  assert.match(band, /href="\/docs\/getting-started\/"[^>]*>\s*Install guide/);
 });
 
-test("the home page's header leads to the docs and the FAQ, and the search is on the other pages", () => {
+test("the Program section draws its block: twelve weeks of three days, one day done and the next one marked", () => {
+  const html = page("/");
+  const block = html.slice(html.indexOf('class="block'), html.indexOf('class="points', html.indexOf('class="block')));
+  const days = [...block.matchAll(/<i\b([^>]*)><\/i>/g)].map(([, set]) => set.match(/class="(done|now)"/)?.[1] ?? "");
+  assert.equal(days.length, 36);
+  assert.deepEqual(days.filter(Boolean), ["done", "now"]);
+  assert.match(block, /role="img" aria-label="A 12-week block of three training days a week/);
+});
+
+test("the Progression section draws three steps of the gym's weights", () => {
+  const steps = [...page("/").matchAll(/<g\b[^>]*data-kg="([\d.]+)"/g)].map(([, kg]) => kg);
+  assert.deepEqual(steps.sort(), ["57.5", "60", "62.5"]);
+});
+
+test("no cyan is left in the site's styles: a lit muscle is the signal's orange", () => {
+  for (const path of builtFiles().filter((file) => /\.(css|html)$/.test(file))) {
+    assert.doesNotMatch(read(path).toString("utf8"), /#1fd6f0|#0aa9c4|\bcyan\b/i, path);
+  }
+});
+
+test("the search is on every page but the home page", () => {
   const header = (html) => html.slice(html.indexOf("<header"), html.indexOf("</header>"));
-  assert.match(header(page("/")), /href="\/docs\/getting-started\/"[^>]*>Docs<[\s\S]*href="\/faq\/"[^>]*>FAQ</);
   assert.doesNotMatch(header(page("/")), /site-search/);
   assert.match(header(page("/faq/")), /site-search/);
+  assert.match(header(page("/docs/logging/")), /site-search/);
 });
 
 test("each still phone is there in both themes, and described", () => {
@@ -189,10 +215,12 @@ test("on a desk the phone shows each section's screen as the reader scrolls, and
     await bring(screen, second ? "top" : "end");
     await phoneShows(screen);
   }
-  // The phone is still pinned in view beside the last section.
+  // The phone is still pinned in view beside the last section. It takes the middle 0.74 of its
+  // canvas (phone.js, FILL), which is itself taller than the view.
   const pinned = await site.run(() => {
-    const { top, bottom } = document.querySelector(".home-stage").getBoundingClientRect();
-    return top >= 0 && bottom <= window.innerHeight;
+    const { top, height } = document.querySelector(".home-stage").getBoundingClientRect();
+    const header = document.querySelector("header.header").offsetHeight;
+    return top + 0.13 * height >= header && top + 0.87 * height <= window.innerHeight;
   });
   assert.ok(pinned, "the phone has scrolled away");
 
@@ -215,10 +243,10 @@ test("a section whole in view reads beside its own screen, also while it is low 
 });
 
 for (const [where, size] of [["a desk", DESK], ["a tall desk", HIGH_DESK]]) {
-  test(`on ${where} the hero's link to a section with two screens lands on its first`, async () => {
+  test(`on ${where} a link to a section lands on its screen`, async () => {
     await visit(size);
     await phoneShows("today");
-    await site.run(() => document.querySelector('.home .glance a[href="#technique"]').click());
+    await site.run(() => (location.hash = "#technique"));
     await pause(1500);
     assert.equal(await site.run(() => document.querySelector(".home-stage").dataset.screen), "mannequin");
   });
@@ -270,11 +298,12 @@ async function withScreens(rewrite, body) {
   await body();
 }
 
-/** The live phone's side of the page as a visitor sees it now, as raw pixels. */
+/** The live phone's side of the page as a visitor sees it now, under the header, as raw pixels. */
 async function seeStage() {
   const box = await site.run(() => {
-    const { left, top, width, height } = document.querySelector(".home-stage").getBoundingClientRect();
-    return { left: Math.round(left), top: Math.round(top), width: Math.floor(width), height: Math.floor(height) };
+    const { left, width } = document.querySelector(".home-stage").getBoundingClientRect();
+    const top = document.querySelector("header.header").offsetHeight;
+    return { left: Math.round(left), top, width: Math.floor(width), height: window.innerHeight - top };
   });
   const { data } = await site.send("Page.captureScreenshot", { format: "png" });
   const pixels = await sharp(Buffer.from(data, "base64")).extract(box).removeAlpha().raw().toBuffer();
@@ -297,6 +326,9 @@ test("the phone turns into place as the scroll begins, then stands still through
       for (const name in screens) screens[name] = screens.today;
     },
     async () => {
+      // Without the big mark and the end of the name behind the phone, which scroll away with
+      // the top of the page.
+      await site.run(() => (document.head.appendChild(document.createElement("style")).textContent = ".mark-big, .hero h1 { visibility: hidden }"));
       await phoneShows("today");
       await pause(700);
       const opening = await seeStage();
@@ -493,7 +525,8 @@ for (const [where, size] of [["a desk", DESK], ["a window taller than wide", NAR
       const hidden = await site.run(async () => {
         const style = document.head.appendChild(document.createElement("style"));
         style.id = "picture-alone";
-        style.textContent = ".home-stage canvas { visibility: hidden } .home-stage img { opacity: 1 !important }";
+        // At once: the picture's own fade would still be under way when it is looked at.
+        style.textContent = ".home-stage canvas { visibility: hidden } .home-stage img { opacity: 1 !important; transition: none !important }";
         await Promise.all([...document.querySelectorAll(".home-stage img")].filter((img) => img.getClientRects().length).map((img) => img.decode()));
         return true;
       });
@@ -539,7 +572,8 @@ test("the theme menu changes the phone's screen, both ways", async () => {
   assert.ok(dark < 90 && light > 170 && darkAgain < 90, `dark ${dark}, light ${light}, dark again ${darkAgain}`);
 });
 
-const STILLS = ["today", ...PICTURED];
+// The stills a visitor sees until Technique's switch is pressed.
+const STILLS = ["today", ...PICTURED.filter((screen) => screen !== "muscles")];
 
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
   await visit(DESK);
@@ -583,3 +617,54 @@ for (const [who, open] of [
     assert.deepEqual(clipsAskedFor(requests()), [], "a clip was asked for");
   });
 }
+
+test("pressing a reps-in-reserve chip marks it and says what it means", async () => {
+  await visit(POCKET);
+  const seen = await site.run(() => {
+    const chips = [...document.querySelectorAll(".rir button")];
+    const state = () => ({ pressed: chips.filter((chip) => chip.getAttribute("aria-pressed") === "true").map((chip) => chip.textContent), says: document.querySelector("#rir-say").textContent });
+    const before = state();
+    chips[0].click();
+    return { before, after: state() };
+  });
+  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve: two more reps were there." });
+  assert.deepEqual(seen.after, { pressed: ["0"], says: "Nothing left: that was the last rep you had." });
+});
+
+test("saying how the last session went shows the next weight, its step and its plates", async () => {
+  await visit(POCKET);
+  const seen = await site.run(() => {
+    const state = () => ({
+      kg: document.querySelector("#next-kg").textContent,
+      why: document.querySelector("#next-why").textContent.trim(),
+      step: [...document.querySelectorAll("#rungs g.on")].map((step) => step.dataset.kg),
+      plates: [...document.querySelectorAll("#next-plates span")].map((plate) => plate.textContent.trim()),
+    });
+    const before = state();
+    [...document.querySelectorAll(".outcomes button")].find((button) => button.textContent.includes("under 6")).click();
+    return { before, after: state() };
+  });
+  assert.deepEqual(seen.before, { kg: "62.5", why: "Up one step. A side, on plates this gym has:", step: ["62.5"], plates: ["1 × 20", "1 × 10", "1 × 1.25"] });
+  assert.deepEqual(seen.after, { kg: "57.5", why: "One step down, about 5% lighter. A side, on plates this gym has:", step: ["57.5"], plates: ["1 × 20", "1 × 5", "1 × 2.5", "1 × 1.25"] });
+});
+
+test("Technique's switch lights the muscles in the signal's orange, and puts them on the still phone", async () => {
+  await visit(POCKET);
+  // The dot's colour as red, green and blue out of 255, however the browser writes it.
+  const dot = () =>
+    site.run(() => {
+      const colour = getComputedStyle(document.querySelector(".muscles li.main"), "::before").backgroundColor;
+      const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+      return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+    });
+  for (const [theme, orange] of [["dark", "232 87 28"], ["light", "224 82 24"]]) {
+    await pickTheme(theme);
+    assert.deepEqual((await stillsSeen()).filter((still) => /mannequin|muscles/.test(still)), [`phone-mannequin-${theme}`]);
+    assert.notEqual(await dot(), orange);
+    await site.run(() => document.querySelector("#layer").click());
+    assert.equal(await site.run(() => document.querySelector("#layer").getAttribute("aria-pressed")), "true");
+    assert.deepEqual((await stillsSeen()).filter((still) => /mannequin|muscles/.test(still)), [`phone-muscles-${theme}`]);
+    assert.equal(await dot(), orange);
+    await site.run(() => document.querySelector("#layer").click());
+  }
+});
