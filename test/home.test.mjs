@@ -627,8 +627,8 @@ test("pressing a reps-in-reserve chip marks it and says what it means", async ()
     chips[0].click();
     return { before, after: state() };
   });
-  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve: two more reps were there." });
-  assert.deepEqual(seen.after, { pressed: ["0"], says: "Nothing left: that was the last rep you had." });
+  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve. Two more reps were possible." });
+  assert.deepEqual(seen.after, { pressed: ["0"], says: "0 in reserve. That was the last rep possible." });
 });
 
 test("saying how the last session went shows the next weight, its step and its plates", async () => {
