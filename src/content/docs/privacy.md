@@ -3,7 +3,7 @@ title: Privacy policy
 description: What stays on your phone, what leaves it and when, for the Overload Vector app, server and website.
 ---
 
-*Last updated 26 November 2026.*
+*Last updated 27 November 2026.*
 
 Overload Vector is a strength-training app for Android. In short: your training stays on your phone,
 and it leaves only for the things you switch on below. There are no ads, no analytics and no
@@ -57,9 +57,11 @@ With each copy the server also records the app version, the time, and a random d
 your phones apart.
 
 **Sign-in.** You sign in with Google, which handles the sign-in under
-[Google's privacy policy](https://policies.google.com/privacy). Your email address and Google sign-in
-are held by our sign-in service (Amazon Cognito). The training copy is filed under an opaque ID, not your name or email. It is
-still your personal data, because the sign-in service can tie the ID back to you.
+[Google's privacy policy](https://policies.google.com/privacy), or, if we have invited your email
+address, with a one-time code mailed to it. An invitation adds your address to our sign-in service
+(Amazon Cognito) before you first sign in. Your email address and your sign-in, with Google or by an
+emailed code, are held by that service. The training copy is filed under an opaque ID, not your name
+or email. It is still your personal data, because the sign-in service can tie the ID back to you.
 
 **What Claude does with it.** Claude, in its own app and when you ask it, reads the copy and may
 propose a Change, a workout or a program. A proposal waits on our server until the app picks it up.
@@ -68,7 +70,8 @@ and kept with it, where Claude can read it. What Claude reads there is handled u
 terms. The copy is never sent back to a phone.
 
 **Where.** On Amazon Web Services, in the EU (region eu-north-1, Stockholm, Sweden). Amazon processes
-it for us. We share it with nobody else.
+it for us. If you sign in by email, Amazon SES in the same region sends the code to your address. We
+share it with nobody else.
 
 **How long.** Until you delete it. A proposal, answered or not, is deleted 30 days after Claude made
 it. Server logs,
