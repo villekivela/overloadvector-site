@@ -3,22 +3,27 @@
 
 const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
 
+// How much scroll the phone's turn into place takes, as a share of the view's height.
+const TURN = 1 / 4;
+// A section takes the phone as it crosses this far down the view: by then it is mostly in view.
+// Any lower than the middle, and a section still whole in view could lose the phone to the next;
+// any higher, and one whole but low in the view might not have it yet.
+const LINE = 1 / 2;
+
 /**
- * `turn` runs from 0 (the back faces the reader) to 1 (the front does) over the first `turnOver`
- * pixels of scroll. `screen` is that of the feature section lying across a line a third of the
- * way down the view, where its words have come up to be read, or Today above the first. A section
- * with several `screens` shows them in turn, an equal share of its height each. `drift`
- * sways once as that section crosses the line: to -1, level at the section's middle, to 1 and
- * level again, so it is the same on both sides of every change of section.
+ * `turn` runs from 0 (the phone turned further away, as the page opens) to 1 (in place, a little
+ * side on to the reader) over the first `TURN` of a view of scroll, and stays there. `screen` is
+ * that of the feature section lying across `LINE`, or Today above the first. A section with several
+ * `screens` shows them in turn, an equal share of its height each.
  * `sections` are in page order, their `top` and `bottom` measured from the top of the page.
  */
-export function story({ scrollY, viewport, turnOver, sections }) {
-  const line = scrollY + viewport / 3;
-  const turn = clamp(scrollY / turnOver, 0, 1);
+export function story({ scrollY, viewport, sections }) {
+  const line = scrollY + viewport * LINE;
+  const turn = clamp(scrollY / (viewport * TURN), 0, 1);
   const section = sections.findLast(({ top }) => top <= line);
-  if (!section) return { turn, screen: "today", drift: 0 };
+  if (!section) return { turn, screen: "today" };
   const through = clamp((line - section.top) / (section.bottom - section.top), 0, 1);
   const { screens } = section;
   const screen = screens[Math.min(screens.length - 1, Math.floor(through * screens.length))];
-  return { turn, screen, drift: -Math.sin(2 * Math.PI * through) };
+  return { turn, screen };
 }

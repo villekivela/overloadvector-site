@@ -36,10 +36,12 @@ const BEZEL = 3.2;
 const SCREEN_WIDTH = WIDTH - 2 * BEZEL;
 const SCREEN_HEIGHT = (SCREEN_WIDTH * 1428) / 640;
 const FIELD_OF_VIEW = 30;
+/** The share of the canvas's height the phone takes when it faces the reader. */
+export const FILL = 0.74;
 
-/** How the phone stands, in radians: `back` opens the page, `front` is where it rests. */
+/** How the phone stands, in radians: `open` is how the page opens, `front` is where it rests. */
 export const POSES = {
-  back: { yaw: Math.PI + 0.5, pitch: 0.1, roll: -0.06 },
+  open: { yaw: -0.7, pitch: 0.1, roll: -0.04 },
   front: { yaw: -0.3, pitch: 0.05, roll: 0 },
 };
 
@@ -299,11 +301,8 @@ function buildFront(screen) {
   return front;
 }
 
-/**
- * Draws the phone into `canvas`, on a clear background. `fill` is the share of the canvas's
- * height the phone takes when it faces the reader.
- */
-export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
+/** Draws the phone into `canvas`, on a clear background. */
+export function createPhone(canvas, { pixelRatio = 1 } = {}) {
   const renderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(pixelRatio);
   renderer.toneMapping = NeutralToneMapping;
@@ -337,7 +336,7 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
   phone.add(shell, buildFront(screen), buildBack(body), buildEdges(body));
   phone.rotation.order = "YXZ";
   scene.add(phone);
-  // A lamp up and to the left for the matte back, and one behind to catch the frame's edge.
+  // A lamp up and to the left, and one behind to catch the frame's edge.
   const key = new DirectionalLight(0xffffff, 1.1);
   key.position.set(-90, 140, 220);
   const edge = new DirectionalLight(0xdfe6ff, 1.0);
@@ -352,17 +351,18 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     setSize(width, height) {
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      // Tall enough for the phone, and wide enough for it at any turn.
-      const tall = Math.max(HEIGHT / fill, (WIDTH * 1.25) / camera.aspect);
+      // Tall enough for the phone, and wide enough for it at any turn. A narrow canvas zooms out
+      // from the same spot, so the phone keeps the perspective of the picture drawn ahead of time.
+      const tall = HEIGHT / FILL;
       camera.position.z = tall / (2 * Math.tan((FIELD_OF_VIEW * Math.PI) / 360));
+      camera.zoom = Math.min(1, (tall * camera.aspect) / (WIDTH * 1.25));
       camera.updateProjectionMatrix();
     },
     /** The body's colour: "dark" or "light", after the page's theme. */
     setFinish,
-    /** How the phone stands. `size` is 1 at rest; less sets it back from the reader. */
-    setPose({ yaw, pitch, roll, size = 1 }) {
+    /** How the phone stands. */
+    setPose({ yaw, pitch, roll }) {
       phone.rotation.set(pitch, yaw, roll);
-      phone.scale.setScalar(size);
     },
     /** Shows `from`, or its blend with `to`: 0 is all `from`, 1 all `to`. */
     setScreen(from, to = from, blend = 0) {
