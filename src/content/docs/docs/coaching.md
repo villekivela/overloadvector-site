@@ -58,11 +58,13 @@ Settings shows what the month's check-ins have cost, as an estimate. **Remove** 
 With the connector, you talk to Claude in its own app, and its proposals appear in Overload Vector.
 
 1. In Overload Vector, open **Settings → Connect Claude**. Read what will be copied, tap **Agree**
-   and sign in with Google.
+   and sign in with Google. If we have invited your email address, you can type it instead and enter
+   the code mailed to you. Sign in with the code before you ever use Google with that address, or the
+   two stay separate accounts.
 2. Tap **Add to Claude**. It copies a client ID and opens Claude's dialog for adding a custom
    connector. The server address is `https://mcp.overloadvector.com/mcp`. Paste the client ID under
    **Advanced settings**, in **Use your own OAuth client**.
-3. Sign in with Google when Claude asks.
+3. When Claude asks, sign in the same way as in the app.
 4. Ask Claude about your training, such as "My wrist hurts today. What should I change?"
 
 <div class="shots part">
