@@ -80,7 +80,9 @@ keep deleted data for up to 35 days.
 
 **Deleting it.** **Settings → Delete my account data** deletes the copy, any waiting proposals and your
 Overload Vector account, after you sign in once more. The training on your phone stays.
-**Disconnect** only stops the copying.
+**Disconnect** only stops the copying. After it, the phone still remembers which account was
+connected, so that a later delete can't remove another one, until you delete that account or connect
+again.
 
 ## Other connections the app makes
 
