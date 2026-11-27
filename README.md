@@ -89,14 +89,22 @@ adb shell screenrecord --size 640x1428 --bit-rate 40000000 /sdcard/rec.mp4
 Then cut it, with ffmpeg on your path:
 
 ```sh
-npm run clips -- rec.mp4 <screen> <light|dark> <from s> <to s> [<fade s>]
+npm run clips -- rec.mp4 <screen> <light|dark> <from s> <to s> [<x:y:w:h[:a:b]>]
 ```
 
-A loop closes on itself: the clip's end dissolves into its opening, which should hold still, and
-the clip starts after that. A clip of something that repeats, such as the mannequin's rep, is best
-cut a whole number of repeats long, starting where it holds. The script prints the seam beside a
-step from one frame to the next: a seam well below the step will show. Retake both themes
-together, so that the section looks the same in either.
+A loop closes on itself: the recording comes back to where it began, and the cut ends a frame
+before it gets there, so the clip's last frame is next to its first. Logging logs a set and takes it
+back, Technique turns the muscles layer on and off over two reps, and Coaching closes the
+check-in's proposal back to Coach. Something that repeats, such as the mannequin's rep, is best cut
+a whole number of repeats long, starting where it holds. The last argument keeps a part of the
+screen (x, y, width and height in the clip's pixels) as it is in the first frame, for the session
+clock, which only counts on; `:a:b` lets it go between the clip's seconds a and b, while the rest
+timer takes its place. The script prints the seam beside a step from one frame to the next: a seam
+well below the step will show. Retake both themes together, so that the section looks the same in
+either.
+
+A section with a clip puts only that on the live phone: Technique's clip shows its muscles, so the
+live phone doesn't change to `muscles`, which the stills still show.
 
 The coach's clip uses the scripted coach (Settings → Scripted coach, debug builds), never a real
 key or account. No clip shows a technique video or any of its frames.
@@ -117,10 +125,6 @@ have changed: update `scripts/sync-formats.mjs` then.
 
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
-
-`shot-mannequin-*` and `shot-muscles-*` are one exercise's details at one moment, without and with
-its muscles layer, for the home page's phone to change between. Retake them together, with the
-mannequin paused.
 
 A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:

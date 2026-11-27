@@ -4,9 +4,12 @@ import sharp from "sharp";
 import { openSite } from "./browser.mjs";
 import { page, read } from "./dist.mjs";
 
-// The feature sections in page order, by the screen each puts on the phone.
-// The Technique section shows two: the mannequin, then its muscles.
-const SECTIONS = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
+// The feature sections in page order, by the screen each puts on the live phone. Technique's is
+// the mannequin's clip, which shows its muscles too.
+const SECTIONS = ["new-program", "logging", "mannequin", "progress", "check-in"];
+// The pictures of the phone in the sections, where there is no live phone: Technique's are two,
+// the mannequin, then its muscles.
+const PICTURED = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
 // The screens the phone plays a clip of, in place of their still.
 const CLIPS = ["logging", "mannequin", "check-in"];
 const DESK = { width: 1280, height: 800 };
@@ -44,7 +47,7 @@ test("each still phone is there in both themes, and described", () => {
     ([img, screen, theme]) => ({ screen, theme, alt: img.match(/\salt="([^"]*)"/)?.[1] ?? "" }),
   );
   // After the screens, Today again: it holds the live phone's place, where the canvas speaks for it.
-  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...SECTIONS, "today"]);
+  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...PICTURED, "today"]);
   for (let i = 0; i < stills.length; i += 2) assert.deepEqual(stills[i + 1], { ...stills[i], theme: "dark" });
   for (const { screen, alt } of stills.slice(0, -2)) assert.ok(alt.length >= 12, `${screen} isn't described`);
   assert.deepEqual(stills.slice(-2).map(({ alt }) => alt), ["", ""]);
@@ -535,7 +538,7 @@ test("the theme menu changes the phone's screen, both ways", async () => {
   assert.ok(dark < 90 && light > 170 && darkAgain < 90, `dark ${dark}, light ${light}, dark again ${darkAgain}`);
 });
 
-const STILLS = ["today", ...SECTIONS];
+const STILLS = ["today", ...PICTURED];
 
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
   await visit(DESK);

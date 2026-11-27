@@ -111,15 +111,21 @@ const video = (name: string) => Object.entries(videos).find(([path]) => path.end
 type Clip = { webm: string; mp4: string };
 // What the live phone puts on its screen: each screenshot's address, per theme, and a clip's.
 const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip } }> = {};
-const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => screens.map((screen, at) => ({ screen, alt: alts[at] })))];
+// A section whose screen has a clip puts only that on the live phone: the clip shows the rest
+// (Technique's plays the mannequin with its muscles on, and off). The pictures keep them all.
+const played = (screen: string) => Boolean(video(`clip-${screen}-light.webm`));
+const live = (screens: string[]) => {
+  const clipped = screens.find(played);
+  return clipped ? [clipped] : screens;
+};
+const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => live(screens).map((screen, at) => ({ screen, alt: alts[at] })))];
 for (const { screen, alt } of shown) {
-  const played = Boolean(video(`clip-${screen}-light.webm`));
-  const picture = (theme: string) => (played ? poster(`clip-${screen}-${theme}`) : shot(`shot-${screen}-${theme}`));
+  const picture = (theme: string) => (played(screen) ? poster(`clip-${screen}-${theme}`) : shot(`shot-${screen}-${theme}`));
   const [light, dark] = await Promise.all(
     ["light", "dark"].map((theme) => getImage({ src: picture(theme), format: "webp", quality: 90 })),
   );
   screens[screen] = { light: light.src, dark: dark.src, alt };
-  if (!played) continue;
+  if (!played(screen)) continue;
   const clip = (theme: string) => {
     const [webm, mp4] = ["webm", "mp4"].map((kind) => video(`clip-${screen}-${theme}.${kind}`));
     if (!webm || !mp4) throw new Error(`clip-${screen}-${theme} needs a .webm and an .mp4`);
@@ -187,7 +193,7 @@ for (const { screen, alt } of shown) {
       </div>
     </section>
     {FEATURES.map(({ screens, kicker, title, text, points, more, alts }, index) => (
-      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screens.join(" ")}>
+      <section class="home-feature" id={kicker.toLowerCase()} data-screen={live(screens).join(" ")}>
         <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
         <h2>{title}</h2>
         <p class="lead">{text}</p>
