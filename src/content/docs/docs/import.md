@@ -18,7 +18,7 @@ Each app gives you a CSV file. Save it somewhere your phone can open it, such as
 
 - **Settings → Import from another app**, then pick the file.
 - On a new phone, Setup's first screen has **Coming from Hevy or Strong? Import your history** under
-  its Start button.
+  **Before you start**.
 
 Nothing is written until you have looked at what the file holds and tapped **Import**. The app asks:
 

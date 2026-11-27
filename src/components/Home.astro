@@ -1,8 +1,9 @@
 ---
 // The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
-// phone is a live 3D model (src/phone/) that turns with the scroll and stays pinned while its
-// screen changes. A narrow screen, a visitor who asked for less motion and a browser without
-// WebGL get a still of the same phone under each text, and never load three.js.
+// phone is a live 3D model (src/phone/) that turns a little into place as the scroll begins, then
+// stands still, pinned, while its screen changes. A narrow screen, a visitor who asked for less
+// motion and a browser without WebGL get a still of the same phone under each text, and never load
+// three.js.
 import { getImage, Image } from "astro:assets";
 import { LinkButton } from "@astrojs/starlight/components";
 
@@ -93,7 +94,6 @@ const TODAY = {
   screen: "today",
   alt: "Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works",
 };
-const BACK_ALT = "The back of a phone, its camera bar across the top";
 
 const files = (pattern: Record<string, { default: ImageMetadata }>) => (name: string) => {
   const found = Object.entries(pattern).find(([path]) => path.endsWith(`/${name}.png`));
@@ -191,10 +191,10 @@ for (const { screen, alt } of shown) {
       </section>
     ))}
   </div>
-  <div class="home-stage" data-screens={JSON.stringify(screens)} data-back-alt={BACK_ALT}>
-    <Image class="stage-back" src={still("phone-back-light")} alt="" width={360} densities={[1, 2]} loading="lazy" />
-    <Image class="stage-back" src={still("phone-back-dark")} alt="" width={360} densities={[1, 2]} loading="lazy" />
-    <canvas role="img" aria-label={BACK_ALT}></canvas>
+  <div class="home-stage" data-screens={JSON.stringify(screens)}>
+    <Image class="stage-opening" src={still("phone-today-light")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+    <Image class="stage-opening" src={still("phone-today-dark")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+    <canvas role="img" aria-label={TODAY.alt}></canvas>
   </div>
 </div>
 
@@ -295,41 +295,49 @@ for (const { screen, alt } of shown) {
     border: 1px solid var(--sl-color-gray-5);
     border-radius: 99rem;
   }
+  /* The app at a glance, as a contents list: a rule between the lines, no boxes. */
   .glance {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-    gap: 0.6rem;
     width: min(100%, 36rem);
+    border-block: 1px solid var(--sl-color-gray-5);
     text-align: start;
+  }
+  .glance li + li {
+    margin: 0;
+    border-top: 1px solid var(--sl-color-gray-5);
   }
   .glance a {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 0.1rem 0.7rem;
-    height: 100%;
-    padding: 0.75rem 0.9rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
+    grid-template-columns: 2.25rem 1fr;
+    align-items: baseline;
+    padding-block: 0.7rem;
     color: var(--sl-color-gray-2);
     font-size: var(--sl-text-sm);
-    line-height: 1.4;
+    line-height: 1.5;
     text-decoration: none;
-    transition: border-color 0.2s;
-  }
-  .glance a:hover {
-    border-color: var(--sl-color-gray-3);
   }
   .glance .number {
     grid-row: span 2;
     font-variant-numeric: tabular-nums;
-    font-weight: 600;
     color: var(--sl-color-gray-3);
   }
   .glance strong {
     font-family: var(--ov-font-title);
     font-size: var(--sl-text-base);
+    font-weight: 600;
     color: var(--sl-color-white);
+  }
+  .glance a:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  /* With room for it, each line is one: the name in its own column, what it does beside it. */
+  @media (min-width: 34rem) {
+    .glance a {
+      grid-template-columns: 2.25rem 8.5rem 1fr;
+    }
+    .glance .number {
+      grid-row: auto;
+    }
   }
   /* A feature: its number and name, what it does, three particulars, and where to read on. */
   .kicker {
@@ -407,11 +415,11 @@ for (const { screen, alt } of shown) {
   }
   /* The phone hangs in front of the page, and throws a shadow on it. */
   .phone-still :global(img),
-  .home-stage :global(.stage-back),
+  .home-stage :global(.stage-opening),
   canvas {
     filter: drop-shadow(0 1.75rem 2.25rem rgb(0 0 0 / 0.55));
   }
-  :global(:root[data-theme="light"]) :is(.phone-still :global(img), .home-stage :global(.stage-back), canvas) {
+  :global(:root[data-theme="light"]) :is(.phone-still :global(img), .home-stage :global(.stage-opening), canvas) {
     filter: drop-shadow(0 1.75rem 2.25rem rgb(20 20 30 / 0.3));
   }
   .home-stage::before,
@@ -442,14 +450,9 @@ for (const { screen, alt } of shown) {
       min-height: 56vh;
       text-align: start;
     }
-    /* The section whose screen is on the phone stands out from the others. */
+    /* A link to a section lands it in the middle of the view, on the first of its screens. */
     .home-feature {
-      opacity: 0.38;
-      transition: opacity 0.35s;
-    }
-    .home-feature[data-active],
-    .home-feature:focus-within {
-      opacity: 1;
+      scroll-margin-top: 19vh;
     }
     /* Room below the last section, so the phone is still pinned while it is read. */
     .home-copy {
@@ -477,17 +480,21 @@ for (const { screen, alt } of shown) {
       align-self: start;
       height: calc(100vh - var(--sl-nav-height) - 3rem);
     }
-    /* The back, drawn ahead of time, holds the place until the model has loaded. */
-    .home-stage :global(.stage-back) {
+    /* The phone as the page opens, drawn ahead of time, holds the place until the model has
+       loaded. */
+    .home-stage :global(.stage-opening) {
       position: absolute;
-      /* The model fills 0.74 of the stage's height, and 0.9 of this picture's. */
       z-index: 1;
+      /* The model fills 0.74 of the stage's height (phone.js, FILL), and 0.9 of this picture's
+         (stills.html, SHARE). In a stage taller than wide the model is sized by its width, and
+         the picture with it: 1.132 of the stage's. */
       top: 8.9%;
       left: 50%;
-      width: auto;
+      width: 113.2%;
+      max-width: none;
       height: 82.2%;
+      object-fit: contain;
       translate: -50% 0;
-      transition: opacity 0.3s;
     }
     canvas {
       position: absolute;
@@ -501,8 +508,11 @@ for (const { screen, alt } of shown) {
     .home-stage[data-ready] canvas {
       opacity: 1;
     }
-    .home-stage[data-ready] :global(.stage-back) {
+    /* It goes only once the canvas is most of the way in: fading both together would dim the
+       phone between them. */
+    .home-stage[data-ready] :global(.stage-opening) {
       opacity: 0;
+      transition: opacity 0.2s 0.2s;
     }
   }
 </style>

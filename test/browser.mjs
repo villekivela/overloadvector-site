@@ -28,6 +28,8 @@ export async function openSite() {
     ...browser,
     origin,
     visit: (route) => browser.visit(origin + route),
+    /** Leaves the site, for a blank page. */
+    leave: () => browser.visit("about:blank"),
     async close() {
       await browser.close();
       server.close();

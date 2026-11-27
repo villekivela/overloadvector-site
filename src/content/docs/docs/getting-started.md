@@ -60,10 +60,10 @@ If you have a recent injury, pain that spreads down an arm or leg, numbness or r
 if exercise brings chest pain, unusual breathlessness or other heart symptoms, see a doctor or
 physio before you start.
 
-**Moving from another phone?** Tap **Restore from a backup** under the first screen's Start button
-instead. See [Backups and moving to a new phone](/docs/backups/).
+**Moving from another phone?** On the first screen, tap **Restore from a backup** under **Before
+you start** instead. See [Backups and moving to a new phone](/docs/backups/).
 
-**Coming from Hevy or Strong?** Tap **Import your history** under the same button, then walk through
+**Coming from Hevy or Strong?** Tap **Import your history** just below it, then walk through
 Setup. See [Coming from Hevy or Strong](/docs/import/).
 
 You can walk through Setup again from **Settings → Run setup again**. Only what you change is kept.

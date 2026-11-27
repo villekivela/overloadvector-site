@@ -1,6 +1,6 @@
 // Draws the home page's still phones: the page's own model (src/phone/phone.js), rendered in a
-// headless Chrome with each screenshot on its screen. Run it after the model or a screenshot the
-// home page shows changes: npm run stills.
+// headless Chrome with each screenshot on its screen. Run it after the model, a pose or a
+// screenshot the home page shows changes: npm run stills.
 import { createServer } from "node:http";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
@@ -30,9 +30,11 @@ try {
     console.log(`${OUT}/${name}.png`);
   };
   for (const theme of ["light", "dark"]) {
-    await draw(`phone-back-${theme}`, "back", theme);
     for (const screen of SCREENS) {
-      await draw(`phone-${screen}-${theme}`, "front", theme, `/src/assets/shots/shot-${screen}-${theme}.png`);
+      // Today is what the page opens on, and holds the live phone's place: it stands as the model
+      // does then.
+      const pose = screen === "today" ? "open" : "front";
+      await draw(`phone-${screen}-${theme}`, pose, theme, `/src/assets/shots/shot-${screen}-${theme}.png`);
     }
   }
 } finally {
