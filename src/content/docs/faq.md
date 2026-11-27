@@ -3,6 +3,12 @@ title: FAQ
 description: Privacy, Claude, cost, phones, moving your training and getting help.
 ---
 
+## Why does Overload Vector exist?
+
+A training log records what was lifted. Overload Vector also runs the program. It suggests each
+weight from the last session, and Claude can propose a change to the program when pain, time or a
+missing machine gets in the way.
+
 ## Is my data private?
 
 Your training stays on your phone. The app has no ads, no analytics and no trackers, and it needs no
