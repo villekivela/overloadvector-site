@@ -12,9 +12,9 @@ const LINE = 1 / 2;
 
 /**
  * `turn` runs from 0 (the phone turned further away, as the page opens) to 1 (in place, a little
- * side on to the reader) over the first `TURN` of a view of scroll, and stays there. `screen` is that of the
- * feature section lying across `LINE`, or Today above the first. A section with several `screens`
- * shows them in turn, an equal share of its height each.
+ * side on to the reader) over the first `TURN` of a view of scroll, and stays there. `screen` is
+ * that of the feature section lying across `LINE`, or Today above the first. A section with several
+ * `screens` shows them in turn, an equal share of its height each.
  * `sections` are in page order, their `top` and `bottom` measured from the top of the page.
  */
 export function story({ scrollY, viewport, sections }) {

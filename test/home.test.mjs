@@ -273,30 +273,29 @@ test("the phone turns into place as the scroll begins, then stands still through
       for (const name in screens) screens[name] = screens.today;
     },
     async () => {
-  await phoneShows("today");
-  await pause(700);
-  const opening = await seeStage();
-  await site.run(() => window.scrollTo({ top: window.innerHeight / 4, behavior: "instant" }));
-  await pause(700);
-  const placed = await seeStage();
-  assert.ok(differing(opening, placed) > 0.005, "the phone didn't turn");
+      await phoneShows("today");
+      await pause(700);
+      const opening = await seeStage();
+      await site.run(() => window.scrollTo({ top: window.innerHeight / 4, behavior: "instant" }));
+      await pause(700);
+      const placed = await seeStage();
+      assert.ok(differing(opening, placed) > 0.005, "the phone didn't turn");
 
-  // The last section at its foot only: beyond that the phone rides up with the end of the page.
-  const seen = new Set();
-  // The last section at its foot only: beyond that the phone rides up with the end of the page.
-  for (const screen of SECTIONS) {
-    for (const to of screen === SECTIONS.at(-1) ? ["end"] : ["end", "top"]) {
-      await bring(screen, to);
-      // Through the change of screen, and after it.
-      for (const wait of [60, 100, 100, 100, 100, 500]) {
-        await pause(wait);
-        const moved = differing(placed, await seeStage());
-        assert.ok(moved < 0.001, `the phone moved at ${screen}, ${to}: ${moved}`);
+      const seen = new Set();
+      // The last section at its foot only: beyond that the phone rides up with the end of the page.
+      for (const screen of SECTIONS) {
+        for (const to of screen === SECTIONS.at(-1) ? ["end"] : ["end", "top"]) {
+          await bring(screen, to);
+          // Through the change of screen, and after it.
+          for (const wait of [60, 100, 100, 100, 100, 500]) {
+            await pause(wait);
+            const moved = differing(placed, await seeStage());
+            assert.ok(moved < 0.001, `the phone moved at ${screen}, ${to}: ${moved}`);
+          }
+          seen.add(await site.run(() => document.querySelector(".home-stage").dataset.screen));
+        }
       }
-      seen.add(await site.run(() => document.querySelector(".home-stage").dataset.screen));
-    }
-  }
-  assert.deepEqual([...seen].filter((screen) => screen !== "today"), SECTIONS, "the screens didn't all come");
+      assert.deepEqual([...seen].filter((screen) => screen !== "today"), SECTIONS, "the screens didn't all come");
     },
   );
 });

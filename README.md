@@ -52,11 +52,12 @@ one phone. `index.mdx` holds the pitch's words and buttons, and everything below
 
 On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it opens turned a
 little further away, turns into place, slightly side on, over the first quarter of a view of
-scroll, and from there on stands still, pinned, while each section's screen crossfades onto it as the section reaches the middle of the view.
-Every section's words read at full strength. `phone.js` is the model, a Pixel 10 Pro's shape built
-from plain geometry, with no maker's logo and nothing downloaded, and holds its two poses. `story.js`
-says what the phone shows at a scroll position, how long its turn takes and where a section takes
-the screen, and `stage.js` drives the model from it.
+scroll, and from there on stands still, pinned, while each section's screen crossfades onto it as
+the section reaches the middle of the view. Every section's words read at full strength.
+`phone.js` is the model, a Pixel 10 Pro's shape built from plain geometry, with no maker's logo and
+nothing downloaded, and holds its two poses. `story.js` says what the phone shows at a scroll
+position, how long its turn takes and where a section takes the screen, and `stage.js` drives the
+model from it.
 
 The home page's header has links to the docs and the FAQ where the other pages have the search
 (`src/components/Search.astro`).
