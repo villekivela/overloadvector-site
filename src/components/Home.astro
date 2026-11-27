@@ -1,9 +1,9 @@
 ---
 // The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
 // phone is a live 3D model (src/phone/) that turns a little into place as the scroll begins, then
-// stands still, pinned, while its screen changes. A narrow screen, a visitor who asked for less
-// motion and a browser without WebGL get a still of the same phone under each text, and never load
-// three.js.
+// stands still, pinned, while its screen changes or plays a section's clip. A narrow screen, a
+// visitor who asked for less motion and a browser without WebGL get a still of the same phone under
+// each text, and never load three.js or a clip.
 import { getImage, Image } from "astro:assets";
 import { LinkButton } from "@astrojs/starlight/components";
 
@@ -102,15 +102,36 @@ const files = (pattern: Record<string, { default: ImageMetadata }>) => (name: st
 };
 const still = files(import.meta.glob("../assets/phone/phone-*.png", { eager: true }));
 const shot = files(import.meta.glob("../assets/shots/shot-*.png", { eager: true }));
+// A screen with a clip (src/assets/clips/, made by npm run clips) plays it on the live phone, and
+// shows the clip's first frame until it plays.
+const poster = files(import.meta.glob("../assets/clips/clip-*.png", { eager: true }));
+const videos = import.meta.glob<string>("../assets/clips/clip-*.{webm,mp4}", { eager: true, query: "?url", import: "default" });
+const video = (name: string) => Object.entries(videos).find(([path]) => path.endsWith(`/${name}`))?.[1];
 
-// What the live phone puts on its screen: each screenshot's address, per theme.
-const screens: Record<string, { light: string; dark: string; alt: string }> = {};
-const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => screens.map((screen, at) => ({ screen, alt: alts[at] })))];
+type Clip = { webm: string; mp4: string };
+// What the live phone puts on its screen: each screenshot's address, per theme, and a clip's.
+const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip } }> = {};
+// A section whose screen has a clip puts only that on the live phone: the clip shows the rest
+// (Technique's plays the mannequin with its muscles on, and off). The pictures keep them all.
+const played = (screen: string) => Boolean(video(`clip-${screen}-light.webm`));
+const live = (screens: string[]) => {
+  const clipped = screens.find(played);
+  return clipped ? [clipped] : screens;
+};
+const shown = [TODAY, ...FEATURES.flatMap(({ screens, alts }) => live(screens).map((screen, at) => ({ screen, alt: alts[at] })))];
 for (const { screen, alt } of shown) {
+  const picture = (theme: string) => (played(screen) ? poster(`clip-${screen}-${theme}`) : shot(`shot-${screen}-${theme}`));
   const [light, dark] = await Promise.all(
-    ["light", "dark"].map((theme) => getImage({ src: shot(`shot-${screen}-${theme}`), format: "webp", quality: 90 })),
+    ["light", "dark"].map((theme) => getImage({ src: picture(theme), format: "webp", quality: 90 })),
   );
   screens[screen] = { light: light.src, dark: dark.src, alt };
+  if (!played(screen)) continue;
+  const clip = (theme: string) => {
+    const [webm, mp4] = ["webm", "mp4"].map((kind) => video(`clip-${screen}-${theme}.${kind}`));
+    if (!webm || !mp4) throw new Error(`clip-${screen}-${theme} needs a .webm and an .mp4`);
+    return { webm, mp4 };
+  };
+  screens[screen].clip = { light: clip("light"), dark: clip("dark") };
 }
 ---
 
@@ -172,7 +193,7 @@ for (const { screen, alt } of shown) {
       </div>
     </section>
     {FEATURES.map(({ screens, kicker, title, text, points, more, alts }, index) => (
-      <section class="home-feature" id={kicker.toLowerCase()} data-screen={screens.join(" ")}>
+      <section class="home-feature" id={kicker.toLowerCase()} data-screen={live(screens).join(" ")}>
         <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
         <h2>{title}</h2>
         <p class="lead">{text}</p>

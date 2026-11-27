@@ -15,6 +15,7 @@ npm run build     # into dist/, with the search index
 npm test          # checks the built site, in a headless Chrome too (set CHROME to choose one)
 npm run preview   # serves dist/, search included
 npm run stills    # redraws the home page's still phones (The home page)
+npm run clips     # makes one of the phone's clips from a screen recording (Clips)
 ```
 
 ## The logo
@@ -53,7 +54,8 @@ one phone. `index.mdx` holds the pitch's words and buttons, and everything below
 On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it opens turned a
 little further away, turns into place, slightly side on, over the first quarter of a view of
 scroll, and from there on stands still, pinned, while each section's screen crossfades onto it as
-the section reaches the middle of the view. Every section's words read at full strength.
+the section reaches the middle of the view. Logging, Technique and Coaching play a clip of the app
+there instead (Clips). Every section's words read at full strength.
 `phone.js` is the model, a Pixel 10 Pro's shape built from plain geometry, with no maker's logo and
 nothing downloaded, and holds its two poses. `story.js` says what the phone shows at a scroll
 position, how long its turn takes and where a section takes the screen, and `stage.js` drives the
@@ -68,6 +70,44 @@ drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run
 the model, a pose or a screenshot the home page shows, and commit what it draws. Today's still stands
 as the page opens, and holds the live phone's place until the model has loaded; the others stand as
 it rests.
+
+### Clips
+
+`src/assets/clips/clip-<screen>-<theme>.webm`, `.mp4` and `.png`: what the live phone plays for a
+screen, in place of its still. Muted and looping, a clip plays from its start whenever its section
+becomes the current one, and pauses when another takes over. The `.png` is its first frame, which
+the phone shows until the clip plays. The stills never load a clip.
+
+Each is 4 to 8 s, and the WebM about 1 MB or less; `npm test` checks both, and that each loop
+doesn't jump. Record a clip on an Android emulator with made-up training (as Screenshots), at a
+font scale of 1, in demo mode with the clock at 12:00:
+
+```sh
+adb shell screenrecord --size 640x1428 --bit-rate 40000000 /sdcard/rec.mp4
+```
+
+Then cut it, with ffmpeg on your path:
+
+```sh
+npm run clips -- rec.mp4 <screen> <light|dark> <from s> <to s> [<x:y:w:h[:a:b]>]
+```
+
+A loop closes on itself: the recording comes back to where it began, and the cut ends a frame
+before it gets there, so the clip's last frame is next to its first. Logging logs a set and takes it
+back, Technique turns the muscles layer on and off over two reps, and Coaching closes the
+check-in's proposal back to Coach. Something that repeats, such as the mannequin's rep, is best cut
+a whole number of repeats long, starting where it holds. The last argument keeps a part of the
+screen (x, y, width and height in the clip's pixels) as it is in the first frame, for the session
+clock, which only counts on; `:a:b` lets it go between the clip's seconds a and b, while the rest
+timer takes its place. The script prints the seam beside a step from one frame to the next: a seam
+well below the step will show. Retake both themes together, so that the section looks the same in
+either.
+
+A section with a clip puts only that on the live phone: Technique's clip shows its muscles, so the
+live phone doesn't change to `muscles`, which the stills still show.
+
+The coach's clip uses the scripted coach (Settings → Scripted coach, debug builds), never a real
+key or account. No clip shows a technique video or any of its frames.
 
 ### The file format pages
 
@@ -85,10 +125,6 @@ have changed: update `scripts/sync-formats.mjs` then.
 
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
-
-`shot-mannequin-*` and `shot-muscles-*` are one exercise's details at one moment, without and with
-its muscles layer, for the home page's phone to change between. Retake them together, with the
-mannequin paused.
 
 A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:

@@ -14,6 +14,7 @@ import {
   MeshBasicMaterial,
   MeshStandardMaterial,
   NeutralToneMapping,
+  NoColorSpace,
   PerspectiveCamera,
   PMREMGenerator,
   RingGeometry,
@@ -23,6 +24,7 @@ import {
   ShapeGeometry,
   SRGBColorSpace,
   TextureLoader,
+  VideoTexture,
   WebGLRenderer,
 } from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -96,15 +98,22 @@ const SCREEN_VERTEX = `
 `;
 
 // The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
-// throws back one soft band of light, which crosses the screen as the phone turns.
+// throws back one soft band of light, which crosses the screen as the phone turns. A picture comes
+// in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to linear here.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
+  uniform bool fromVideo;
+  uniform bool toVideo;
   uniform float blend;
   varying vec2 vUv;
   varying float vTurn;
+  vec3 colour(sampler2D screen, bool video) {
+    vec4 texel = texture2D(screen, vUv);
+    return video ? sRGBTransferEOTF(texel).rgb : texel.rgb;
+  }
   void main() {
-    vec3 shown = mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend);
+    vec3 shown = mix(colour(from, fromVideo), colour(to, toVideo), blend);
     float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
     float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
     gl_FragColor = vec4(shown + glare * 0.028, 1.0);
@@ -315,7 +324,13 @@ export function createPhone(canvas, { pixelRatio = 1 } = {}) {
   const blank = new DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
   blank.needsUpdate = true;
   const screen = new ShaderMaterial({
-    uniforms: { from: { value: blank }, to: { value: blank }, blend: { value: 0 } },
+    uniforms: {
+      from: { value: blank },
+      to: { value: blank },
+      fromVideo: { value: false },
+      toVideo: { value: false },
+      blend: { value: 0 },
+    },
     vertexShader: SCREEN_VERTEX,
     fragmentShader: SCREEN_FRAGMENT,
   });
@@ -368,11 +383,21 @@ export function createPhone(canvas, { pixelRatio = 1 } = {}) {
     setScreen(from, to = from, blend = 0) {
       screen.uniforms.from.value = from;
       screen.uniforms.to.value = to;
+      screen.uniforms.fromVideo.value = Boolean(from.isVideoTexture);
+      screen.uniforms.toVideo.value = Boolean(to.isVideoTexture);
       screen.uniforms.blend.value = blend;
     },
     async loadScreen(url) {
       const texture = await loader.loadAsync(url);
       texture.colorSpace = SRGBColorSpace;
+      texture.anisotropy = sharpest;
+      return texture;
+    },
+    /** A screen that shows what `video` is playing. */
+    videoScreen(video) {
+      const texture = new VideoTexture(video);
+      // Raw: the screen's shader decodes it.
+      texture.colorSpace = NoColorSpace;
       texture.anisotropy = sharpest;
       return texture;
     },

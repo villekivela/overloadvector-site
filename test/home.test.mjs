@@ -4,9 +4,14 @@ import sharp from "sharp";
 import { openSite } from "./browser.mjs";
 import { page, read } from "./dist.mjs";
 
-// The feature sections in page order, by the screen each puts on the phone.
-// The Technique section shows two: the mannequin, then its muscles.
-const SECTIONS = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
+// The feature sections in page order, by the screen each puts on the live phone. Technique's is
+// the mannequin's clip, which shows its muscles too.
+const SECTIONS = ["new-program", "logging", "mannequin", "progress", "check-in"];
+// The pictures of the phone in the sections, where there is no live phone: Technique's are two,
+// the mannequin, then its muscles.
+const PICTURED = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
+// The screens the phone plays a clip of, in place of their still.
+const CLIPS = ["logging", "mannequin", "check-in"];
 const DESK = { width: 1280, height: 800 };
 const POCKET = { width: 390, height: 800 };
 // A desk's tall window, where a section can be whole in view and still low in it.
@@ -42,10 +47,25 @@ test("each still phone is there in both themes, and described", () => {
     ([img, screen, theme]) => ({ screen, theme, alt: img.match(/\salt="([^"]*)"/)?.[1] ?? "" }),
   );
   // After the screens, Today again: it holds the live phone's place, where the canvas speaks for it.
-  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...SECTIONS, "today"]);
+  assert.deepEqual(stills.filter(({ theme }) => theme === "light").map(({ screen }) => screen), ["today", ...PICTURED, "today"]);
   for (let i = 0; i < stills.length; i += 2) assert.deepEqual(stills[i + 1], { ...stills[i], theme: "dark" });
   for (const { screen, alt } of stills.slice(0, -2)) assert.ok(alt.length >= 12, `${screen} isn't described`);
   assert.deepEqual(stills.slice(-2).map(({ alt }) => alt), ["", ""]);
+});
+
+test("each clip comes as a VP9 WebM of about 1 MB or less, and as an H.264 MP4 for a browser without VP9", () => {
+  const screens = JSON.parse(page("/").match(/data-screens="([^"]*)"/)[1].replaceAll("&quot;", '"').replaceAll("&#39;", "'").replaceAll("&amp;", "&"));
+  const played = Object.entries(screens).filter(([, { clip }]) => clip);
+  assert.deepEqual(played.map(([screen]) => screen), CLIPS);
+  for (const [screen, { clip }] of played) {
+    for (const theme of ["light", "dark"]) {
+      const webm = read(clip[theme].webm.slice(1));
+      const mp4 = read(clip[theme].mp4.slice(1));
+      assert.ok(webm.includes("V_VP9"), `${screen} ${theme}: the WebM isn't VP9`);
+      assert.ok(webm.length <= 1.1e6, `${screen} ${theme}: the WebM is ${webm.length} bytes`);
+      assert.ok(mp4.includes("avc1"), `${screen} ${theme}: the MP4 isn't H.264`);
+    }
+  }
 });
 
 test("the page for a wrong address has no phone", () => {
@@ -81,6 +101,9 @@ function askedForThree(requests) {
     .filter((path) => path.endsWith(".js"))
     .some((path) => read(path).toString("utf8").includes("THREE."));
 }
+
+/** The clips the page asked for. */
+const clipsAskedFor = (requests) => requests.filter((url) => /\.(webm|mp4)$/.test(new URL(url).pathname));
 
 const until = (what, test, ...args) =>
   site.run(
@@ -153,6 +176,7 @@ test("on a desk the phone shows each section's screen as the reader scrolls, and
   const requests = await visit(DESK);
   await phoneShows("today");
   assert.ok(askedForThree(requests()), "three.js wasn't asked for");
+  assert.deepEqual(clipsAskedFor(requests()), [], "a clip was asked for before its section");
   assert.deepEqual(await stillsSeen().catch(() => "the canvas"), "the canvas");
 
   for (const screen of SECTIONS) {
@@ -337,6 +361,80 @@ test("a new screen fades in over the old one", async () => {
   }
 });
 
+/** How much of the phone's side changes over `milliseconds`. */
+async function changeOver(milliseconds) {
+  const before = await seeStage();
+  await pause(milliseconds);
+  return differing(before, await seeStage());
+}
+
+const playing = (screen) =>
+  until(
+    `the phone playing ${screen ?? "nothing"}`,
+    (screen) => (document.querySelector(".home-stage").dataset.playing ?? null) === screen,
+    screen,
+  );
+
+test("a section with a clip plays it on the phone while it is current, and stops it when another takes over", async () => {
+  await visit(DESK);
+  await phoneShows("today");
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    for (const screen of CLIPS) {
+      await bring(screen, "end");
+      await phoneShows(screen);
+      await playing(screen);
+      assert.ok((await changeOver(1500)) > 0.002, `${screen} in ${theme} stood still`);
+      // Progression has no clip: the phone shows its still, and nothing plays.
+      await bring("progress", "end");
+      await phoneShows("progress");
+      await playing(null);
+      await pause(500);
+      assert.ok((await changeOver(1500)) < 0.0005, `the phone kept moving after ${screen} in ${theme}`);
+    }
+  }
+});
+
+test("each clip lasts 4 to 8 s, and its last frame leads into its first as one frame leads into the next", async () => {
+  await visit(DESK);
+  const clips = await site.run(async () => {
+    const screens = JSON.parse(document.querySelector(".home-stage").dataset.screens);
+    const seen = {};
+    for (const [screen, { clip }] of Object.entries(screens)) {
+      for (const [theme, { webm }] of Object.entries(clip ?? {})) {
+        const video = Object.assign(document.createElement("video"), { muted: true, preload: "auto", src: webm });
+        await new Promise((resolve, reject) => {
+          video.addEventListener("canplaythrough", resolve, { once: true });
+          video.addEventListener("error", () => reject(new Error(`${webm} didn't load`)), { once: true });
+        });
+        const pen = Object.assign(document.createElement("canvas"), { width: 160, height: 357 }).getContext("2d", { willReadFrequently: true });
+        const frameAt = async (time) => {
+          video.currentTime = time;
+          await new Promise((resolve) => video.addEventListener("seeked", resolve, { once: true }));
+          pen.drawImage(video, 0, 0, 160, 357);
+          return pen.getImageData(0, 0, 160, 357).data;
+        };
+        // The share of values that differ by more than a rounding's worth.
+        const apart = (one, other) => {
+          let count = 0;
+          for (let i = 0; i < one.length; i += 4) for (let c = 0; c < 3; c++) if (Math.abs(one[i + c] - other[i + c]) > 12) count++;
+          return count / ((one.length / 4) * 3);
+        };
+        const first = await frameAt(0);
+        const second = await frameAt(1 / 30);
+        const last = await frameAt(video.duration - 1 / 60);
+        seen[`${screen} ${theme}`] = { duration: video.duration, seam: apart(last, first), step: apart(first, second) };
+      }
+    }
+    return seen;
+  });
+  assert.deepEqual(Object.keys(clips).sort(), CLIPS.flatMap((screen) => [`${screen} dark`, `${screen} light`]).sort());
+  for (const [name, { duration, seam, step }] of Object.entries(clips)) {
+    assert.ok(duration >= 4 && duration <= 8, `${name} lasts ${duration} s`);
+    assert.ok(seam <= step + 0.002, `${name} jumps at its loop: ${seam} of the values change, against ${step} from one frame to the next`);
+  }
+});
+
 test("the picture holding the phone's place stays until the model has a screen to show", async () => {
   await site.send("Network.setBlockedURLs", { urls: ["*shot-*"] });
   try {
@@ -351,6 +449,30 @@ test("the picture holding the phone's place stays until the model has a screen t
     assert.deepEqual(seen, { model: "0", picture: ["1"] });
   } finally {
     await site.send("Network.setBlockedURLs", { urls: [] });
+  }
+});
+
+test("a clip on the phone has the colours of its first frame's still, in both themes", async () => {
+  const brightness = async (theme, clips) => {
+    if (!clips) await site.send("Network.setBlockedURLs", { urls: ["*.webm", "*.mp4"] });
+    try {
+      await visit(DESK);
+      await pickTheme(theme);
+      await phoneShows("today");
+      // Logging, whose opening changes no more than a few digits.
+      await bring("logging", "end");
+      await phoneShows("logging");
+      if (clips) await playing("logging");
+      await pause(700);
+      return screenBrightness();
+    } finally {
+      await site.send("Network.setBlockedURLs", { urls: [] });
+    }
+  };
+  for (const theme of ["dark", "light"]) {
+    const still = await brightness(theme, false);
+    const played = await brightness(theme, true);
+    assert.ok(Math.abs(played - still) < 12, `${theme}: the still ${still}, the clip ${played}`);
   }
 });
 
@@ -417,7 +539,7 @@ test("the theme menu changes the phone's screen, both ways", async () => {
   assert.ok(dark < 90 && light > 170 && darkAgain < 90, `dark ${dark}, light ${light}, dark again ${darkAgain}`);
 });
 
-const STILLS = ["today", ...SECTIONS];
+const STILLS = ["today", ...PICTURED];
 
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
   await visit(DESK);
@@ -451,12 +573,13 @@ for (const [who, open] of [
     },
   ],
 ]) {
-  test(`${who} gets the still phones in the picked theme, and no three.js`, async () => {
+  test(`${who} gets the still phones in the picked theme, and no three.js or clip`, async () => {
     const requests = await open();
     await pickTheme("dark");
     assert.deepEqual(await stillsSeen(), STILLS.map((screen) => `phone-${screen}-dark`));
     await pickTheme("light");
     assert.deepEqual(await stillsSeen(), STILLS.map((screen) => `phone-${screen}-light`));
     assert.equal(askedForThree(requests()), false, "three.js was asked for");
+    assert.deepEqual(clipsAskedFor(requests()), [], "a clip was asked for");
   });
 }
