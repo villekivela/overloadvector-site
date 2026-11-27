@@ -37,10 +37,10 @@ const SCREEN_WIDTH = WIDTH - 2 * BEZEL;
 const SCREEN_HEIGHT = (SCREEN_WIDTH * 1428) / 640;
 const FIELD_OF_VIEW = 30;
 
-/** How the phone stands, in radians: `back` opens the page, `front` is where it rests. */
+/** How the phone stands, in radians: `open` is how the page opens, `front` is where it rests. */
 export const POSES = {
-  back: { yaw: Math.PI + 0.5, pitch: 0.1, roll: -0.06 },
-  front: { yaw: -0.3, pitch: 0.05, roll: 0 },
+  open: { yaw: -0.5, pitch: 0.1, roll: -0.04 },
+  front: { yaw: 0, pitch: 0, roll: 0 },
 };
 
 /** The body's colours by the page's theme: a charcoal phone on the dark page, a moonstone one on the light. */
@@ -94,7 +94,8 @@ const SCREEN_VERTEX = `
 `;
 
 // The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
-// throws back one soft band of light, which crosses the screen as the phone turns.
+// throws back one soft band of light, which comes onto the screen from its upper right as the
+// phone turns into place, and rests there.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
@@ -103,7 +104,7 @@ const SCREEN_FRAGMENT = `
   varying float vTurn;
   void main() {
     vec3 shown = mix(texture2D(from, vUv).rgb, texture2D(to, vUv).rgb, blend);
-    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
+    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.85 + vTurn * 2.2;
     float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
     gl_FragColor = vec4(shown + glare * 0.028, 1.0);
     #include <colorspace_fragment>
@@ -359,10 +360,9 @@ export function createPhone(canvas, { fill = 0.74, pixelRatio = 1 } = {}) {
     },
     /** The body's colour: "dark" or "light", after the page's theme. */
     setFinish,
-    /** How the phone stands. `size` is 1 at rest; less sets it back from the reader. */
-    setPose({ yaw, pitch, roll, size = 1 }) {
+    /** How the phone stands. */
+    setPose({ yaw, pitch, roll }) {
       phone.rotation.set(pitch, yaw, roll);
-      phone.scale.setScalar(size);
     },
     /** Shows `from`, or its blend with `to`: 0 is all `from`, 1 all `to`. */
     setScreen(from, to = from, blend = 0) {

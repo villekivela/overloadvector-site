@@ -30,9 +30,11 @@ try {
     console.log(`${OUT}/${name}.png`);
   };
   for (const theme of ["light", "dark"]) {
-    await draw(`phone-back-${theme}`, "back", theme);
     for (const screen of SCREENS) {
-      await draw(`phone-${screen}-${theme}`, "front", theme, `/src/assets/shots/shot-${screen}-${theme}.png`);
+      // Today is what the page opens on, and holds the live phone's place: it stands as the model
+      // does then.
+      const pose = screen === "today" ? "open" : "front";
+      await draw(`phone-${screen}-${theme}`, pose, theme, `/src/assets/shots/shot-${screen}-${theme}.png`);
     }
   }
 } finally {

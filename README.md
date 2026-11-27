@@ -50,11 +50,13 @@ Write for users, in plain English, from the app as it is. A new page goes in the
 `src/components/Home.astro` is the top of the home page: the pitch, then what the app does, section by section, beside
 one phone. `index.mdx` holds the pitch's words and buttons, and everything below the phone.
 
-On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it turns from its back
-to its front as the reader scrolls through the pitch, then stays pinned while each section puts its
-own screen on it. `phone.js` is the model, a Pixel 10 Pro's shape built from plain geometry, with no
-maker's logo and nothing downloaded. `story.js` says what the phone shows at a scroll position, and
-`stage.js` drives the model from it.
+On a wide screen the phone is a 3D model drawn with three.js (`src/phone/`): it opens a little
+turned away, turns to face the reader over the first quarter of a view of scroll, and from there on
+stands still, pinned, while each section's screen crossfades onto it as the section comes into view.
+Every section's words read at full strength. `phone.js` is the model, a Pixel 10 Pro's shape built
+from plain geometry, with no maker's logo and nothing downloaded, and holds its two poses. `story.js`
+says what the phone shows at a scroll position, how long its turn takes and where a section takes
+the screen, and `stage.js` drives the model from it.
 
 The home page's header has links to the docs and the FAQ where the other pages have the search
 (`src/components/Search.astro`).
@@ -62,7 +64,9 @@ The home page's header has links to the docs and the FAQ where the other pages h
 A narrow screen, a visitor who asked for less motion and a browser without WebGL get a still of the
 same phone under each text instead, and never load three.js. The stills are in `src/assets/phone/`,
 drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing
-the model or a screenshot the home page shows, and commit what it draws.
+the model, a pose or a screenshot the home page shows, and commit what it draws. Today's still stands
+as the page opens, and holds the live phone's place until the model has loaded; the others stand as
+it rests.
 
 ### The file format pages
 

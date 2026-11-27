@@ -13,14 +13,23 @@
 <script type="module">
   import { createPhone, POSES } from "/src/phone/phone.js";
 
-  const phone = createPhone(document.querySelector("canvas"), { fill: 0.9 });
-  /** A PNG of a theme's phone in a pose, with the screenshot at `shot` on its screen if one is given. */
+  // The home page's camera (`fill`), so a still has the live phone's perspective and the one
+  // holding its place doesn't jump when the model arrives. A still is the middle of that picture,
+  // with the phone taking `TALL` of the still's height (Home.astro sizes the holding one by both).
+  const FILL = 0.74;
+  const TALL = 0.9;
+  const drawn = document.querySelector("canvas");
+  const phone = createPhone(drawn, { fill: FILL });
+  /** A PNG of a theme's phone in a pose, with the screenshot at `shot` on its screen. */
   window.still = async (pose, theme, width, height, shot) => {
-    phone.setSize(width, height);
+    const [wide, high] = [width, height].map((side) => Math.round((side * TALL) / FILL));
+    phone.setSize(wide, high);
     phone.setFinish(theme);
     phone.setPose(POSES[pose]);
-    if (shot) phone.setScreen(await phone.loadScreen(shot));
+    phone.setScreen(await phone.loadScreen(shot));
     phone.render();
-    return document.querySelector("canvas").toDataURL("image/png");
+    const still = Object.assign(document.createElement("canvas"), { width, height });
+    still.getContext("2d").drawImage(drawn, (width - wide) / 2, (height - high) / 2);
+    return still.toDataURL("image/png");
   };
 </script>
