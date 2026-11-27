@@ -60,8 +60,8 @@ If you have a recent injury, pain that spreads down an arm or leg, numbness or r
 if exercise brings chest pain, unusual breathlessness or other heart symptoms, see a doctor or
 physio before you start.
 
-**Moving from another phone?** Tap **Restore from a backup** under the first screen's Start button
-instead. See [Backups and moving to a new phone](/docs/backups/).
+**Moving from another phone?** Tap **Restore from a backup** on the first screen, under
+**Before you start**, instead. See [Backups and moving to a new phone](/docs/backups/).
 
 You can walk through Setup again from **Settings → Run setup again**. Only what you change is kept.
 
