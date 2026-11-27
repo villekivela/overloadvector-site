@@ -30,10 +30,10 @@ test("the home page's address is on overloadvector.com", () => {
 
 const BETA = /href="https:\/\/github\.com\/villekivela\/overloadvector-releases\/releases\/latest"[^>]*>\s*Get the beta/;
 
-test("the home page offers the beta and the docs under its name, and again in the band it ends with", () => {
+test("the home page's first buttons lead to the band it ends with and to the docs, and the band offers the beta", () => {
   const html = page("/");
   const hero = html.slice(html.indexOf("<h1"), html.indexOf('class="facts'));
-  assert.match(hero, BETA);
+  assert.match(hero, /href="#start"[^>]*>\s*Get the beta/);
   assert.match(hero, /href="\/docs\/getting-started\/"[^>]*>\s*Read the docs/);
   const band = html.slice(html.indexOf('id="start"'), html.indexOf('<footer class="site-footer'));
   assert.match(band, /<h2[^>]*>\s*Start training\s*<\/h2>/);
@@ -55,7 +55,7 @@ test("the Progression section draws three steps of the gym's weights", () => {
   assert.deepEqual(steps.sort(), ["57.5", "60", "62.5"]);
 });
 
-test("no cyan is left in the site's styles: a lit muscle is the signal's orange", () => {
+test("no style on the site is cyan, which a lit muscle was", () => {
   for (const path of builtFiles().filter((file) => /\.(css|html)$/.test(file))) {
     assert.doesNotMatch(read(path).toString("utf8"), /#1fd6f0|#0aa9c4|\bcyan\b/i, path);
   }
@@ -636,7 +636,7 @@ test("saying how the last session went shows the next weight, its step and its p
   const seen = await site.run(() => {
     const state = () => ({
       kg: document.querySelector("#next-kg").textContent,
-      why: document.querySelector("#next-why").textContent.trim(),
+      why: document.querySelector("#next-why").parentElement.textContent.trim().replace(/\s+/g, " "),
       step: [...document.querySelectorAll("#rungs g.on")].map((step) => step.dataset.kg),
       plates: [...document.querySelectorAll("#next-plates span")].map((plate) => plate.textContent.trim()),
     });
@@ -668,3 +668,19 @@ test("Technique's switch lights the muscles in the signal's orange, and puts the
     await site.run(() => document.querySelector("#layer").click());
   }
 });
+
+for (const [where, size, behind] of [["a desk", DESK, ".home-stage"], ["a phone", POCKET, ".hero .phone-still img"]]) {
+  test(`on ${where} the big mark stands behind the phone the page opens with`, async () => {
+    await visit(size);
+    const seen = await site.run((behind) => {
+      const box = (element) => element.getBoundingClientRect();
+      const mark = [...document.querySelectorAll(".mark-big")].filter((mark) => mark.getClientRects().length);
+      const phone = [...document.querySelectorAll(behind)].find((phone) => phone.getClientRects().length);
+      const [m, p] = [box(mark[0]), box(phone)];
+      // The phone's middle lies on the mark.
+      const [x, y] = [p.left + p.width / 2, p.top + p.height / 2];
+      return { marks: mark.length, behind: m.left < x && x < m.right && m.top < y && y < m.bottom };
+    }, behind);
+    assert.deepEqual(seen, { marks: 1, behind: true });
+  });
+}

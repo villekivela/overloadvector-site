@@ -132,6 +132,16 @@
   background: var(--ov-signal);
   color: var(--ov-on-signal);
 }
+/* Two abreast on a phone. */
+@media (max-width: 59.99rem) {
+  .ov-go,
+  .ov-alt {
+    padding: 1em 1.3em;
+  }
+  .ov-go {
+    padding-right: 1.9em;
+  }
+}
 .ov-go:hover {
   filter: brightness(1.1);
 }
@@ -234,7 +244,11 @@ h1#_top:not(.home *) {
   color: var(--ov-ink);
   text-decoration-color: var(--ov-ink);
 }
+/* A word of code in a sentence stays in the text's face, on a raised chip. */
 .sl-markdown-content :not(pre) > code:not(:where(.not-content *)) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
   border: 1px solid var(--ov-line);
   background: var(--ov-raised);
 }
@@ -343,7 +357,9 @@ mobile-starlight-toc a[aria-current="true"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     transition: none !important;
   }
 }

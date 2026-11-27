@@ -75,7 +75,7 @@ const faint = () =>
       ["the sidebar's current page", ".sidebar-content a[aria-current]", (style) => style.boxShadow.match(/(rgb|color)\([^)]*\)/)?.[0]],
       ["the switch's rim", ".switch i", (style) => style.borderTopColor],
       ["a chip's rim", ".rir button", (style) => style.borderTopColor],
-      ["a button's rim", ".ov-alt", (style) => style.borderTopColor],
+      ["a button's rim", ".ov-alt, .outcomes button", (style) => style.borderTopColor],
     ]) {
       for (const element of document.querySelectorAll(selector)) {
         if (seen(element)) check(what, colour(getComputedStyle(element)), element.parentElement, 3);

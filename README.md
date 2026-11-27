@@ -42,8 +42,8 @@ the app. Plates and reps-in-reserve chips keep the app's colours.
 What you press, the home page's closing band and the pressed answer in Progression have the mark's
 stepped corner, cut from their lower right.
 
-Both themes meet WCAG AA, which `test/contrast.test.mjs` checks on the home page, three docs pages
-and the FAQ: text at 4.5:1, large text and the rim or line that tells a control's state at 3:1.
+Both themes meet WCAG AA, which `test/contrast.test.mjs` checks on the home page, two docs pages,
+the FAQ and the privacy policy: text at 4.5:1, large text and the rim or line that tells a control's state at 3:1.
 Orange text smaller than large would fail on the light theme: darken `--ov-signal-ink` there if a
 page ever needs it.
 
@@ -160,8 +160,8 @@ shows its own:
 
 ## Fonts
 
-Mona Sans, condensed to 75% at weight 800 and set in capitals, for the name, the headings and large
-figures; Inter for everything else (`src/styles/fonts.css`). They are served from this site, never
+Mona Sans, condensed to 75% at weight 800 and set in capitals, for the name, a page's title, its
+sections' headings and large figures; Inter for everything else, smaller headings included (`src/styles/fonts.css`). They are served from this site, never
 from a font service, and their licences are published beside them (`public/fonts/`) and linked in
 the footer.
 

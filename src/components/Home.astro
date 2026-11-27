@@ -2,9 +2,10 @@
 // The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
 // phone is a live 3D model (src/phone/) that turns a little into place as the scroll begins, then
 // stands still, pinned, while its screen changes or plays a section's clip. A narrow screen, a
-// visitor who asked for less motion and a browser without WebGL get a still of the same phone under
+// visitor who asked for less motion and a browser without WebGL get a still of the same phone with
 // each text, and never load three.js or a clip.
 import { getImage, Image } from "astro:assets";
+import BigMark from "./BigMark.astro";
 import Mark from "./Mark.astro";
 
 const BETA = "https://github.com/villekivela/overloadvector-releases/releases/latest";
@@ -193,8 +194,6 @@ const corners = rungs.flatMap(({ faces }) => faces.flatMap(({ points }) => point
 const [left, top] = [0, 1].map((axis) => Math.min(...corners.map((point) => point[axis])) - 0.05);
 const [right, bottom] = [0, 1].map((axis) => Math.max(...corners.map((point) => point[axis])) + 0.05);
 const path = (points: number[][]) => `M${points.map((point) => point.map((value) => value.toFixed(3)).join(",")).join("L")}Z`;
-// The mark's outline, for the band the page ends with.
-const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15,51.28L78.15,40.06L54,26.11L29.85,40.06L29.85,67.94ZM54,76.11L58.72,73.39L58.72,65.06L65.93,60.89L65.93,52.56L73.15,48.39L73.15,42.94L54,31.89L34.85,42.94L34.85,65.06Z";
 ---
 
 {/* Before the first paint, so the page never jumps from one layout to the other. */}
@@ -225,13 +224,8 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
 
 <div class="home">
   <div class="home-top grid">
-    {/* The mark, as big as the screen allows, in the page's own greys. The phone stands in front of it. */}
-    <svg class="mark-big" viewBox="29.85 26.11 48.3 55.78" aria-hidden="true">
-      <path class="top" d="M32.05,41.67L54,29L75.95,41.67L54,54.35Z"></path>
-      <path class="left" d="M32.35,41.5L54.3,54.17L54.3,79.17L32.35,66.5Z"></path>
-      <path class="right" d="M54,54L75.65,41.5L75.65,49.83L68.43,54L68.43,62.33L61.22,66.5L61.22,74.83L54,79Z"></path>
-      <path class="band" fill-rule="evenodd" d={OUTLINE}></path>
-    </svg>
+    {/* Behind the live phone, and behind the opening still where the stills stand beside the text. */}
+    <BigMark />
     <div class="home-copy">
       <section class="hero">
         <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
@@ -240,10 +234,12 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
           session, and replans when your week doesn't go to plan.
         </p>
         <div class="actions">
-          <a class="ov-go" href={BETA}>Get the beta</a>
+          <a class="ov-go" href="#start">Get the beta</a>
           <a class="ov-alt" href={INSTALL}>Read the docs</a>
         </div>
         <div class="phone-still">
+          {/* Behind the opening still on a narrow screen. */}
+          <BigMark />
           <Image src={still("phone-today-light")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
           <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
         </div>
@@ -313,7 +309,7 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
                   </svg>
                   <div class="verdict-fig" aria-live="polite">
                     <div class="fig"><span id="next-kg">{OUTCOMES[0].kg}</span><small>kg</small></div>
-                    <p><span id="next-why">{OUTCOMES[0].why} <span>A side, on plates this gym has:</span></span></p>
+                    <p><span id="next-why">{OUTCOMES[0].why}</span> <span class="aside">A side, on plates this gym has:</span></p>
                     <div class="plates" id="next-plates">
                       {side(OUTCOMES[0].kg).map(([size, colour]) => <span><i style={`--c:${colour}`}></i>1 × {size}</span>)}
                     </div>
@@ -367,7 +363,7 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
     </section>
   </div>
   <div class="home-cta grid" id="start">
-    <svg viewBox="29.85 26.11 48.3 55.78" aria-hidden="true"><path fill-rule="evenodd" d={OUTLINE}></path></svg>
+    <Mark />
     <h2>Start training</h2>
     <p>Overload Vector is in beta, and free while it is. It runs on Android 8.0 or newer, on 64-bit ARM phones.</p>
     <div class="actions">
@@ -429,7 +425,7 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
     const kg = Number(outcome.dataset.kg);
     for (const step of all<SVGGElement>("#rungs g")) step.classList.toggle("on", Number(step.dataset.kg) === kg);
     document.querySelector("#next-kg")!.textContent = String(kg);
-    document.querySelector("#next-why")!.firstChild!.textContent = `${outcome.dataset.why} `;
+    document.querySelector("#next-why")!.textContent = outcome.dataset.why!;
     document.querySelector("#next-plates")!.replaceChildren(
       ...(JSON.parse(outcome.dataset.side!) as [number, string][]).map(([size, colour]) => {
         const plate = document.createElement("span");
@@ -551,23 +547,19 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
   .hero .lead {
     max-width: 27em;
   }
-  .mark-big {
-    position: absolute;
-    z-index: 0;
-    overflow: visible;
+  /* The big mark: the one in the hero's still on a narrow screen, the page's own on a wide one. */
+  .home-top > :global(.mark-big) {
     display: none;
   }
-  .mark-big .band {
-    fill: var(--ov-mark-band);
+  .hero .phone-still {
+    position: relative;
   }
-  .mark-big .top {
-    fill: var(--ov-mark-top);
-  }
-  .mark-big .left {
-    fill: var(--ov-mark-left);
-  }
-  .mark-big .right {
-    fill: var(--ov-signal);
+  .hero .phone-still :global(.mark-big) {
+    z-index: -1;
+    right: -22vw;
+    bottom: 2%;
+    width: auto;
+    height: 96%;
   }
   .home-copy {
     position: relative;
@@ -851,7 +843,7 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
   .outcomes button {
     margin: 0 -1px -1px 0;
     padding: 0.8em 0.9em;
-    border: 1px solid var(--ov-line);
+    border: 1px solid var(--ov-rim);
     font-size: 0.9em;
     font-weight: 500;
     color: var(--ov-muted);
@@ -919,7 +911,7 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
     margin-top: 0.9em;
     font-size: 0.92em;
   }
-  .verdict-fig p span span {
+  .verdict-fig p .aside {
     color: var(--ov-muted);
   }
   /* The load a side, written as the app writes it. */
@@ -1050,13 +1042,13 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
   .home-cta :global(:focus-visible) {
     outline-color: var(--ov-on-signal);
   }
-  .home-cta svg {
+  .home-cta :global(svg) {
     position: absolute;
     top: 50%;
     right: calc(-4 * var(--ov-u));
     width: auto;
     height: 150%;
-    fill: rgb(0 0 0 / 0.1);
+    color: rgb(0 0 0 / 0.1);
     translate: 0 -50%;
   }
 
@@ -1065,13 +1057,14 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
     .grid {
       grid-template-columns: repeat(12, minmax(0, 1fr));
     }
+    /* The words take seven columns and the phone four, with one free between them. */
     .home-copy,
     .home-closing section,
     .home-cta h2 {
-      grid-column: 1 / 9;
+      grid-column: 1 / 8;
     }
     .home-cta p {
-      grid-column: 1 / 7;
+      grid-column: 1 / 6;
     }
     .home-cta .actions {
       grid-column: 7 / 13;
@@ -1090,14 +1083,18 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
       line-height: 0.8;
     }
     .hero .lead {
-      max-width: min(27em, 62%);
+      max-width: min(27em, 72%);
       margin-top: calc(2.6 * var(--ov-u));
     }
     .hero .actions {
       margin-top: calc(2.2 * var(--ov-u));
     }
-    .mark-big {
+    .hero .phone-still :global(.mark-big) {
+      display: none;
+    }
+    .home-top > :global(.mark-big) {
       display: block;
+      z-index: 0;
       top: calc((100vh - var(--head)) / 2);
       right: calc(var(--ov-m) - 9 * var(--ov-u));
       width: auto;
@@ -1167,24 +1164,8 @@ const OUTLINE = "M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15
       .phone-still :global(img) {
         width: 100%;
       }
-      .facts,
-      .points {
-        position: relative;
-      }
     }
   }
-  /* The one moment the page moves by itself: the mark comes up behind the phone. */
-  @media (prefers-reduced-motion: no-preference) {
-    .mark-big {
-      animation: rise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-    @keyframes rise {
-      from {
-        opacity: 0;
-      }
-    }
-  }
-
   /* The live phone: the texts scroll past on one side, the phone stays on the other. */
   :global(:root[data-home="live"]) {
     .home-feature {

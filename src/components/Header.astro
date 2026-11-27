@@ -7,14 +7,15 @@ import Mark from "./Mark.astro";
 
 const { id } = Astro.locals.starlightRoute.entry;
 const home = id === "index" || id === "";
-const here = (part: boolean) => (part ? "page" : undefined);
+// A link is marked as the page itself, or as the part of the site the page is in.
+const here = (href: string, part: boolean) => (Astro.url.pathname === href ? "page" : part ? "true" : undefined);
 ---
 
 <div class="site-head">
   <a href="/" class="site-title"><Mark />Overload Vector</a>
   <nav class="site-links" aria-label="Site">
-    <a href="/docs/getting-started/" aria-current={here(id.startsWith("docs/"))}>Docs</a>
-    <a href="/faq/" aria-current={here(id === "faq")}>FAQ</a>
+    <a href="/docs/getting-started/" aria-current={here("/docs/getting-started/", id.startsWith("docs/"))}>Docs</a>
+    <a href="/faq/" aria-current={here("/faq/", false)}>FAQ</a>
   </nav>
   {!home && <div class="site-search print:hidden"><Search /></div>}
   <div class="site-theme print:hidden"><ThemeSelect /></div>

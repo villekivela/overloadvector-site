@@ -16,8 +16,8 @@ export default defineConfig({
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
       ],
       customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
-      // Hero puts Home.astro on the home page, and Header is the site's own on every page
-      // (README, The home page).
+      // Hero puts Home.astro on the home page (README, The home page), and Header is the site's
+      // own on every page (README, The look).
       components: {
         Footer: "./src/components/Footer.astro",
         Header: "./src/components/Header.astro",

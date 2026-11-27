@@ -46,6 +46,7 @@ test("text is in Inter", async () => {
   onlyIn("Inter", await fontsOf(".site-footer p"), "the footer");
   await site.visit("/docs/getting-started/");
   onlyIn("Inter", await fontsOf(".sl-markdown-content h3"), "a smaller heading");
+  onlyIn("Inter", await fontsOf(".sl-markdown-content li > code"), "a word of code in a sentence");
   await site.visit("/");
   onlyIn("Inter", await fontsOf(".home-feature .lead"), "a feature's text");
 });
@@ -63,7 +64,7 @@ test("a number in a heading is in Mona Sans, as its words are", async () => {
 });
 
 // Inter is installed on many a desk, so a missing letter in the site's own cut looks right by eye.
-test("no text is drawn in a font of the visitor's own, code and keys aside", async () => {
+test("no text is drawn in a font of the visitor's own, blocks of code and keys aside", async () => {
   for (const route of ["/", ...Object.keys(PAGES)]) {
     await site.visit(route);
     // The app's ⋮ menu is named by its sign, which Inter doesn't have: that one is the visitor's.
@@ -72,8 +73,8 @@ test("no text is drawn in a font of the visitor's own, code and keys aside", asy
       await document.fonts.ready;
     });
     const { root } = await site.send("DOM.getDocument", { depth: -1 });
-    const { nodeIds } = await site.send("DOM.querySelectorAll", { nodeId: root.nodeId, selector: "body *:not(script, style, pre, pre *, code, kbd, svg *, [data-sign], :has(code, kbd, [data-sign]))" });
-    // A row's fonts count those of the code or the key within it, so only what holds neither is asked.
+    const { nodeIds } = await site.send("DOM.querySelectorAll", { nodeId: root.nodeId, selector: "body *:not(script, style, pre, pre *, kbd, svg *, [data-sign], :has(kbd, [data-sign]))" });
+    // A row's fonts count those of a key or the sign within it, so only what holds neither is asked.
     const strays = new Set();
     for (const nodeId of nodeIds) {
       const { fonts } = await site.send("CSS.getPlatformFontsForNode", { nodeId });

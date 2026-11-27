@@ -25,11 +25,13 @@ test("the header marks the part of the site the reader is in", () => {
   const current = (route) => {
     const html = page(route);
     const header = html.slice(html.indexOf("<header"), html.indexOf("</header>"));
-    return [...header.matchAll(/<a href="([^"]*)" aria-current="page"/g)].map(([, href]) => href);
+    return [...header.matchAll(/<a href="([^"]*)" aria-current="(\w+)"/g)].map(([, href, how]) => `${href} ${how}`);
   };
   assert.deepEqual(current("/"), []);
-  assert.deepEqual(current("/docs/logging/"), ["/docs/getting-started/"]);
-  assert.deepEqual(current("/faq/"), ["/faq/"]);
+  // The Docs link is the page itself only on the page it leads to.
+  assert.deepEqual(current("/docs/getting-started/"), ["/docs/getting-started/ page"]);
+  assert.deepEqual(current("/docs/logging/"), ["/docs/getting-started/ true"]);
+  assert.deepEqual(current("/faq/"), ["/faq/ page"]);
   assert.deepEqual(current("/privacy/"), []);
 });
 
