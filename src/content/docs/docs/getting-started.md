@@ -63,6 +63,9 @@ physio before you start.
 **Moving from another phone?** Tap **Restore from a backup** under the first screen's Start button
 instead. See [Backups and moving to a new phone](/docs/backups/).
 
+**Coming from Hevy or Strong?** Tap **Import your history** under the same button, then walk through
+Setup. See [Coming from Hevy or Strong](/docs/import/).
+
 You can walk through Setup again from **Settings → Run setup again**. Only what you change is kept.
 
 ## Your first program
