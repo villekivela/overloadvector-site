@@ -3,8 +3,8 @@ title: Progression and suggestions
 description: How Overload Vector works out the next weight and rep target for each exercise.
 ---
 
-Every exercise gets a suggested weight and target for its next session, with no spreadsheets. A
-suggestion is only ever a suggestion: type another weight and the app follows what you really lifted.
+The app suggests a weight and a target for every exercise's next session. You can type another
+weight, and the next suggestion follows what you lifted.
 
 ## What it reads
 
@@ -12,9 +12,10 @@ The app judges your **work sets at the top weight** from the last time you did t
 that exercise. It counts reps and reps in reserve (RIR) together, so 11 reps with 1 in reserve is
 as good as 10 reps with 2 in reserve.
 
-It also keeps one **strength estimate** for each exercise: roughly the most you could lift once,
-worked out from your sets of 12 reps or fewer. Machines and cables have an estimate for each machine, since their
-stacks don't compare, and Squat and Deadlift have one for each bar.
+It also keeps one **strength estimate** for each exercise. This is roughly the most you could lift
+once, worked out from your sets of 12 reps or fewer. Machines and cables have an estimate for each
+machine, because the numbers on one stack don't compare with another's. Squat and Deadlift have one
+for each bar.
 
 An exercise with no history gets no suggestion until you've logged its first set.
 
@@ -56,13 +57,14 @@ Under the exercise's name, a short line gives the reason: "Up to 62.5 kg, you to
 
 A deload week never lowers your estimate, and the app doesn't step the weight down after one. With
 [training days](/docs/programs/#training-days) set, after two or more weeks with no training the first
-week back is an **easy week**: one set fewer, one more rep in reserve and no techniques. A coach's [Change](/docs/coaching/), such as 10% lighter after
-time off, applies on top of the suggestion for as long as it lasts.
+week back is an **easy week**, with one set fewer, one more rep in reserve and no techniques. A
+coach's [Change](/docs/coaching/), such as 10% lighter after time off, applies on top of the
+suggestion for as long as it lasts.
 
 ## Goals and records
 
 Set a **lift goal** for an exercise's estimate from its trend on the **Progress** tab, with a date
-if you like. A goal shows how far you are; it never changes your program or your suggestions. Goals
+if you like. A goal shows how far you are. It never changes your program or your suggestions. Goals
 are for free weights and weighted bodyweight exercises.
 
 A set that beats your earlier ones is marked as a **record**: a new best estimate, or more reps than

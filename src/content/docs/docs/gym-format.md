@@ -5,11 +5,11 @@ description: "Every field of the JSON file a gym and its equipment are imported 
 
 <!-- A copy: change the app's note, then run scripts/sync-formats.mjs. -->
 
-A gym file describes one gym and its equipment, so a whole gym can be set up at once: Settings →
+A gym file describes one gym and its equipment, so a whole gym can be set up at once. Settings →
 Gyms and equipment → **Import gym** picks the file. Importing adds a new gym and never changes or
-replaces one already there. The file is checked strictly first: every problem is listed with its
-path (`equipment[2].serves[0]: unknown exercise "bb_row"`) and nothing is added until the file is
-clean.
+replaces one already there. The file is checked strictly first. Every problem is listed with its
+path, such as `equipment[2].serves[0]: unknown exercise "bb_row"`, and nothing is added until the
+file has none.
 
 ## Example
 

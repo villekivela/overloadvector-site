@@ -3,7 +3,7 @@ title: Backups and moving to a new phone
 description: Export and restore your training, and what Android backs up for you.
 ---
 
-Your training lives on your phone. There are two ways to keep it safe.
+Your training is stored on your phone. There are two ways to back it up.
 
 | | Backup file | Android's own backup |
 | --- | --- | --- |
@@ -11,17 +11,17 @@ Your training lives on your phone. There are two ways to keep it safe.
 | When | When you tap **Export backup** | By Android, about once a day |
 | Restore | **Settings → Restore from a backup** | When the app is installed on a phone signed in to that account |
 
-**Trust the file.** Keep a recent one somewhere off the phone, such as Drive or your computer.
-Android's backup is a safety net: it runs only when the phone is idle, charging and on Wi-Fi, and it
-needs "Backup by Google One" switched on in the phone's Google settings.
+**Rely on the backup file.** Keep a recent one somewhere off the phone, such as Drive or your
+computer. Treat Android's backup as a fallback. It runs only when the phone is idle, charging and on
+Wi-Fi, and it needs "Backup by Google One" switched on in the phone's Google settings.
 
 ## What's in a backup
 
-Everything you made in the app: programs and their Changes, every session (the one you're in the
-middle of too), training days, gyms and equipment, the exercise library with your edits, goals,
+Everything you made in the app: programs and their Changes, every session, including one in
+progress, training days, gyms and equipment, the exercise library with your edits, goals,
 bodyweight, your training style and your settings.
 
-**Never in a backup:** your Claude key and your sign-in for the connector. They are sealed to the
+**Never in a backup:** your Claude key and your sign-in for the connector. They can't leave the
 phone, so you enter them again after a move. The connector's account copy is not a backup, and it is
 never copied back to a phone.
 
@@ -40,7 +40,7 @@ never copied back to a phone.
 ## Restore
 
 **Settings → Restore from a backup**, then pick the file. The app asks "Replace everything on this
-phone?". Restoring replaces all the data on the phone with the file's; nothing is merged. A file the
+phone?". Restoring replaces all the data on the phone with the file's. Nothing is merged. A file the
 app can't read says why, and nothing changes.
 
 ## Move to a new phone
@@ -54,4 +54,4 @@ If you rely on Android's backup instead, sign in to the same Google account whil
 phone, restore from its backup, then install Overload Vector. Android puts the data back as the app is
 installed.
 
-Remember that uninstalling the app deletes its data from the phone.
+Uninstalling the app deletes its data from the phone.

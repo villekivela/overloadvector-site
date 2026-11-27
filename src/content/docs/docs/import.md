@@ -9,7 +9,7 @@ empty. Programs don't come across.
 ## Export from the other app
 
 - **Hevy:** open its settings and export your data. The workouts file holds your sessions. The
-  measurements file holds your bodyweight; import it as well if you want that.
+  measurements file holds your bodyweight. Import it as well if you want that.
 - **Strong:** open its settings and export your data.
 
 Each app gives you a CSV file. Save it somewhere your phone can open it, such as Downloads.
@@ -22,7 +22,7 @@ Each app gives you a CSV file. Save it somewhere your phone can open it, such as
 
 Nothing is written until you have looked at what the file holds and tapped **Import**. The app asks:
 
-- **kg or lb**, if the file doesn't say. Check it: a Strong file may not name its unit.
+- **kg or lb**, if the file doesn't say. Check it, because a Strong file may not name its unit.
 - **Which gym** the history is from. Machine and cable sets join that gym's matching machines.
 - **Exercises it doesn't recognise.** Tap a name to match it to an exercise in the library, which
   offers similar names first, or leave it skipped. Skipped names are listed at the end.
@@ -55,6 +55,6 @@ Claude sees which app they came from.
 
 ## Take an import back
 
-**Settings** lists each import. **Remove** deletes exactly what that import brought in; what you
+**Settings** lists each import. **Remove** deletes exactly what that import brought in. What you
 logged in Overload Vector stays. To change how exercises were matched, remove the import and import
 the file again.

@@ -25,8 +25,8 @@ connector.
 ## What does it cost, and how do I cancel?
 
 Overload Vector is [free in the beta](/docs/free-and-full/), so there's nothing to cancel. What you
-spend on Claude is between you and Anthropic: remove your key in **Settings → Claude key**, delete it
-in the Claude Console, or change your Claude plan there.
+spend on Claude is between you and Anthropic. To stop it, remove your key in **Settings → Claude
+key**, delete it in the Claude Console, or change your Claude plan there.
 
 ## What happens when a subscription ends?
 
@@ -45,11 +45,11 @@ Export a backup on the old phone and restore it on the new one. See
 
 ## How do I delete my data?
 
-On the phone, uninstalling the app deletes it; Android's backup in your Google account is managed in
-your Google settings, and backup files are yours to delete. If you connected Claude, tap
+Uninstalling the app deletes the data on the phone. Android's backup in your Google account is
+managed in your Google settings, and backup files are yours to delete. If you connected Claude, tap
 **Settings → Delete my account data** first, which deletes the copy on the server.
 
 ## How do I get help?
 
 Email [support@overloadvector.com](mailto:support@overloadvector.com). Say your phone model, your
-Android version and the app's version (the last line of Settings). See [Contact](/contact/).
+Android version and the app's version, which is the last line of Settings. See [Contact](/contact/).
