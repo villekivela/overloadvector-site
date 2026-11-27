@@ -8,8 +8,8 @@ the weights it can be set to. Add and edit gyms in **Settings → Gyms and equip
 
 ## Gear
 
-**Gear** on a gym's screen is the list of equipment kinds it has. Start from one of the presets Hotel,
-Garage, Basic, Advanced or All, and tap what differs. Setup uses it to pick exercises you can do there.
+**Gear** on a gym's screen is the list of equipment kinds it has. Start from a preset and tap
+what differs. The presets are Hotel, Garage, Basic, Advanced and All. Setup uses it to pick exercises you can do there.
 
 <div class="shots">
 

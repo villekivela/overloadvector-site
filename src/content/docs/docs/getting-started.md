@@ -31,8 +31,8 @@ that ends a rest can come late. See [Rest](/docs/logging/#rest).
 
 ## Setup
 
-The first time it opens, the app goes through ten steps, one on each screen. You can skip most of
-them, and nothing is saved until the last step.
+The first time it opens, the app asks its questions, one on each screen. You can skip most of them,
+and nothing is saved until the last step.
 
 1. **Units:** kilograms or pounds.
 2. **Your gym:** its name and the equipment it has. You start from a preset: Hotel, Garage, Basic,
@@ -63,7 +63,7 @@ physio before you start.
 **Moving from another phone?** On the first screen, tap **Restore from a backup** under **Before
 you start** instead. See [Backups and moving to a new phone](/docs/backups/).
 
-**Coming from Hevy or Strong?** Tap **Import your history** just below it, then walk through
+**Coming from Hevy or Strong?** Tap **Import your history** just below it, then go through
 Setup. See [Coming from Hevy or Strong](/docs/import/).
 
 To go through Setup again, tap **Settings → Run setup again**. Answers you don't change stay as

@@ -32,7 +32,7 @@ const FEATURES = [
     screens: ["logging"],
     kicker: "Logging",
     title: "Log every set in a few taps",
-    text: "A set is a weight, a rep count and reps in reserve. The weight is filled in already, and a set done as planned takes one tap after its reps.",
+    text: "A set is a weight, a rep count and reps in reserve. The app fills in its suggested weight, and a set done as planned takes one tap after its reps.",
     points: [
       "The app works out warm-up sets and the plates for each side",
       "A rest timer between sets",
@@ -49,7 +49,7 @@ const FEATURES = [
     points: [
       "Step through the rep, phase by phase",
       "See which muscles each exercise works",
-      "A technique video, one tap away",
+      "Technique videos, a tap away",
     ],
     more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
     alts: [
@@ -74,7 +74,7 @@ const FEATURES = [
     screens: ["check-in"],
     kicker: "Coaching",
     title: "Replan when the week changes",
-    text: "Tell Claude what happened, such as a sore wrist or a week at a hotel gym, and it proposes what to change.",
+    text: "Tell Claude what happened, such as a sore wrist, a short evening or a hotel gym, and it proposes what to change.",
     points: [
       "For pain, too little time and missing equipment",
       "Nothing changes until you accept it",
@@ -231,7 +231,7 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
         <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
         <p class="lead">
           <b>A strength-training app for Android.</b> It runs a periodized program, logs every set and works out the next
-          weight from the last session. When a week goes wrong, Claude can propose what to change.
+          weight from the last session. When you can't train as planned, Claude can propose what to change.
         </p>
         <div class="actions">
           <a class="ov-go" href="#start">Get the beta</a>

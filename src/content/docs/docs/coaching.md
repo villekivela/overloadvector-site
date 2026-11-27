@@ -55,7 +55,7 @@ Settings shows what the month's check-ins have cost, as an estimate. **Remove** 
 
 ## The connector
 
-With the connector, you talk to Claude in its own app, and its proposals appear in Overload Vector.
+With the connector, you talk to Claude in the Claude app, and its proposals appear in Overload Vector.
 
 1. In Overload Vector, open **Settings → Connect Claude**. Read what will be copied, tap **Agree**
    and sign in with Google. If Overload Vector has invited your email address, you can type it instead, all in

@@ -51,7 +51,7 @@ differs before you accept, and you can revert them from the Changes page.
 ## Training days
 
 With training days set, your program's days take turns on them. Three days on three training days
-land on the same weekdays each week; four days on three rotate. A missed day is skipped, and Today
+land on the same weekdays each week. Four days on three rotate. A missed day is skipped, and Today
 offers to train it on a free day that week. A week with no sessions doesn't count, and the next week
 runs it again.
 

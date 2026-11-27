@@ -17,12 +17,12 @@ Wi-Fi, and it needs "Backup by Google One" switched on in the phone's Google set
 
 ## What's in a backup
 
-Everything you made in the app: programs and their Changes, every session, including one in
-progress, training days, gyms and equipment, the exercise library with your edits, goals,
+Everything you made in the app: programs and their Changes, every session (one in progress
+too), training days, gyms and equipment, the exercise library with your edits, goals,
 bodyweight, your training style and your settings.
 
-**Never in a backup:** your Claude key and your sign-in for the connector. They can't leave the
-phone, so you enter them again after a move. The connector's account copy is not a backup, and it is
+**Never in a backup:** your Claude key and your sign-in for the connector. They are stored so that
+only this phone can read them, so you enter them again after a move. The connector's account copy is not a backup, and it is
 never copied back to a phone.
 
 ## Export

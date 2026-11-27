@@ -33,7 +33,7 @@ check.
   are in.
 
 Type with the number pad at the bottom. The app questions a weight that looks like a typo, such as ten
-times the last set or one your equipment can't make, before it logs it. Pick a suggested weight, or
+times the last set or one your equipment can't make, before logging it. Pick a suggested weight, or
 tap the check again to keep yours.
 
 To fix a logged set, tap it, change it and tap the check. Tap the number of a set you haven't logged
@@ -47,7 +47,7 @@ The app records partials, but they don't count towards your estimates.
 ## Warm-ups
 
 The app writes warm-up sets from your first work set's weight, rounded to what your equipment can
-load. They are marked **W** and are optional, and they never count as training volume. For barbells and
+load. They are marked **W** and are optional. They never count as training volume. For barbells and
 plate-loaded machines, the pad also shows which plates go on each side.
 
 ## Rest
