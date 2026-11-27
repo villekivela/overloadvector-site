@@ -104,7 +104,9 @@ the phone shows until the clip plays. The stills never load a clip.
 
 Each is 4 to 8 s, and the WebM about 1 MB or less; `npm test` checks both, and that each loop
 doesn't jump. Record a clip on an Android emulator with made-up training (as Screenshots), at a
-font scale of 1, in demo mode with the clock at 12:00:
+font scale of 1, in demo mode with the clock at 12:00. Start the emulator with `-gpu host`: drawn in
+software the mannequin gets a few frames a second, and its turn to the muscles, which eases frame by
+frame, takes a quarter of a minute.
 
 ```sh
 adb shell screenrecord --size 640x1428 --bit-rate 40000000 /sdcard/rec.mp4
@@ -117,9 +119,10 @@ npm run clips -- rec.mp4 <screen> <light|dark> <from s> <to s> [<x:y:w:h[:a:b]>]
 ```
 
 A loop closes on itself: the recording comes back to where it began, and the cut ends a frame
-before it gets there, so the clip's last frame is next to its first. Logging logs a set and takes it
-back, Technique turns the muscles layer on and off over two reps, and Coaching closes the
-check-in's proposal back to Coach. Something that repeats, such as the mannequin's rep, is best cut
+before it gets there, so the clip's last frame is next to its first. Logging types a set's reps,
+logs it, takes it back and clears the reps; Technique turns the muscles layer on and off over two
+reps of 4 s, starting where the rep holds; and Coaching closes the check-in's proposal back to
+Coach. Something that repeats, such as the mannequin's rep, is best cut
 a whole number of repeats long, starting where it holds. The last argument keeps a part of the
 screen (x, y, width and height in the clip's pixels) as it is in the first frame, for the session
 clock, which only counts on; `:a:b` lets it go between the clip's seconds a and b, while the rest
@@ -149,6 +152,8 @@ have changed: update `scripts/sync-formats.mjs` then.
 
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
+`shot-mannequin-*` and `shot-muscles-*` are on no page: they are the screens of Technique's two
+still phones, which `npm run stills` draws from them.
 
 A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:
