@@ -26,7 +26,7 @@ One exercise shows at a time. Each set is a row with **kg** or lb, **reps**, **R
 - **Weight** comes filled in with the app's [suggestion](/docs/progression/). You can change it.
 - **Reps** start empty. The cell shows the target, such as `6–8`.
 - **RIR**, reps in reserve, is how many more reps you could have done. `0` is to failure and `2` means
-  two left. It starts at the target. A set with its RIR cleared doesn't move your suggestions.
+  two left. It starts at the target. You can clear it, but a set without it doesn't move your suggestions.
 - **The check** logs the set and starts your rest. A set done as planned is one tap once its reps
   are in.
 
@@ -55,7 +55,7 @@ seconds, or to end it. When rest is over the phone vibrates, also with the scree
 notification shows the next set. Allow notifications to see it on the lock screen.
 
 If you installed from Google Play, Android may hold the buzz back while the phone sleeps. To stop
-that, open **Settings**, tap **Alarms & reminders** and allow exact alarms. The row shows only while
+that, open the app's **Settings**, tap **Alarms & reminders** and allow exact alarms. The row shows only while
 they are off.
 
 There's no rest between the two exercises of a superset, before a drop, or after an exercise's last

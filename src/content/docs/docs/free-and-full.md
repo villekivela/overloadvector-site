@@ -15,7 +15,7 @@ logged.
 Coaching uses your own Claude key or account. Overload Vector doesn't bill for it.
 
 - **With an API key**, Anthropic charges your Claude Console account for what each check-in uses.
-  Settings shows an estimate for the month, and the Console can cap the month's spend.
+  Settings shows an estimate for the month. Set a monthly spend limit in the Console.
 - **With the connector**, your use counts against your own Claude plan.
 
 You can use the app without either.

@@ -6,11 +6,12 @@ description: Privacy, Claude, cost, phones, moving your training and getting hel
 ## Why does Overload Vector exist?
 
 To run a strength program and log it in one app. Overload Vector suggests each weight from the last
-session. When you can't train as planned, Claude proposes a Change, a workout or a new program.
+session. When you can't train as planned, Claude can propose a Change, a workout or a new
+program.
 
 ## Is my data private?
 
-Yes. Your training stays on your phone. The app has no ads, no analytics and no trackers, and it
+Your training stays on your phone. The app has no ads, no analytics and no trackers, and it
 needs no account. Your training goes elsewhere only if you choose: to Anthropic when you check in
 with your own Claude key, to your Overload Vector account if you connect Claude, and to your Google
 account if Android's backup is on. The [privacy policy](/privacy/) has the details.

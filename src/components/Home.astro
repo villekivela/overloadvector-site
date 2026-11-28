@@ -22,7 +22,7 @@ const FEATURES = [
     text: "Pick your training days and your gym's equipment. The app writes a periodized program on the phone, ready to start the same day.",
     points: [
       "Blocks, weeks and days, with weekly set targets per muscle",
-      "Only exercises your gym has the equipment for",
+      "Built for the equipment your gym has",
       "Or import a program file of your own",
     ],
     more: { text: "How programs work", href: "/docs/programs/" },
@@ -32,10 +32,10 @@ const FEATURES = [
     screens: ["logging"],
     kicker: "Logging",
     title: "Log every set in a few taps",
-    text: "Weight, reps, reps in reserve. The weight is already filled in, so a set done as planned takes its reps and one tap.",
+    text: "Weight, reps, reps in reserve. The app fills in the weight it suggests, so a set done as planned takes its reps and one tap.",
     points: [
       "Warm-up sets and the plates for each side, worked out for you",
-      "A rest timer that buzzes with the screen off",
+      "A rest timer that buzzes when rest is over",
       "Drop sets, myo-reps and other intensity techniques",
     ],
     more: { text: "How logging works", href: "/docs/logging/" },
@@ -76,7 +76,7 @@ const FEATURES = [
     title: "Replan when the week changes",
     text: "Sore wrist, short evening, hotel gym? Tell Claude, and it proposes what to change.",
     points: [
-      "A Change to the program, a workout for today or a new program",
+      "For pain, too little time and missing equipment",
       "Nothing changes until you accept it",
       "Needs an Anthropic API key or a Claude account",
     ],
@@ -231,7 +231,7 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
         <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
         <p class="lead">
           <b>Strength training for Android.</b> Run a periodized program, log every set and get the next weight from
-          your last session. Can't train as planned? Claude proposes what to change.
+          your last session. Can't train as planned? Claude can propose what to change.
         </p>
         <div class="actions">
           <a class="ov-go" href="#start">Get the beta</a>

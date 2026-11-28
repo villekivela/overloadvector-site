@@ -17,7 +17,7 @@ worked out from your sets of 12 reps or fewer. Machines and cables have an estim
 machine, because the numbers on one stack don't compare with another's. Squat and Deadlift have one
 for each bar.
 
-An exercise gets its first suggestion once you've logged its first set.
+An exercise with no history gets no suggestion until you've logged its first set.
 
 ## The rules
 

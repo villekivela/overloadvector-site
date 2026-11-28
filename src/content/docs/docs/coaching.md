@@ -11,8 +11,8 @@ program and your recent training, then proposes one of:
 - **A new program.**
 - A plain answer, when the plan can stay as it is.
 
-**Nothing changes until you accept it.** You see the difference first, and you can revert a Change
-later.
+**Nothing changes until you accept it.** You see the difference first, and you can revert an accepted
+Change later.
 
 There are two ways to use Claude. Both are optional, and logging, programs and progression work
 without either.
@@ -79,7 +79,7 @@ A proposal shows on **Today** as a card the next time you open the app. Tap **Re
 or decline. A proposal you leave alone expires after 30 days.
 
 Your phone copies new training to the account after each session and when you open the app. Claude
-reads the copy and proposes. It can't change anything in your app.
+can read the copy and propose. It can't change anything in your app.
 
 - **Disconnect** stops the copying. The copy stays.
 - **Delete my account data**, in Settings, deletes the copy, any waiting proposals and your Overload
@@ -94,7 +94,8 @@ you in, [write to support](/contact/).
 ## The coach line
 
 When your log shows a pattern, such as a lift that hasn't moved in three sessions or a day you keep
-missing, Today shows one line about it with **Check in**. The line needs no key and changes nothing.
+missing, Today shows one line about it with **Check in**. It needs no key to show, and it changes
+nothing by itself.
 
 ## Your training style
 
