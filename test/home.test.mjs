@@ -820,6 +820,27 @@ test("on the live phone Technique's muscles light while the clip shows them lit,
   }
 });
 
+test("what you press is drawn as the app draws its buttons: 8 px of rounding, no stepped corner, the signal for the primary action", async () => {
+  await visit(DESK);
+  for (const [theme, tonal] of [["dark", "68 68 74"], ["light", "226 226 230"]]) {
+    await pickTheme(theme);
+    const seen = await site.run(() => {
+      const rgb = (colour) => {
+        const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+        return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+      };
+      const look = (selector) => {
+        const style = getComputedStyle(document.querySelector(selector));
+        return { fill: rgb(style.backgroundColor), ink: rgb(style.color), round: style.borderTopLeftRadius, cut: style.clipPath, weight: style.fontWeight };
+      };
+      return { go: look(".hero .ov-go"), alt: look(".hero .ov-alt"), picked: look('.outcomes button[aria-pressed="true"]'), chip: look(".rir button").round };
+    });
+    assert.deepEqual(seen.go, { fill: ORANGE[theme], ink: "17 17 17", round: "8px", cut: "none", weight: "500" });
+    assert.deepEqual(seen.alt, { fill: tonal, ink: theme === "dark" ? "242 242 244" : "25 25 27", round: "8px", cut: "none", weight: "500" });
+    assert.deepEqual([seen.picked.round, seen.picked.cut, seen.chip], ["8px", "none", "8px"]);
+  }
+});
+
 test("the Coaching card's Accept is drawn as the app draws it: the theme's orange, near-black words, modest rounding", async () => {
   await visit(POCKET);
   for (const theme of ["dark", "light"]) {

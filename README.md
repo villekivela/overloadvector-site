@@ -39,8 +39,12 @@ the app's Graphite greys, dark and light, and one signal colour, the orange `#e8
 it. The signal is for the primary action and "you are here"; a lit muscle is the same orange, as in
 the app. Plates and reps-in-reserve chips keep the app's colours.
 
-What you press, the home page's closing band and the pressed answer in Progression have the mark's
-stepped corner, cut from their lower right.
+What you press is drawn as the app draws its buttons (owner, 2026-11-28): 8 px of rounding, the
+label in Inter Medium, the primary action in the signal under near-black words (the app's deeper
+orange `#e05218` on the light theme) and the one beside it in the app's tonal grey. A picked answer
+in Progression is filled in the app's ink, as the app fills a picked choice. On the orange closing
+band the primary action is the ink button and the other is outlined. The closing band itself and
+the big mark behind the phone keep the mark's stepped corner.
 
 Both themes meet WCAG AA, which `test/contrast.test.mjs` checks on the home page, two docs pages,
 the FAQ and the privacy policy: text at 4.5:1, large text and the rim or line that tells a control's state at 3:1.
