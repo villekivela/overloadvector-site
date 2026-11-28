@@ -69,11 +69,10 @@ const faint = () =>
       if (seen(step) && style.content !== "none") check("a step's number", style.color, step, needed(style));
     }
     // What tells a control's state: the line under the header's current part and beside the
-    // sidebar's current page, the switch's rim, and a chip's.
+    // sidebar's current page, and a chip's rim.
     for (const [what, selector, colour] of [
       ["the header's current part", ".site-links a[aria-current]", (style) => style.boxShadow.match(/(rgb|color)\([^)]*\)/)?.[0]],
       ["the sidebar's current page", ".sidebar-content a[aria-current]", (style) => style.boxShadow.match(/(rgb|color)\([^)]*\)/)?.[0]],
-      ["the switch's rim", ".switch i", (style) => style.borderTopColor],
       ["a chip's rim", ".rir button", (style) => style.borderTopColor],
       ["a button's rim", ".ov-alt, .outcomes button", (style) => style.borderTopColor],
     ]) {
@@ -102,7 +101,6 @@ for (const theme of ["dark", "light"]) {
       if (route !== "/") return;
       // The home page again with each of its controls pressed.
       await site.run(() => {
-        document.querySelector("#layer").click();
         for (const chip of document.querySelectorAll(".rir button")) chip.setAttribute("aria-pressed", "true");
         for (const outcome of document.querySelectorAll(".outcomes button")) outcome.setAttribute("aria-pressed", "true");
       });

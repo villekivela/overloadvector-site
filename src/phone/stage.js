@@ -145,9 +145,15 @@ export function startStage(stage) {
     // A clip starts once its screen has faded in, and stops as another begins to.
     play(change ? null : shown);
     // Which clip is playing, for the tests.
-    const running = [...clips].find(([, { video }]) => !video.paused)?.[0].split(":")[0];
+    const [key, clip] = [...clips].find(([, { video }]) => !video.paused) ?? [];
+    const running = key?.split(":")[0];
     if (running) stage.dataset.playing = running;
     else delete stage.dataset.playing;
+    // A clip that turns the muscles layer on and off says when it is off, for the page's list of
+    // them, which is lit whenever no such clip is playing.
+    const [from, to] = screens[running]?.lit?.[key.split(":")[1]] ?? [];
+    const time = clip?.video.currentTime;
+    stage.toggleAttribute("data-unlit", from !== undefined && clip.drawn && !(time >= from && time < to));
     if (change || (wanted !== shown && loaded.has(wanted))) redraw();
   }
 
