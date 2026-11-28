@@ -85,7 +85,12 @@ const FEATURES = [
   },
 ];
 // What a visitor asks first, under the hero.
-const FACTS = ["Android 8.0 or newer", "Free in the beta", "No account, no ads, no trackers"];
+// Each fact's icon is the path of a 24-unit drawing: a phone, a price tag, a shield.
+const FACTS = [
+  { text: "Android 8.0 or newer", icon: "M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10 18.5h4" },
+  { text: "Free in the beta", icon: "M3.5 3.5h8l9 9-8 8-9-9v-8ZM8 8h.01" },
+  { text: "No account, no ads, no trackers", icon: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6l8-3ZM8.5 12l2.5 2.5 4.5-5" },
+];
 const TODAY = {
   screen: "today",
   alt: "Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works",
@@ -130,11 +135,13 @@ for (const { screen, alt } of shown) {
   screens[screen].clip = { light: clip("light"), dark: clip("dark") };
 }
 
-// Program: the block as it is, a column a week and a row a training day. Week 1's first day is
-// done and its second is next.
+// Program: the block as it is, a column a week and a row a training day. Four weeks are done,
+// and in week 5 the first day is done and the second is next.
 const WEEKS = Array.from({ length: 12 }, (_, week) => week + 1);
 const DAYS = ["A", "B", "C"];
-const dayState = (week: number, day: number) => (week === 1 && day === 0 ? "done" : week === 1 && day === 1 ? "now" : undefined);
+const NOW = { week: 5, day: 1 };
+const dayState = (week: number, day: number) =>
+  week < NOW.week || (week === NOW.week && day < NOW.day) ? "done" : week === NOW.week && day === NOW.day ? "now" : undefined;
 
 // Logging: how hard a set was, in the app's reps-in-reserve colours.
 const RIR = [
@@ -245,7 +252,12 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
         </div>
       </section>
       <ul class="facts">
-        {FACTS.map((fact) => <li>{fact}</li>)}
+        {FACTS.map(({ text, icon }) => (
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
+            {text}
+          </li>
+        ))}
       </ul>
       {FEATURES.map(({ screens, kicker, title, text, points, more, alts }) => (
         <section class="home-feature" id={kicker.toLowerCase()} data-screen={live(screens).join(" ")}>
@@ -254,7 +266,7 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
           <div class="inst">
             {kicker === "Program" && (
               <Fragment>
-                <div class="block" role="img" aria-label="A 12-week block of three training days a week, with week 1's first day done and its second day next">
+                <div class="block" role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next">
                   <span></span>
                   {WEEKS.map((week) => <span>{week}</span>)}
                   {DAYS.map((day, row) => (
@@ -365,7 +377,6 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
   <div class="home-cta grid" id="start">
     <Mark />
     <h2>Start training</h2>
-    <p>Overload Vector is in beta, and free while it is. It runs on Android 8.0 or newer, on 64-bit ARM phones.</p>
     <div class="actions">
       <a class="ov-go" href={BETA}>Get the beta</a>
       <a class="ov-alt" href={INSTALL}>Install guide</a>
@@ -571,8 +582,21 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     border-block: 1px solid var(--ov-line);
   }
   .facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
     padding: 0.875rem 0;
     font-weight: 500;
+  }
+  .facts svg {
+    flex: none;
+    width: 1.5em;
+    height: 1.5em;
+    fill: none;
+    stroke: var(--ov-signal);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
   .facts li + li {
     border-top: 1px solid var(--ov-line);
@@ -731,11 +755,12 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
   }
   .rir button {
     --on: #111;
-    min-width: 2.9em;
-    height: 2.9em;
-    padding: 0 0.7em;
+    min-width: 2.4em;
+    height: 2.4em;
+    padding: 0 0.6em;
     border: 2px solid var(--c);
     border-radius: 0.5em;
+    font-size: 1.25em;
     font-weight: 600;
     color: var(--t);
   }
@@ -839,9 +864,9 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
   .outcomes {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.6em;
   }
   .outcomes button {
-    margin: 0 -1px -1px 0;
     padding: 0.8em 0.9em;
     border: 1px solid var(--ov-rim);
     font-size: 0.9em;
@@ -1021,10 +1046,6 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     font-size: clamp(4rem, calc(11 * var(--ov-u)), 17.5rem);
     line-height: 0.8;
   }
-  .home-cta p {
-    max-width: 31em;
-    font-weight: 500;
-  }
   .home-cta .actions {
     position: relative;
   }
@@ -1062,9 +1083,6 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     .home-closing section,
     .home-cta h2 {
       grid-column: 1 / 8;
-    }
-    .home-cta p {
-      grid-column: 1 / 6;
     }
     .home-cta .actions {
       grid-column: 7 / 13;
