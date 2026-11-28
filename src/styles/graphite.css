@@ -102,19 +102,48 @@
   color: var(--ov-on-signal);
 }
 
-/* What you press: the signal, with the mark's stepped corner cut from its lower right. */
+/* What you press, drawn as the app draws its buttons (a trial): 8 px of rounding, the label in
+   Inter Medium, Material's 40-high, 24-padded button scaled to the page's text. The primary
+   action is the app's signal under near-black words, the one beside it the app's tonal grey. */
+:root {
+  --ov-tonal: #44444a;
+  --ov-on-tonal: #f2f2f4;
+  --ov-primary: #f2f2f4;
+  --ov-on-primary: #141416;
+}
+:root[data-theme="light"] {
+  --ov-tonal: #e2e2e6;
+  --ov-on-tonal: #19191b;
+  --ov-primary: #1c1c1f;
+  --ov-on-primary: #fff;
+}
 .ov-go,
 .ov-alt {
   display: inline-block;
-  padding: 1.1em 2em;
-  font-size: 1.05em;
-  font-weight: 600;
-  line-height: 1.2;
+  padding: 0.8em 1.6em;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  letter-spacing: 0.006em;
+  line-height: 1.25;
   text-decoration: none;
 }
-.ov-go,
-.home-cta,
-.outcomes button[aria-pressed="true"] {
+.ov-go {
+  background: var(--ov-lit);
+  color: var(--ov-on-signal);
+}
+.ov-go:hover {
+  filter: brightness(1.08);
+}
+.ov-alt {
+  background: var(--ov-tonal);
+  color: var(--ov-on-tonal);
+}
+.ov-alt:hover {
+  filter: brightness(1.08);
+}
+/* The band the home page ends with keeps the mark's stepped corner: it is no button. */
+.home-cta {
   --s: 0.5em;
   clip-path: polygon(
     0 0,
@@ -127,31 +156,12 @@
     0 100%
   );
 }
-.ov-go {
-  padding-right: 2.6em;
-  background: var(--ov-signal);
-  color: var(--ov-on-signal);
-}
-/* Two abreast on a phone. */
-@media (max-width: 59.99rem) {
-  .ov-go,
-  .ov-alt {
-    padding: 1em 1.3em;
-  }
-  .ov-go {
-    padding-right: 1.9em;
-  }
-}
-.ov-go:hover {
-  filter: brightness(1.1);
-}
-.ov-alt {
-  border: 1px solid var(--ov-rim);
-  font-weight: 500;
-  color: var(--ov-ink);
-}
-.ov-alt:hover {
-  border-color: var(--ov-muted);
+/* The header's search, a tonal button too. */
+.site-search button[data-open-modal] {
+  border: 0;
+  border-radius: 8px;
+  background: var(--ov-tonal);
+  color: var(--ov-on-tonal);
 }
 
 /* ---------- Reading pages: the docs, the FAQ and the rest. ---------- */
