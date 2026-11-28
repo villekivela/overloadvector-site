@@ -60,6 +60,14 @@ test("the facts under the hero are Android, free in the beta, and no ads or trac
   assert.doesNotMatch(text(html.slice(html.indexOf("<main"), html.indexOf('<footer class="site-footer'))), /8\.0/);
 });
 
+test("the Android fact carries the Android robot's head, filled in, and the footer credits Google for it", () => {
+  const html = page("/");
+  const first = html.slice(html.indexOf("<li", html.indexOf('class="facts')), html.indexOf("</li>", html.indexOf('class="facts')));
+  assert.match(first, /<svg[^>]*class="[^"]*\bsolid\b[^>]*>\s*<path[^>]*d="M17\.6,9\.48l1\.84-3\.18/);
+  const footer = text(html.slice(html.indexOf('<footer class="site-footer')));
+  assert.match(footer, /The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3\.0 Attribution License\./);
+});
+
 test("the facts under the hero each carry an icon, and the closing band doesn't say them again", () => {
   const html = page("/");
   const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
