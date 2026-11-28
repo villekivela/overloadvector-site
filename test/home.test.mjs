@@ -450,7 +450,7 @@ test("a section with a clip plays it on the phone while it is current, and stops
   }
 });
 
-test("each clip lasts 4 to 8 s, and its last frame leads into its first as one frame leads into the next", async () => {
+test("each clip lasts 4 to 8 s, or up to 12 with screens to read, and its last frame leads into its first as one frame leads into the next", async () => {
   await visit(DESK);
   const clips = await site.run(async () => {
     const screens = JSON.parse(document.querySelector(".home-stage").dataset.screens);
@@ -478,14 +478,35 @@ test("each clip lasts 4 to 8 s, and its last frame leads into its first as one f
         const first = await frameAt(0);
         const second = await frameAt(1 / 30);
         const last = await frameAt(video.duration - 1 / 60);
-        seen[`${screen} ${theme}`] = { duration: video.duration, seam: apart(last, first), step: apart(first, second) };
+        // How long each stretch lasts in which nothing on the screen changes, looked at every tenth of a second.
+        const stills = [];
+        if (screen === "check-in") {
+          let [before, since] = [first, 0];
+          for (let time = 0.1; time < video.duration; time += 0.1) {
+            const now = await frameAt(time);
+            if (apart(before, now) > 0.0005) {
+              stills.push(time - 0.1 - since);
+              since = time;
+            }
+            before = now;
+          }
+          stills.push(video.duration - since);
+        }
+        seen[`${screen} ${theme}`] = { duration: video.duration, seam: apart(last, first), step: apart(first, second), stills };
       }
     }
     return seen;
   });
   assert.deepEqual(Object.keys(clips).sort(), CLIPS.flatMap((screen) => [`${screen} dark`, `${screen} light`]).sort());
-  for (const [name, { duration, seam, step }] of Object.entries(clips)) {
-    assert.ok(duration >= 4 && duration <= 8, `${name} lasts ${duration} s`);
+  for (const [name, { duration, seam, step, stills }] of Object.entries(clips)) {
+    // Coaching's has a question and a proposed Change to read, and Coach to come back to: each
+    // stands still long enough to, which takes the clip past 8 s.
+    const reading = name.startsWith("check-in");
+    assert.ok(duration >= 4 && duration <= (reading ? 12 : 8), `${name} lasts ${duration} s`);
+    if (reading) {
+      const longest = stills.sort((a, b) => b - a).slice(0, 3).map((still) => Math.round(still * 10) / 10);
+      assert.ok(longest[0] >= 2.6 && longest[1] >= 2.1 && longest[2] >= 0.7, `${name} holds its screens for ${longest} s`);
+    }
     assert.ok(seam <= step + 0.002, `${name} jumps at its loop: ${seam} of the values change, against ${step} from one frame to the next`);
   }
 });

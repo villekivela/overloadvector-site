@@ -103,7 +103,9 @@ becomes the current one, and pauses when another takes over. The `.png` is its f
 the phone shows until the clip plays. The stills never load a clip.
 
 Each is 4 to 8 s, and the WebM about 1 MB or less; `npm test` checks both, and that each loop
-doesn't jump. Record a clip on an Android emulator with made-up training (as Screenshots), at a
+doesn't jump. Coaching's is up to 12 s: the scripted coach answers at once, so its question and
+its proposed Change are each stopped a second or two longer with `+<t>:<d>` (below), or the
+clip looks sped up. The test checks they stand still long enough to read. Record a clip on an Android emulator with made-up training (as Screenshots), at a
 font scale of 1, in demo mode with the clock at 12:00. Start the emulator with `-gpu host`: drawn in
 software the mannequin gets a few frames a second, and its turn to the muscles, which eases frame by
 frame, takes a quarter of a minute.
@@ -122,7 +124,9 @@ A loop closes on itself: the recording comes back to where it began, and the cut
 before it gets there, so the clip's last frame is next to its first. Logging types a set's reps,
 logs it, takes it back and clears the reps; Technique turns the muscles layer on and off over two
 reps of 4 s, starting where the rep holds; and Coaching closes the check-in's proposal back to
-Coach. Something that repeats, such as the mannequin's rep, is best cut
+Coach. An argument `+<t>:<d>` stops the clip at its second t for d seconds more; put t where the
+screen stands still (Coaching's: `1.45 10.12 +3.4:0.8 +7.95:1.5` dark, `1.4 9.78 +3.4:1.2 +7.7:1.6`
+light, from recordings that tap a second and a half after they start). Something that repeats, such as the mannequin's rep, is best cut
 a whole number of repeats long, starting where it holds. The last argument keeps a part of the
 screen (x, y, width and height in the clip's pixels) as it is in the first frame, for the session
 clock, which only counts on; `:a:b` lets it go between the clip's seconds a and b, while the rest
