@@ -65,7 +65,8 @@ With the connector, you talk to Claude in its own app, and its proposals appear 
 2. Tap **Add to Claude**. It opens Claude's dialog for adding a custom connector, with the server
    address `https://mcp.overloadvector.com/mcp` filled in. Keep the other settings as they are and
    add it.
-3. When Claude asks, sign in the same way as in the app.
+3. When Claude asks you to sign in, choose **Continue with Google** or **Sign in with an emailed
+   code**, the way you signed in to the app.
 4. Ask Claude about your training, such as "My wrist hurts today. What should I change?"
 
 <div class="shots part">
