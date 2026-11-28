@@ -5,22 +5,20 @@ description: Privacy, Claude, cost, phones, moving your training and getting hel
 
 ## Why does Overload Vector exist?
 
-Overload Vector runs a strength program and logs it in the same app. It suggests each weight from
-the last session. When you can't train as planned, Claude can propose a Change to the program, a
-workout or a new program.
+To run a strength program and log it in one app. Overload Vector suggests each weight from the last
+session. When you can't train as planned, Claude proposes a Change, a workout or a new program.
 
 ## Is my data private?
 
-Your training stays on your phone. The app has no ads, no analytics and no trackers, and it needs no
-account. It goes elsewhere only if you choose: to Anthropic when you check in with your own Claude
-key, to your Overload Vector account if you connect Claude, and to your Google account if Android's
-backup is on. The [privacy policy](/privacy/) has the details.
+Yes. Your training stays on your phone. The app has no ads, no analytics and no trackers, and it
+needs no account. Your training goes elsewhere only if you choose: to Anthropic when you check in
+with your own Claude key, to your Overload Vector account if you connect Claude, and to your Google
+account if Android's backup is on. The [privacy policy](/privacy/) has the details.
 
 ## Do I need a Claude account?
 
-No. Logging, programs, progression, history and backups all work without one. For
-[coaching](/docs/coaching/) you need either an Anthropic API key or a Claude account to use with the
-connector.
+No. Logging, programs, progression, history and backups all work without one.
+[Coaching](/docs/coaching/) needs an Anthropic API key, or a Claude account for the connector.
 
 ## What does it cost, and how do I cancel?
 

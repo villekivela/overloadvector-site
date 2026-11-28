@@ -8,8 +8,8 @@ weights. It needs no account, and your training stays on your phone.
 
 ## Install the beta
 
-Overload Vector is in beta and free. You need an Android phone with **Android 8.0 or newer** and a
-64-bit ARM processor. Nearly every phone of recent years has one.
+Overload Vector is in beta and free. It needs **Android 8.0 or newer** and a 64-bit ARM processor,
+which nearly every recent phone has.
 
 1. On the phone, open the
    [latest release](https://github.com/villekivela/overloadvector-releases/releases/latest) in the
@@ -18,25 +18,24 @@ Overload Vector is in beta and free. You need an Android phone with **Android 8.
    your browser.
 3. Open Overload Vector.
 
-After that, updates come through the app. When a newer version is out, a banner on **Today** offers
-it. Tap the banner and confirm Android's "Update this app?". To stop the check, switch off
-**Settings → Check for updates**.
+Updates come through the app. A banner on **Today** offers each new version. Tap it and confirm
+Android's "Update this app?". To stop the check, switch off **Settings → Check for updates**.
 
 ### From Google Play
 
-If you were invited to the test on Google Play, open the invitation link on the phone, accept it
-and install Overload Vector from the Play Store. Google Play then keeps the app up to date, so it
-has no update banner and no **Check for updates**. Allow the app's exact alarms too, or the buzz
-that ends a rest can come late. See [Rest](/docs/logging/#rest).
+Invited to the test on Google Play? Open the invitation link on the phone, accept it and install
+Overload Vector from the Play Store. Google Play keeps the app up to date, so it has no update
+banner and no **Check for updates**. Allow the app's exact alarms too, or the buzz that ends a
+[rest](/docs/logging/#rest) can come late.
 
 ## Setup
 
-The first time it opens, the app asks its questions, one on each screen. You can skip most of them,
-and nothing is saved until the last step.
+On first launch the app asks its questions, one on each screen. You can skip most of them, and
+nothing is saved until the last step.
 
 1. **Units:** kilograms or pounds.
-2. **Your gym:** its name and the equipment it has. You start from a preset: Hotel, Garage, Basic,
-   Advanced or All.
+2. **Your gym:** its name and the equipment it has, starting from a
+   [preset](/docs/gyms/#gear).
 3. **Training days:** the weekdays you train, up to six.
 4. **Session length:** 45, 60, 75 or 90 minutes, the same every day or different per day.
 5. **Goal:** hypertrophy, strength or both, and whether you're coming back from a break.
@@ -66,22 +65,21 @@ you start** instead. See [Backups and moving to a new phone](/docs/backups/).
 **Coming from Hevy or Strong?** Tap **Import your history** below it, then go through
 Setup. See [Coming from Hevy or Strong](/docs/import/).
 
-To go through Setup again, tap **Settings → Run setup again**. Answers you don't change stay as
-they were.
+To redo Setup, tap **Settings → Run setup again**. Answers you don't change stay.
 
 ## Your first program
 
 At the end of Setup, choose one:
 
-- **A program tailored to you.** The app writes it on the phone from your answers, without using the
-  network. It shows the whole program with its weekly sets per muscle, and you tap **Start
-  program**, **Save for later** or **Reject**.
+- **A program tailored to you.** The app writes it on the phone from your answers, without the
+  network. Review the whole program with its weekly sets per muscle, then tap **Start program**,
+  **Save for later** or **Reject**.
 - **Import a program file.** A program you or Claude wrote. See [Programs](/docs/programs/).
 - **Train ad hoc for now.** Start a session at any time and add exercises as you go.
 - **Build it with Claude**, if you connected Claude. Claude proposes the program in the Claude app,
   and the proposal appears on Today for you to review.
 
-While no program is running, Today and Program also offer **Overload Vector Full Body**, the starter
+With no program running, Today and Program also offer **Overload Vector Full Body**, the starter
 program. It runs three days a week for 12 weeks, with few sets, each taken hard.
 
 ## Today
@@ -100,8 +98,8 @@ program. It runs three days a week for 12 weeks, with few sets, each taken hard.
 
 </div>
 
-If you set training days, your program's days take turns on them, and a day you miss is skipped.
-Without training days the program runs in order, whenever you train. To change the training days,
-tap the pencil at the top of Today.
+With training days set, your program's days take turns on them, and a missed day is skipped.
+Without them the program runs in order, whenever you train. To change the training days, tap the
+pencil at the top of Today.
 
 Next: [log your first session](/docs/logging/).

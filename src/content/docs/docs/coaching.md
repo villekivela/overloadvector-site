@@ -3,19 +3,19 @@ title: Coaching with Claude
 description: Check-ins with your own Claude API key, or Claude through the Overload Vector connector.
 ---
 
-When you can't train as planned, because of a sore wrist, a short evening or a hotel gym, Claude
-can propose what to do. It reads your program and your recent training, then proposes one of:
+A sore wrist, a short evening, a hotel gym. When you can't train as planned, Claude reads your
+program and your recent training, then proposes one of:
 
 - **A Change** to your program, for a few days or for good.
 - **A workout** for today, outside the program.
 - **A new program.**
 - A plain answer, when the plan can stay as it is.
 
-**Nothing changes until you accept it.** You see the difference first, and you can revert an accepted
-Change later.
+**Nothing changes until you accept it.** You see the difference first, and you can revert a Change
+later.
 
-There are two ways to use Claude. Both are optional. Logging, programs and progression work without
-either.
+There are two ways to use Claude. Both are optional, and logging, programs and progression work
+without either.
 
 | | Your own API key | The connector |
 | --- | --- | --- |
@@ -30,14 +30,14 @@ The [privacy policy](/privacy/) lists what is sent.
 
 1. Create an API key in the [Claude Console](https://console.anthropic.com/), and set a monthly
    spend limit there.
-2. In Overload Vector, open **Settings → Claude key**, paste the key and save. The key is checked,
-   then stored encrypted on your phone. It is never in a backup.
+2. In Overload Vector, open **Settings → Claude key**, paste the key and save. The app checks the
+   key, then stores it encrypted on your phone. It is never in a backup.
 3. Open **Coach** and pick what's going on: **Something hurts**, **Short on time**, **Different gym
    or none**, **Tired or slept badly**, **Change my program**, **Build me a workout**, **New
    program** or **Something else**.
 
-Claude asks a few short questions, one on each screen. Tap an answer or type your own. At the end
-you review what it proposes, and accept it, ask for changes or drop it.
+Claude asks a few short questions, one on each screen. Tap an answer or type your own. Then review
+what it proposes, and accept it, ask for changes or drop it.
 
 <div class="shots">
 
@@ -55,7 +55,7 @@ Settings shows what the month's check-ins have cost, as an estimate. **Remove** 
 
 ## The connector
 
-With the connector, you talk to Claude in the Claude app, and its proposals appear in Overload Vector.
+You talk to Claude in the Claude app, and its proposals appear in Overload Vector.
 
 1. In Overload Vector, open **Settings → Connect Claude**. Read what will be copied, tap **Agree**
    and sign in with Google. If Overload Vector has invited your email address, you can type it instead, all in
@@ -75,11 +75,11 @@ With the connector, you talk to Claude in the Claude app, and its proposals appe
 
 </div>
 
-What Claude proposes shows on **Today** as a card the next time you open the app. Tap **Review**,
-then accept or decline. A proposal you leave alone expires after 30 days.
+A proposal shows on **Today** as a card the next time you open the app. Tap **Review**, then accept
+or decline. A proposal you leave alone expires after 30 days.
 
 Your phone copies new training to the account after each session and when you open the app. Claude
-can read the copy and propose. It can't change anything in your app.
+reads the copy and proposes. It can't change anything in your app.
 
 - **Disconnect** stops the copying. The copy stays.
 - **Delete my account data**, in Settings, deletes the copy, any waiting proposals and your Overload
@@ -88,14 +88,13 @@ can read the copy and propose. It can't change anything in your app.
 
 The app asks you to sign in again after a year, and Claude after 90 days.
 
-During the beta, signing in to the connector may be limited to invited testers. If Google won't let
+During the beta, the connector's sign-in may be limited to invited testers. If Google won't let
 you in, [write to support](/contact/).
 
 ## The coach line
 
 When your log shows a pattern, such as a lift that hasn't moved in three sessions or a day you keep
-missing, Today shows one line about it with **Check in**. It needs no key to show, and it changes
-nothing by itself.
+missing, Today shows one line about it with **Check in**. The line needs no key and changes nothing.
 
 ## Your training style
 

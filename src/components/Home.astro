@@ -18,11 +18,11 @@ const FEATURES = [
   {
     screens: ["new-program"],
     kicker: "Program",
-    title: "A program for your week and your gym",
-    text: "Setup asks which days you train and what your gym has, then writes a periodized program on the phone. You can start it the same day.",
+    title: "A program built for your week and your gym",
+    text: "Pick your training days and your gym's equipment. The app writes a periodized program on the phone, ready to start the same day.",
     points: [
-      "Blocks, weeks and days, with weekly set targets for each muscle",
-      "Built for the equipment your gym has",
+      "Blocks, weeks and days, with weekly set targets per muscle",
+      "Only exercises your gym has the equipment for",
       "Or import a program file of your own",
     ],
     more: { text: "How programs work", href: "/docs/programs/" },
@@ -32,10 +32,10 @@ const FEATURES = [
     screens: ["logging"],
     kicker: "Logging",
     title: "Log every set in a few taps",
-    text: "A set is a weight, a rep count and reps in reserve. The app fills in its suggested weight, and a set done as planned takes one tap after its reps.",
+    text: "Weight, reps, reps in reserve. The weight is already filled in, so a set done as planned takes its reps and one tap.",
     points: [
-      "The app works out warm-up sets and the plates for each side",
-      "A rest timer between sets",
+      "Warm-up sets and the plates for each side, worked out for you",
+      "A rest timer that buzzes with the screen off",
       "Drop sets, myo-reps and other intensity techniques",
     ],
     more: { text: "How logging works", href: "/docs/logging/" },
@@ -45,7 +45,7 @@ const FEATURES = [
     screens: ["mannequin", "muscles"],
     kicker: "Technique",
     title: "See how every lift is done",
-    text: "A 3D mannequin does each exercise on the machine your gym has. Watch the movement before you load the bar.",
+    text: "A 3D mannequin does each exercise on the machine your gym has. Watch the rep before you load the bar.",
     points: [
       "Step through the rep, phase by phase",
       "See which muscles each exercise works",
@@ -61,10 +61,10 @@ const FEATURES = [
     screens: ["progress"],
     kicker: "Progression",
     title: "Know what to lift next",
-    text: "The app suggests the next weight for every exercise, from the reps and reps in reserve you logged last time.",
+    text: "Every exercise gets its next weight, worked out from the reps and reps in reserve you logged last time.",
     points: [
       "Only weights your gym can load",
-      "Each suggestion gives its reason",
+      "Every suggestion says why",
       "Weekly sets per muscle, tracked against your targets",
     ],
     more: { text: "How progression works", href: "/docs/progression/" },
@@ -74,9 +74,9 @@ const FEATURES = [
     screens: ["check-in"],
     kicker: "Coaching",
     title: "Replan when the week changes",
-    text: "Tell Claude what happened, such as a sore wrist, a short evening or a hotel gym, and it proposes what to change.",
+    text: "Sore wrist, short evening, hotel gym? Tell Claude, and it proposes what to change.",
     points: [
-      "For pain, too little time and missing equipment",
+      "A Change to the program, a workout for today or a new program",
       "Nothing changes until you accept it",
       "Needs an Anthropic API key or a Claude account",
     ],
@@ -230,8 +230,8 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
       <section class="hero">
         <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
         <p class="lead">
-          <b>A strength-training app for Android.</b> It runs a periodized program, logs every set and works out the next
-          weight from the last session. When you can't train as planned, Claude can propose what to change.
+          <b>Strength training for Android.</b> Run a periodized program, log every set and get the next weight from
+          your last session. Can't train as planned? Claude proposes what to change.
         </p>
         <div class="actions">
           <a class="ov-go" href="#start">Get the beta</a>
@@ -357,15 +357,15 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     <section>
       <h2>Your training stays on your phone</h2>
       <p>
-        No account, no ads and no trackers. Your training is stored on your phone and leaves it only through what you
-        switch on. The <a href="/privacy/">privacy policy</a> lists each case.
+        No account, no ads, no trackers. Your training leaves the phone only through what you switch on, and the
+        <a href="/privacy/">privacy policy</a> lists each case.
       </p>
     </section>
   </div>
   <div class="home-cta grid" id="start">
     <Mark />
     <h2>Start training</h2>
-    <p>Overload Vector is in beta, and free while the beta lasts. It runs on 64-bit ARM phones with Android 8.0 or newer.</p>
+    <p>In beta, and free while the beta lasts. Runs on 64-bit ARM phones with Android 8.0 or newer.</p>
     <div class="actions">
       <a class="ov-go" href={BETA}>Get the beta</a>
       <a class="ov-alt" href={INSTALL}>Install guide</a>

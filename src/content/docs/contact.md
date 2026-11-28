@@ -15,4 +15,4 @@ For a problem, it helps to include:
 Please don't send your Claude API key or a backup file unless support asks for one. A backup holds
 all of your training.
 
-You may find your answer in the [FAQ](/faq/) or the [docs](/docs/getting-started/).
+The [FAQ](/faq/) and the [docs](/docs/getting-started/) may already answer you.

@@ -20,8 +20,8 @@ One program runs at a time. Starting another keeps the old one and its sessions.
 ## The Program tab
 
 The tabs under the title are the blocks. Pick one to see its weeks, its days and each day's
-exercises. Tap an exercise to edit it. Finished blocks have **Review**, a page on how the
-block went. It shows your lifts, the sessions you did, your volume and your records.
+exercises. Tap an exercise to edit it. A finished block has **Review**, which shows your lifts, the
+sessions you did, your volume and your records.
 
 <div class="shots">
 
@@ -55,8 +55,8 @@ land on the same weekdays each week. Four days on three rotate. A missed day is 
 offers to train it on a free day that week. A week with no sessions doesn't count, and the next week
 runs it again.
 
-Set the days, each day's gym and how many minutes you have from the pencil at the top of Today. When
-a day is planned to run longer than you have, Today says so.
+Tap the pencil at the top of Today to set the days, each day's gym and how many minutes you have.
+When a day is planned to run longer than that, Today says so.
 
 ## Importing a program
 
@@ -67,8 +67,8 @@ The app checks the file first. If anything is wrong, it lists every problem with
 file and imports nothing. If a program is running, choose **Start now** or **Save for later**.
 
 The [program file format](/docs/program-format/) describes every field, so you can write a program
-by hand or ask Claude to. **Export** on a program's sheet saves it as a file, which is also the
-easiest example to start from.
+by hand or ask Claude to. **Export** on a program's sheet saves it as a file, which is the easiest
+example to start from.
 
 ## Your program list
 

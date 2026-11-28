@@ -52,7 +52,7 @@ test("the Program section draws its block: twelve weeks of three days, one day d
 
 test("the Logging section's example set is the one its clip logs: 50 kg for 8 reps", () => {
   const html = page("/");
-  const set = html.slice(html.indexOf('class="set'), html.indexOf('class="rir'));
+  const set = html.slice(html.indexOf(">", html.indexOf('class="set"')) + 1, html.indexOf('<div class="rir'));
   assert.equal(set.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), "50 kg × 8 reps");
 });
 

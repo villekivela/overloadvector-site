@@ -8,8 +8,9 @@ the weights it can be set to. Add and edit gyms in **Settings → Gyms and equip
 
 ## Gear
 
-**Gear** on a gym's screen is the list of equipment kinds it has. Start from a preset and tap
-what differs. The presets are Hotel, Garage, Basic, Advanced and All. Setup uses it to pick exercises you can do there.
+**Gear** on a gym's screen lists the kinds of equipment it has. Start from a preset and tap what
+differs. The presets are Hotel, Garage, Basic, Advanced and All. Setup uses the list to pick
+exercises you can do there.
 
 <div class="shots">
 
@@ -26,9 +27,8 @@ what differs. The presets are Hotel, Garage, Basic, Advanced and All. Setup uses
 - **Bars** and the gym's **plates**, counted in pairs of each size.
 - **Dumbbells:** the sizes on the rack.
 
-You can type a stack's labels as a short list, such as `5 10 15 … 100`, or **read them from a
-photo**. The phone reads the photo itself. If you'd rather, Claude reads it instead, with your
-Claude key.
+Type a stack's labels as a short list, such as `5 10 15 … 100`, or **read them from a photo**. The
+phone reads the photo itself. If you'd rather, Claude reads it instead, with your Claude key.
 
 <div class="shots">
 
@@ -61,6 +61,6 @@ machine's pin and labels read as printed on it.
 
 ## Importing a gym
 
-**Settings → Gyms and equipment → Import gym** reads a gym file and adds it as a new gym, without
-changing the ones you have. The app lists every problem in a file, and adds nothing until the
-file has none. The [gym file format](/docs/gym-format/) describes every field.
+**Settings → Gyms and equipment → Import gym** reads a gym file and adds it as a new gym. The gyms
+you have stay as they are. The app lists every problem in a file, and adds nothing until the file
+has none. The [gym file format](/docs/gym-format/) describes every field.

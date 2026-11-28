@@ -3,13 +3,13 @@ title: Coming from Hevy or Strong
 description: Import your training history from Hevy's or Strong's CSV export.
 ---
 
-You can bring the sessions you logged in Hevy or Strong with you, so your history doesn't start
+Overload Vector imports the sessions you logged in Hevy or Strong, so your history doesn't start
 empty. Programs don't come across.
 
 ## Export from the other app
 
-- **Hevy:** open its settings and export your data. The workouts file holds your sessions. The
-  measurements file holds your bodyweight. Import it as well if you want that.
+- **Hevy:** open its settings and export your data. The workouts file holds your sessions, and the
+  measurements file your bodyweight. Import both if you want both.
 - **Strong:** open its settings and export your data.
 
 Each app gives you a CSV file. Save it somewhere your phone can open it, such as Downloads.
@@ -20,7 +20,7 @@ Each app gives you a CSV file. Save it somewhere your phone can open it, such as
 - On a new phone, Setup's first screen has **Coming from Hevy or Strong? Import your history** under
   **Before you start**.
 
-Nothing is written until you have looked at what the file holds and tapped **Import**. The app asks:
+The app shows what the file holds and writes nothing until you tap **Import**. It asks:
 
 - **kg or lb**, if the file doesn't say. Check it, because a Strong file may not name its unit.
 - **Which gym** the history is from. Machine and cable sets join that gym's matching machines.
@@ -47,14 +47,14 @@ app doesn't suggest weights from them. If you want a machine's history to carry 
 [add it to your gym](/docs/gyms/) under the exercise's name before you import. On a new phone,
 that means finishing Setup, adding the machines, then importing from Settings.
 
-**Importing again is safe.** A session already imported, or one overlapping a session on the phone,
-is skipped.
+**Importing again is safe.** The app skips a session it already imported, and one that overlaps a
+session on the phone.
 
 If you've [connected Claude](/docs/coaching/), imported sessions are copied like any other, and
 Claude sees which app they came from.
 
 ## Take an import back
 
-**Settings** lists each import. **Remove** deletes exactly what that import brought in. What you
-logged in Overload Vector stays. To change how exercises were matched, remove the import and import
+**Settings** lists each import. **Remove** deletes exactly what that import brought in, and nothing
+you logged in Overload Vector. To change how exercises were matched, remove the import and import
 the file again.

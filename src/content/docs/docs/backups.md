@@ -11,9 +11,9 @@ Your training is stored on your phone. There are two ways to back it up.
 | When | When you tap **Export backup** | By Android, about once a day |
 | Restore | **Settings → Restore from a backup** | When the app is installed on a phone signed in to that account |
 
-**Rely on the backup file.** Keep a recent one somewhere off the phone, such as Drive or your
-computer. Treat Android's backup as a fallback. It runs only when the phone is idle, charging and on
-Wi-Fi, and it needs "Backup by Google One" switched on in the phone's Google settings.
+**Rely on the backup file.** Keep a recent one off the phone, such as on Drive or your computer.
+Android's backup is the fallback. It runs only when the phone is idle, charging and on Wi-Fi, and it
+needs "Backup by Google One" switched on in the phone's Google settings.
 
 ## What's in a backup
 
@@ -21,8 +21,8 @@ Everything you made in the app: programs and their Changes, every session (one i
 too), training days, gyms and equipment, the exercise library with your edits, goals,
 bodyweight, your training style and your settings.
 
-**Never in a backup:** your Claude key and your sign-in for the connector. They are stored so that
-only this phone can read them, so you enter them again after a move. The connector's account copy is not a backup, and it is
+**Never in a backup:** your Claude key and your sign-in for the connector. Only this phone can read
+them, so you enter them again after a move. The connector's account copy is not a backup, and it is
 never copied back to a phone.
 
 ## Export
@@ -40,8 +40,8 @@ never copied back to a phone.
 ## Restore
 
 **Settings → Restore from a backup**, then pick the file. The app asks "Replace everything on this
-phone?". Restoring replaces all the data on the phone with the file's. Nothing is merged. A file the
-app can't read says why, and nothing changes.
+phone?". Restoring replaces all the data on the phone with the file's, and merges nothing. If the app
+can't read a file, it says why and changes nothing.
 
 ## Move to a new phone
 
@@ -50,8 +50,8 @@ app can't read says why, and nothing changes.
 3. On Setup's first screen, tap **Restore from a backup** and pick the file.
 4. Enter your Claude key again, or **Connect Claude** and tap **Use this phone** when asked.
 
-If you rely on Android's backup instead, sign in to the same Google account while setting up the new
-phone, restore from its backup, then install Overload Vector. Android puts the data back as the app is
-installed.
+With Android's backup instead, sign in to the same Google account while setting up the new phone,
+restore from its backup, then install Overload Vector. Android puts the data back as the app
+installs.
 
 Uninstalling the app deletes its data from the phone.
