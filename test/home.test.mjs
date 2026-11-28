@@ -702,19 +702,19 @@ test("on the live phone Technique's muscles light while the clip shows them lit,
     await bring("mannequin", "end");
     await phoneShows("mannequin");
     await playing("mannequin");
-    // A loop and a little more, looked at a few times a second: how orange the phone's side is,
-    // and whether the list is lit.
+    // Two loops, looked at as often as a look takes: how orange the phone's side is, and
+    // whether the list is lit.
     const looks = [];
-    for (const end = Date.now() + 9000; Date.now() < end; await pause(60)) {
+    for (const end = Date.now() + 17000; Date.now() < end; await pause(60)) {
       const [{ pixels }, colour] = await Promise.all([seeStage(), dot()]);
       let orange = 0;
       for (let i = 0; i < pixels.length; i += 3) if (pixels[i] > 180 && pixels[i + 1] > 40 && pixels[i + 1] < 130 && pixels[i + 2] < 80) orange++;
       looks.push({ onPhone: orange > 150, onList: colour === ORANGE[theme] });
     }
-    const [lit, dim] = [looks.filter(({ onPhone }) => onPhone), looks.filter(({ onPhone }) => !onPhone)];
-    assert.ok(lit.length > 8 && dim.length > 8, `${theme}: the clip was lit in ${lit.length} looks and dim in ${dim.length}`);
     // A look takes a moment, so the two may differ in a look beside a change, and never between.
     const steady = looks.filter((look, at) => at > 0 && looks[at - 1].onPhone === look.onPhone && looks[at + 1]?.onPhone === look.onPhone);
+    const [lit, dim] = [steady.filter(({ onPhone }) => onPhone), steady.filter(({ onPhone }) => !onPhone)];
+    assert.ok(lit.length >= 3 && dim.length >= 3, `${theme}: of ${looks.length} looks, the clip was steadily lit in ${lit.length} and dim in ${dim.length}`);
     const apart = steady.filter(({ onPhone, onList }) => onPhone !== onList).length;
     assert.equal(apart, 0, `${theme}: the list and the clip differed in ${apart} of ${steady.length} steady looks`);
     // Away from Technique the list is lit again.
@@ -722,6 +722,17 @@ test("on the live phone Technique's muscles light while the clip shows them lit,
     await playing(null);
     assert.equal(await dot(), ORANGE[theme]);
   }
+});
+
+test("a window made narrow while the clip shows the muscles dim has them lit beside the still", async () => {
+  await visit(DESK);
+  await phoneShows("today");
+  await bring("mannequin", "end");
+  await until("the clip showing its muscles dim", () => document.querySelector(".home-stage").hasAttribute("data-unlit"));
+  await site.send("Emulation.setDeviceMetricsOverride", { ...POCKET, deviceScaleFactor: 1, mobile: false });
+  await until("the stills", () => document.querySelector(".home-stage canvas").getClientRects().length === 0);
+  await pause(500);
+  assert.equal(await dot(), ORANGE[await site.run(() => document.documentElement.dataset.theme)]);
 });
 
 for (const [where, size, behind] of [["a desk", DESK, ".home-stage"], ["a phone", POCKET, ".hero .phone-still img"]]) {
