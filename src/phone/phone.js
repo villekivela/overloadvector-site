@@ -89,17 +89,24 @@ function panel(width, height, radius) {
 
 const SCREEN_VERTEX = `
   varying vec2 vUv;
-  varying float vTurn;
+  varying vec3 vNormal;
+  varying vec3 vPlace;
   void main() {
     vUv = uv;
-    vTurn = normalize(normalMatrix * normal).x;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vNormal = normalMatrix * normal;
+    vec4 place = modelViewMatrix * vec4(position, 1.0);
+    vPlace = place.xyz;
+    gl_Position = projectionMatrix * place;
   }
 `;
 
-// The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
-// throws back one soft band of light, which crosses the screen as the phone turns. A picture comes
-// in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to linear here.
+// The screen lights itself: no lamp or tone mapping changes the app's colours, and its picture is
+// read a little sharper than the size it is drawn at asks for, so the text on it stays crisp. The
+// glass over it is glossy: it mirrors a window up and to the right as a pane of light with hard
+// edges and a thin line beside it, which cross the screen as the phone turns and at rest lie
+// over its upper right corner. Everywhere else the screen's colours are untouched. A picture
+// comes in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to
+// linear here.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
@@ -107,19 +114,28 @@ const SCREEN_FRAGMENT = `
   uniform bool toVideo;
   uniform float blend;
   varying vec2 vUv;
-  varying float vTurn;
+  varying vec3 vNormal;
+  varying vec3 vPlace;
   vec3 colour(sampler2D screen, bool video) {
-    vec4 texel = texture2D(screen, vUv);
+    vec4 texel = texture2D(screen, vUv, -0.5);
     return video ? sRGBTransferEOTF(texel).rgb : texel.rgb;
+  }
+  // 1 between two edges, each a hair wide.
+  float pane(float from, float to, float at) {
+    return smoothstep(from, from + 0.004, at) * (1.0 - smoothstep(to, to + 0.004, at));
   }
   void main() {
     vec3 shown = mix(colour(from, fromVideo), colour(to, toVideo), blend);
-    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
-    float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
-    gl_FragColor = vec4(shown + glare * 0.028, 1.0);
+    // Where the glass's mirror image of this spot lies, on a wall a unit behind the camera.
+    vec3 mirrored = reflect(normalize(vPlace), normalize(vNormal));
+    vec2 wall = mirrored.xy / max(mirrored.z, 0.001);
+    float across = wall.x + 0.35 * wall.y;
+    float window = pane(GLOSS_FROM, GLOSS_FROM + 2.0, across) * mix(0.04, 0.014, clamp((across - GLOSS_FROM) / 0.12, 0.0, 1.0));
+    float line = pane(GLOSS_FROM - 0.03, GLOSS_FROM - 0.022, across) * 0.02;
+    gl_FragColor = vec4(shown + window + line, 1.0);
     #include <colorspace_fragment>
   }
-`;
+`.replace(/GLOSS_FROM/g, "(-0.585)");
 
 /** A camera lens seen from above, painted: the glass's rings, its coating and the light on it. */
 function lensFace(periscope) {

@@ -341,6 +341,33 @@ function differing({ pixels: one }, { pixels: other }) {
   return count / one.length;
 }
 
+test("the glass leaves a black screen black, but for the window it mirrors in a corner", async () => {
+  // Every screen is a black picture, so whatever light the phone's screen shows is the glass's.
+  const black = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg==";
+  await withScreens(`(screens) => { for (const screen of Object.values(screens)) { screen.light = screen.dark = "${black}"; delete screen.clip; } }`, async () => {
+    await phoneShows("today");
+    await pickTheme("dark");
+    await bring("progress", "end");
+    await phoneShows("progress");
+    await pause(600);
+    assert.ok((await screenBrightness()) < 4, `the middle of a black screen is ${await screenBrightness()} bright`);
+    // Over the screen's middle half, nearly every point is black, and the mirrored window is
+    // a patch of clearly lighter ones with the rest left alone.
+    const { pixels, width, height } = await seeStage();
+    let [points, lifted, lit] = [0, 0, 0];
+    for (let y = Math.round(height * 0.12); y < height * 0.8; y++) {
+      for (let x = Math.round(width * 0.3); x < width * 0.78; x++) {
+        const value = pixels[(y * width + x) * 3];
+        points++;
+        if (value > 8) lifted++;
+        if (value > 30) lit++;
+      }
+    }
+    assert.ok(lifted / points < 0.12, `the glass lightens ${Math.round((lifted / points) * 100)}% of a black screen's middle`);
+    assert.ok(lit / points > 0.005, `the glass mirrors nothing: ${lit} lit points`);
+  });
+});
+
 test("the phone turns into place as the scroll begins, then stands still through every change of screen", async () => {
   // Every screen is given Today's picture, so whatever changes on the phone's side is the phone
   // moving, not its screen.
