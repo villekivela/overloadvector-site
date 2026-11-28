@@ -8,6 +8,8 @@ import { PAGES } from "./pages.mjs";
 const WE = /\b(we|us|our|ours)\b/i;
 const FIRST_PERSON = /\b(I|[Mm]y|[Mm]e)\b/;
 const STOCK_PHRASE = /\b(seamless(ly)?|empower\w*|journey|effortless(ly)?|unlock\w*|elevate\w*|leverage\w*|simply|real life|game.chang\w*|safety net)\b/i;
+// Connecting Claude takes an Overload Vector account, so no page may say the app needs none.
+const NO_ACCOUNT = /\b(no|without an) account\b/i;
 // A dash that joins two halves of a sentence. A range such as 6–8 has no spaces round it.
 const JOINING_DASH = /\s[—–]\s/;
 // Copies of the app's notes, whose examples name days as the app does ("Day A — Heavy bench").
@@ -34,6 +36,8 @@ function assertNone(pattern, text) {
 
 for (const route of ["/", ...Object.keys(PAGES)]) {
   test(`${route} has no stock phrase`, () => assertNone(STOCK_PHRASE, words(main(route))));
+
+  test(`${route} never says the app needs no account`, () => assertNone(NO_ACCOUNT, words(main(route))));
 
   if (!FORMAT_PAGES.includes(route)) {
     test(`${route} joins no sentence with a dash`, () => assertNone(JOINING_DASH, words(main(route))));

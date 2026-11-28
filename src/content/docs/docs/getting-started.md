@@ -4,7 +4,7 @@ description: Install Overload Vector, go through Setup and start a first program
 ---
 
 Overload Vector runs a periodized strength program, logs each session and works out the next
-weights. It needs no account, and your training stays on your phone.
+weights. Your training stays on your phone, and you need an account only to connect Claude.
 
 ## Install the beta
 

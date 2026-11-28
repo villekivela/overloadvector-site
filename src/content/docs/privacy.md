@@ -12,7 +12,7 @@ trackers, and nothing is sold or shared for advertising.
 ## What stays on your phone
 
 Everything you put in the app: programs, sessions, gyms and equipment, bodyweight, goals, notes,
-your training style and your settings. The app needs no account and works without a network. A photo
+your training style and your settings. The app needs an account only to connect Claude, and it works without a network. A photo
 of a weight stack is read on the phone and deleted once read; the app's text reader sends nothing.
 
 ## Backups

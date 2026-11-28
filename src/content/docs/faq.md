@@ -11,8 +11,8 @@ program.
 
 ## Is my data private?
 
-Your training stays on your phone. The app has no ads, no analytics and no trackers, and it
-needs no account. Your training goes elsewhere only if you choose: to Anthropic when you check in
+Your training stays on your phone. The app has no ads, no analytics and no trackers, and you
+need an account only to connect Claude. Your training goes elsewhere only if you choose: to Anthropic when you check in
 with your own Claude key, to your Overload Vector account if you connect Claude, and to your Google
 account if Android's backup is on. The [privacy policy](/privacy/) has the details.
 
