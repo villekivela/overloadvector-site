@@ -53,8 +53,8 @@ const FEATURES = [
     ],
     more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
     alts: [
-      "An exercise's details: the mannequin doing a Smith machine RDL, and the muscles it works",
-      "An exercise's details with the muscles layer on: the mannequin doing a Smith machine RDL, its working muscles lit up",
+      "An exercise's details: the mannequin doing a barbell bench press, and the muscles it works",
+      "An exercise's details with the muscles layer on: the mannequin doing a barbell bench press, its working muscles lit up",
     ],
   },
   {
@@ -116,7 +116,7 @@ const screens: Record<string, { light: string; dark: string; alt: string; clip?:
 // Technique's clip turns the muscles layer on and off: the seconds of each theme's clip between
 // which its muscles are lit. The list beside the phone lights and dims with it. Measure these
 // again whenever the clip is cut again (README, "Clips").
-const LIT: Record<string, { light: Span; dark: Span }> = { mannequin: { dark: [1.27, 4.73], light: [0.8, 4.27] } };
+const LIT: Record<string, { light: Span; dark: Span }> = { mannequin: { dark: [1.23, 4.87], light: [0.77, 4.4] } };
 // A section whose screen has a clip puts only that on the live phone: the clip shows the rest
 // (Technique's plays the mannequin with its muscles on, and off). The pictures keep them all.
 const played = (screen: string) => Boolean(video(`clip-${screen}-light.webm`));
@@ -158,15 +158,14 @@ const RIR = [
   { label: "4+", tone: "r3", say: "4 or more in reserve. An easy set." },
 ];
 
-// Technique: the muscles a Smith machine RDL works, and how much of each, as the mannequin lights them.
+// Technique: the muscles a barbell bench press works, as the app's exercise details name them:
+// the main ones, then the "also" ones, which the list lights half as much.
 const MUSCLES = [
-  ["Lower back", 1],
-  ["Hamstrings", 0.5],
-  ["Glutes", 0.5],
-  ["Forearm flexors", 0.5],
-  ["Traps", 0.5],
-  ["Lats", 0.5],
-  ["Mid traps", 0.5],
+  ["Chest", 1],
+  ["Front delts", 1],
+  ["Triceps", 1],
+  ["Forearms", 0.5],
+  ["Side delts", 0.5],
 ] as const;
 
 // Progression: how the last session went, and the weight that follows from it.
@@ -302,7 +301,7 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
             )}
             {kicker === "Technique" && (
               <Fragment>
-                <ul class="muscles" aria-label="The muscles a Smith machine RDL works">
+                <ul class="muscles" aria-label="The muscles a barbell bench press works">
                   {MUSCLES.map(([muscle, share]) => <li class={share === 1 ? "main" : undefined} style={`--share:${share}`}>{muscle}</li>)}
                 </ul>
               </Fragment>

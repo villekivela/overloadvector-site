@@ -715,6 +715,14 @@ test("saying how the last session went shows the next weight, its step and its p
   assert.deepEqual(seen.after, { kg: "57.5", why: "One step down, about 5% lighter. A side, on plates this gym has:", step: ["57.5"], plates: ["1 × 20", "1 × 5", "1 × 2.5", "1 × 1.25"] });
 });
 
+test("Technique lists the muscles of a barbell bench press as the app names them: the main ones, then the rest", () => {
+  const html = page("/");
+  const list = html.slice(html.indexOf('class="muscles'), html.indexOf("</ul>", html.indexOf('class="muscles')));
+  assert.match(list, /aria-label="The muscles a barbell bench press works"/);
+  const muscles = [...list.matchAll(/<li([^>]*)>([^<]*)<\/li>/g)].map(([, set, name]) => (/class="main"/.test(set) ? `${name}*` : name));
+  assert.deepEqual(muscles, ["Chest*", "Front delts*", "Triceps*", "Forearms", "Side delts"]);
+});
+
 // The main muscle's dot as red, green and blue out of 255, however the browser writes it.
 const dot = () =>
   site.run(() => {
@@ -753,7 +761,8 @@ test("on the live phone Technique's muscles light while the clip shows them lit,
       const [{ pixels }, colour] = await Promise.all([seeStage(), dot()]);
       let orange = 0;
       for (let i = 0; i < pixels.length; i += 3) if (pixels[i] > 180 && pixels[i + 1] > 40 && pixels[i + 1] < 130 && pixels[i + 2] < 80) orange++;
-      looks.push({ onPhone: orange > 150, onList: colour === ORANGE[theme] });
+      // With the layer off the phone's side has no orange at all; lit, a pressing arm hides some of it.
+      looks.push({ onPhone: orange > 20, onList: colour === ORANGE[theme] });
     }
     // A look takes a moment, so the two may differ in a look beside a change, and never between.
     const steady = looks.filter((look, at) => at > 0 && looks[at - 1].onPhone === look.onPhone && looks[at + 1]?.onPhone === look.onPhone);
