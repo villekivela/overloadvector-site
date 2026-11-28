@@ -52,6 +52,14 @@ test("the Program section draws its block: twelve weeks of three days, four week
   assert.match(block, /role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next"/);
 });
 
+test("the facts under the hero are Android, free in the beta, and no ads or trackers, with no Android version on the page", () => {
+  const html = page("/");
+  const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
+  const said = facts.split("<li").slice(1).map((item) => text(item.slice(item.indexOf(">") + 1)).trim());
+  assert.deepEqual(said, ["Android", "Free in the beta", "No ads, no trackers"]);
+  assert.doesNotMatch(text(html.slice(html.indexOf("<main"), html.indexOf('<footer class="site-footer'))), /8\.0/);
+});
+
 test("the facts under the hero each carry an icon, and the closing band doesn't say them again", () => {
   const html = page("/");
   const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
