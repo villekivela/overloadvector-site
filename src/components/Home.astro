@@ -959,10 +959,11 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     font-weight: 500;
   }
   .change .verdict span:last-child {
-    padding: 0.55em 1.2em;
-    border-radius: 2em;
-    background: var(--ov-ink);
-    color: var(--ov-bg);
+    /* Accept as the app draws it: its accent in each theme, the lit muscles' orange. */
+    padding: 0.6em 1.3em;
+    border-radius: 0.5em;
+    background: var(--ov-lit);
+    color: var(--ov-on-signal);
   }
 
   /* ---------- What the page ends with: privacy, then the band that offers the beta. ---------- */
