@@ -50,6 +50,12 @@ test("the Program section draws its block: twelve weeks of three days, one day d
   assert.match(block, /role="img" aria-label="A 12-week block of three training days a week/);
 });
 
+test("the Logging section's example set is the one its clip logs: 50 kg for 8 reps", () => {
+  const html = page("/");
+  const set = html.slice(html.indexOf('class="set'), html.indexOf('class="rir'));
+  assert.equal(set.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), "50 kg × 8 reps");
+});
+
 test("the Progression section draws three steps of the gym's weights", () => {
   const steps = [...page("/").matchAll(/<g\b[^>]*data-kg="([\d.]+)"/g)].map(([, kg]) => kg);
   assert.deepEqual(steps.sort(), ["57.5", "60", "62.5"]);
