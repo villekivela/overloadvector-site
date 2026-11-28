@@ -5,14 +5,14 @@ description: What stays on your phone, what leaves it and when, for the Overload
 
 *Last updated 27 November 2026.*
 
-Overload Vector is a strength-training app for Android. In short: your training stays on your phone,
-and it leaves only for the things you switch on below. There are no ads, no analytics and no
+Overload Vector is a strength-training app for Android. Your training stays on your phone and
+leaves it only for the things you switch on below. There are no ads, no analytics and no
 trackers, and nothing is sold or shared for advertising.
 
 ## What stays on your phone
 
 Everything you put in the app: programs, sessions, gyms and equipment, bodyweight, goals, notes,
-your training style and your settings. The app needs no account and works without a network. A photo
+your training style and your settings. The app needs an account only to connect Claude, and it works without a network. A photo
 of a weight stack is read on the phone and deleted once read; the app's text reader sends nothing.
 
 ## Backups
@@ -74,13 +74,14 @@ it for us. If you sign in by email, Amazon SES in the same region sends the code
 share it with nobody else.
 
 **How long.** Until you delete it. A proposal, answered or not, is deleted 30 days after Claude made
-it. Server logs,
-which hold the opaque ID but no training data, are kept for 30 days. The database's recovery copies
+it. Server logs, which hold the opaque ID but no training data, are kept for 30 days. The database's recovery copies
 keep deleted data for up to 35 days.
 
 **Deleting it.** **Settings → Delete my account data** deletes the copy, any waiting proposals and your
 Overload Vector account, after you sign in once more. The training on your phone stays.
-**Disconnect** only stops the copying.
+**Disconnect** only stops the copying. After it, the phone still remembers which account was
+connected, so that a later delete can't remove another one, until you delete that account or connect
+again.
 
 ## Other connections the app makes
 

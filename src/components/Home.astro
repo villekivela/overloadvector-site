@@ -18,12 +18,12 @@ const FEATURES = [
   {
     screens: ["new-program"],
     kicker: "Program",
-    title: "A program built around you",
-    text: "Tell it your week and your gym, and setup writes a periodized program you can start today.",
+    title: "A program built for your week and your gym",
+    text: "Pick your training days and your gym's equipment. The app writes a periodized program on the phone, ready to start the same day.",
     points: [
-      "Blocks, weeks and days, with set targets for every muscle",
+      "Blocks, weeks and days, with weekly set targets per muscle",
       "Built for the equipment your gym has",
-      "Or bring your own program and import it",
+      "Or import a program file of your own",
     ],
     more: { text: "How programs work", href: "/docs/programs/" },
     alts: ["A new program for review, with its weekly sets per muscle shown on the mannequin"],
@@ -32,11 +32,11 @@ const FEATURES = [
     screens: ["logging"],
     kicker: "Logging",
     title: "Log every set in a few taps",
-    text: "Weight, reps and reps in reserve go in fast, so your attention stays on the lift.",
+    text: "Weight, reps, reps in reserve. The app fills in the weight it suggests, so a set done as planned takes its reps and one tap.",
     points: [
-      "Warm-ups and plate loading worked out for you",
-      "A rest timer between sets",
-      "Intensity techniques, logged as you do them",
+      "Warm-up sets and the plates for each side, worked out for you",
+      "A rest timer that buzzes when rest is over",
+      "Drop sets, myo-reps and other intensity techniques",
     ],
     more: { text: "How logging works", href: "/docs/logging/" },
     alts: ["Logging a set: weight, reps and reps in reserve, with the rest timer running"],
@@ -45,7 +45,7 @@ const FEATURES = [
     screens: ["mannequin", "muscles"],
     kicker: "Technique",
     title: "See how every lift is done",
-    text: "A 3D mannequin does each exercise on your machine, so you know the movement before you load the bar.",
+    text: "A 3D mannequin does each exercise on the machine your gym has. Watch the rep before you load the bar.",
     points: [
       "Step through the rep, phase by phase",
       "See which muscles each exercise works",
@@ -61,10 +61,10 @@ const FEATURES = [
     screens: ["progress"],
     kicker: "Progression",
     title: "Know what to lift next",
-    text: "Every exercise gets its next weight from what you did last time, so you never have to guess.",
+    text: "Every exercise gets its next weight, worked out from the reps and reps in reserve you logged last time.",
     points: [
-      "Only weights your gym really has",
-      "Each suggestion tells you why",
+      "Only weights your gym can load",
+      "Every suggestion says why",
       "Weekly sets per muscle, tracked against your targets",
     ],
     more: { text: "How progression works", href: "/docs/progression/" },
@@ -73,12 +73,12 @@ const FEATURES = [
   {
     screens: ["check-in"],
     kicker: "Coaching",
-    title: "Replan when life gets in the way",
-    text: "Sore wrist, short evening, hotel gym: tell Claude what's going on, and it proposes what to change.",
+    title: "Replan when the week changes",
+    text: "Sore wrist, short evening, hotel gym? Tell Claude, and it proposes what to change.",
     points: [
-      "Works around pain, time and missing equipment",
+      "For pain, too little time and missing equipment",
       "Nothing changes until you accept it",
-      "Bring an Anthropic API key or your Claude account",
+      "Needs an Anthropic API key or a Claude account",
     ],
     more: { text: "How coaching works", href: "/docs/coaching/" },
     alts: ["The coach asking what's going on: pain, short on time, another gym and more"],
@@ -87,9 +87,10 @@ const FEATURES = [
 // What a visitor asks first, under the hero.
 // Each fact's icon is the path of a 24-unit drawing: a phone, a price tag, a shield.
 const FACTS = [
-  { text: "Android 8.0 or newer", icon: "M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10 18.5h4" },
+  // The Android robot's head, as Google draws it, filled in; the footer credits it.
+  { text: "Android", icon: "M17.6,9.48l1.84-3.18c0.16-0.31,0.04-0.69-0.26-0.85c-0.29-0.15-0.65-0.06-0.83,0.22l-1.88,3.24c-2.86-1.21-6.08-1.21-8.94,0L5.65,5.67c-0.19-0.29-0.58-0.38-0.87-0.2C4.5,5.65,4.41,6.01,4.56,6.3L6.4,9.48C3.3,11.25,1.28,14.44,1,18h22C22.72,14.44,20.7,11.25,17.6,9.48z M7,15.25c-0.69,0-1.25-0.56-1.25-1.25c0-0.69,0.56-1.25,1.25-1.25S8.25,13.31,8.25,14C8.25,14.69,7.69,15.25,7,15.25z M17,15.25c-0.69,0-1.25-0.56-1.25-1.25c0-0.69,0.56-1.25,1.25-1.25s1.25,0.56,1.25,1.25C18.25,14.69,17.69,15.25,17,15.25z", solid: true },
   { text: "Free in the beta", icon: "M3.5 3.5h8l9 9-8 8-9-9v-8ZM8 8h.01" },
-  { text: "No account, no ads, no trackers", icon: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6l8-3ZM8.5 12l2.5 2.5 4.5-5" },
+  { text: "No ads, no trackers", icon: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6l8-3ZM8.5 12l2.5 2.5 4.5-5" },
 ];
 const TODAY = {
   screen: "today",
@@ -151,11 +152,11 @@ const dayState = (week: number, day: number) =>
 
 // Logging: how hard a set was, in the app's reps-in-reserve colours.
 const RIR = [
-  { label: "0", tone: "r0", say: "Nothing left: that was the last rep you had." },
-  { label: "1", tone: "r1", say: "1 in reserve: one more rep was there." },
-  { label: "2", tone: "r1", say: "2 in reserve: two more reps were there.", pressed: true },
-  { label: "3", tone: "r3", say: "3 in reserve: three more reps were there." },
-  { label: "4+", tone: "r3", say: "4 or more in reserve: an easy set." },
+  { label: "0", tone: "r0", say: "0 in reserve. That was the last rep possible." },
+  { label: "1", tone: "r1", say: "1 in reserve. One more rep was possible." },
+  { label: "2", tone: "r1", say: "2 in reserve. Two more reps were possible.", pressed: true },
+  { label: "3", tone: "r3", say: "3 in reserve. Three more reps were possible." },
+  { label: "4+", tone: "r3", say: "4 or more in reserve. An easy set." },
 ];
 
 // Technique: the muscles a barbell bench press works, as the app's exercise details name them:
@@ -242,8 +243,8 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
       <section class="hero">
         <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
         <p class="lead">
-          <b>A strength-training app that runs your program set by set.</b> It works out every weight from your last
-          session, and replans when your week doesn't go to plan.
+          <b>Strength training for Android.</b> Run a periodized program, log every set and get the next weight from
+          your last session. Can't train as planned? Claude can propose what to change.
         </p>
         <div class="actions">
           <a class="ov-go" href="#start">Get the beta</a>
@@ -257,9 +258,9 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
         </div>
       </section>
       <ul class="facts">
-        {FACTS.map(({ text, icon }) => (
+        {FACTS.map(({ text, icon, solid }) => (
           <li>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
+            <svg class:list={{ solid }} viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
             {text}
           </li>
         ))}
@@ -287,9 +288,9 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
             {kicker === "Logging" && (
               <Fragment>
                 <div class="set">
-                  <span class="fig">80<small>kg</small></span>
+                  <span class="fig">50<small>kg</small></span>
                   <span class="x">×</span>
-                  <span class="fig">6<small>reps</small></span>
+                  <span class="fig">8<small>reps</small></span>
                 </div>
                 <div class="rir" role="group" aria-label="Reps in reserve">
                   {RIR.map(({ label, tone, say, pressed }) => (
@@ -336,7 +337,7 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
             {kicker === "Coaching" && (
               <div class="change">
                 <p class="said"><b>Something hurts.</b> My wrist, on the Smith machine bench press.</p>
-                <h3>For a week: an easier-on-the-joints alternative and one more rep in reserve.</h3>
+                <h3>For a week: another chest exercise and one more rep in reserve.</h3>
                 <dl>
                   <dt>Exercise</dt>
                   <dd><s>Smith machine bench press</s> Machine chest press</dd>
@@ -368,10 +369,10 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
 
   <div class="home-closing grid">
     <section>
-      <h2>Your training stays yours</h2>
+      <h2>Your training stays on your phone</h2>
       <p>
-        No account, no ads and no trackers. Your training lives on your phone, and leaves it only for what you switch
-        on. Read the <a href="/privacy/">privacy policy</a>.
+        No ads, no trackers. Your training leaves the phone only through what you switch on, and
+        the <a href="/privacy/">privacy policy</a> lists each case.
       </p>
     </section>
   </div>
@@ -589,6 +590,11 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     stroke-width: 1.5;
     stroke-linecap: round;
     stroke-linejoin: round;
+  }
+  .facts svg.solid {
+    fill: var(--ov-signal);
+    fill-rule: evenodd;
+    stroke: none;
   }
   .facts li + li {
     border-top: 1px solid var(--ov-line);

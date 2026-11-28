@@ -64,7 +64,9 @@ headings, restyled in `graphite.css`.
 | User docs, `/docs/…` | `src/content/docs/docs/` |
 | FAQ, contact, privacy policy | `src/content/docs/faq.md`, `contact.md`, `privacy.md` |
 
-Write for users, in plain English, from the app as it is. A new page goes in the sidebar
+Write for users, in plain English, from the app as it is. The site speaks as Overload Vector and to
+"you". Only the privacy policy says "we", and only the FAQ's questions say "I"; `test/wording.test.mjs`
+checks that, and that no page joins a sentence with a dash. A new page goes in the sidebar
 (`astro.config.mjs`) and in `test/pages.mjs`.
 
 `/privacy/` is the app's privacy policy: its address must not change. Keep its date current.

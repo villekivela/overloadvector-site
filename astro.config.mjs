@@ -29,6 +29,7 @@ export default defineConfig({
           label: "Docs",
           items: [
             "docs/getting-started",
+            "docs/import",
             "docs/logging",
             "docs/progression",
             "docs/programs",

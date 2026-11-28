@@ -52,6 +52,22 @@ test("the Program section draws its block: twelve weeks of three days, four week
   assert.match(block, /role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next"/);
 });
 
+test("the facts under the hero are Android, free in the beta, and no ads or trackers, with no Android version on the page", () => {
+  const html = page("/");
+  const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
+  const said = facts.split("<li").slice(1).map((item) => text(item.slice(item.indexOf(">") + 1)).trim());
+  assert.deepEqual(said, ["Android", "Free in the beta", "No ads, no trackers"]);
+  assert.doesNotMatch(text(html.slice(html.indexOf("<main"), html.indexOf('<footer class="site-footer'))), /8\.0/);
+});
+
+test("the Android fact carries the Android robot's head, filled in, and the footer credits Google for it", () => {
+  const html = page("/");
+  const first = html.slice(html.indexOf("<li", html.indexOf('class="facts')), html.indexOf("</li>", html.indexOf('class="facts')));
+  assert.match(first, /<svg[^>]*class="[^"]*\bsolid\b[^>]*>\s*<path[^>]*d="M17\.6,9\.48l1\.84-3\.18/);
+  const footer = text(html.slice(html.indexOf('<footer class="site-footer')));
+  assert.match(footer, /The Android robot is reproduced or modified from work created and shared by Google and used according to terms described in the Creative Commons 3\.0 Attribution License\./);
+});
+
 test("the facts under the hero each carry an icon, and the closing band doesn't say them again", () => {
   const html = page("/");
   const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
@@ -71,6 +87,29 @@ test("the outcome buttons stand apart, and the reps-in-reserve numbers are large
   });
   assert.ok(seen.gap >= 8, `the outcomes are ${seen.gap}px apart`);
   assert.ok(seen.chip >= seen.note * 1.2, `a chip's number is ${seen.chip}px beside ${seen.note}px text`);
+});
+
+test("the Logging section's example set is the one its clip logs: 50 kg for 8 reps", () => {
+  const html = page("/");
+  const set = html.slice(html.indexOf(">", html.indexOf('class="set"')) + 1, html.indexOf('<div class="rir'));
+  assert.equal(set.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), "50 kg × 8 reps");
+});
+
+const text = (html) => html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+
+test("the home page keeps a space between its words and the link to the privacy policy", () => {
+  assert.match(text(page("/")), /and the privacy policy lists each case/);
+});
+
+test("the home page leaves the processor to the install guide", () => {
+  assert.doesNotMatch(text(page("/")), /64-bit|ARM/);
+});
+
+test("the home page's example Change swaps an exercise without calling either one safer", () => {
+  const html = page("/");
+  const change = text(html.slice(html.indexOf('class="change"'), html.indexOf('class="verdict"')));
+  assert.match(change, /Machine chest press/);
+  assert.doesNotMatch(change, /easier|safer|joints/i);
 });
 
 test("the Progression section draws three steps of the gym's weights", () => {
@@ -698,8 +737,8 @@ test("pressing a reps-in-reserve chip marks it and says what it means", async ()
     chips[0].click();
     return { before, after: state() };
   });
-  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve: two more reps were there." });
-  assert.deepEqual(seen.after, { pressed: ["0"], says: "Nothing left: that was the last rep you had." });
+  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve. Two more reps were possible." });
+  assert.deepEqual(seen.after, { pressed: ["0"], says: "0 in reserve. That was the last rep possible." });
 });
 
 test("saying how the last session went shows the next weight, its step and its plates", async () => {
