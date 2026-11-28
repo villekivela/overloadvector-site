@@ -2,14 +2,14 @@ import assert from "node:assert/strict";
 import { after, before, test } from "node:test";
 import sharp from "sharp";
 import { openSite } from "./browser.mjs";
-import { page, read } from "./dist.mjs";
+import { builtFiles, page, read } from "./dist.mjs";
 
 // The feature sections in page order, by the screen each puts on the live phone. Technique's is
 // the mannequin's clip, which shows its muscles too.
 const SECTIONS = ["new-program", "logging", "mannequin", "progress", "check-in"];
-// The pictures of the phone in the sections, where there is no live phone: Technique's are two,
-// the mannequin, then its muscles.
-const PICTURED = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
+// The pictures of the phone in the sections, where there is no live phone: Technique's is the
+// mannequin with its muscles lit, as the list beside it is.
+const PICTURED = ["new-program", "logging", "muscles", "progress", "check-in"];
 // The screens the phone plays a clip of, in place of their still.
 const CLIPS = ["logging", "mannequin", "check-in"];
 const DESK = { width: 1280, height: 800 };
@@ -19,27 +19,76 @@ const HIGH_DESK = { width: 1440, height: 1100 };
 // A window taller than it is wide, where the phone is sized by its side's width.
 const NARROW_DESK = { width: 1000, height: 1200 };
 
-test("the home page names Overload Vector", () => {
-  assert.match(page("/"), /<h1[^>]*>\s*Overload Vector\s*<\/h1>/);
+test("the home page names Overload Vector, a word a line", () => {
+  const [, name] = page("/").match(/<h1[^>]*>(.*?)<\/h1>/s);
+  assert.match(name, /^\s*<span[^>]*>Overload<\/span>\s+<span[^>]*>Vector<\/span>\s*$/);
 });
 
 test("the home page's address is on overloadvector.com", () => {
   assert.match(page("/"), /<link rel="canonical" href="https:\/\/overloadvector\.com\/"\s*\/?>/);
 });
 
-test("the home page offers the beta from the releases, and ends with the docs and the FAQ", () => {
+const BETA = /href="https:\/\/github\.com\/villekivela\/overloadvector-releases\/releases\/latest"[^>]*>\s*Get the beta/;
+
+test("the home page's first buttons lead to the band it ends with and to the docs, and the band offers the beta", () => {
   const html = page("/");
-  assert.match(html, /href="https:\/\/github\.com\/villekivela\/overloadvector-releases\/releases\/latest"[^>]*>\s*Get the beta/);
-  const end = html.slice(html.lastIndexOf("<h2"), html.indexOf('<footer class="site-footer'));
-  assert.match(end, /href="\/docs\/getting-started\/"/);
-  assert.match(end, /href="\/faq\/"/);
+  const hero = html.slice(html.indexOf("<h1"), html.indexOf('class="facts'));
+  assert.match(hero, /href="#start"[^>]*>\s*Get the beta/);
+  assert.match(hero, /href="\/docs\/getting-started\/"[^>]*>\s*Read the docs/);
+  const band = html.slice(html.indexOf('id="start"'), html.indexOf('<footer class="site-footer'));
+  assert.match(band, /<h2[^>]*>\s*Start training\s*<\/h2>/);
+  assert.match(band, BETA);
+  assert.match(band, /href="\/docs\/getting-started\/"[^>]*>\s*Install guide/);
 });
 
-test("the home page's header leads to the docs and the FAQ, and the search is on the other pages", () => {
+test("the Program section draws its block: twelve weeks of three days, four weeks done and the next day marked", () => {
+  const html = page("/");
+  const block = html.slice(html.indexOf('class="block'), html.indexOf('class="points', html.indexOf('class="block')));
+  const days = [...block.matchAll(/<i\b([^>]*)><\/i>/g)].map(([, set]) => set.match(/class="(done|now)"/)?.[1] ?? "");
+  assert.equal(days.length, 36);
+  // A row is a training day and a column a week: weeks 1 to 4 are done, and week 5 has day A done and day B next.
+  const row = (done, fifth) => [...Array(done).fill("done"), fifth, ...Array(7).fill("")];
+  assert.deepEqual(days, [...row(4, "done"), ...row(4, "now"), ...row(4, "")]);
+  assert.match(block, /role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next"/);
+});
+
+test("the facts under the hero each carry an icon, and the closing band doesn't say them again", () => {
+  const html = page("/");
+  const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
+  const items = facts.split("<li").slice(1);
+  assert.equal(items.length, 3);
+  for (const item of items) assert.match(item, /^[^>]*>\s*<svg[^>]*aria-hidden="true"/, "a fact starts with an icon that a screen reader skips");
+  const band = html.slice(html.indexOf('id="start"'), html.indexOf('<footer class="site-footer')).replace(/<[^>]+>/g, " ");
+  assert.doesNotMatch(band, /Android|free|account|ads|trackers/i);
+});
+
+test("the outcome buttons stand apart, and the reps-in-reserve numbers are larger than the text beside them", async () => {
+  await visit(DESK);
+  const seen = await site.run(() => {
+    const [first, second] = [...document.querySelectorAll(".outcomes button")].map((button) => button.getBoundingClientRect());
+    const size = (selector) => parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
+    return { gap: second.left - first.right, chip: size(".rir button"), note: size(".rir .note") };
+  });
+  assert.ok(seen.gap >= 8, `the outcomes are ${seen.gap}px apart`);
+  assert.ok(seen.chip >= seen.note * 1.2, `a chip's number is ${seen.chip}px beside ${seen.note}px text`);
+});
+
+test("the Progression section draws three steps of the gym's weights", () => {
+  const steps = [...page("/").matchAll(/<g\b[^>]*data-kg="([\d.]+)"/g)].map(([, kg]) => kg);
+  assert.deepEqual(steps.sort(), ["57.5", "60", "62.5"]);
+});
+
+test("no style on the site is cyan, which a lit muscle was", () => {
+  for (const path of builtFiles().filter((file) => /\.(css|html)$/.test(file))) {
+    assert.doesNotMatch(read(path).toString("utf8"), /#1fd6f0|#0aa9c4|\bcyan\b/i, path);
+  }
+});
+
+test("the search is on every page but the home page", () => {
   const header = (html) => html.slice(html.indexOf("<header"), html.indexOf("</header>"));
-  assert.match(header(page("/")), /href="\/docs\/getting-started\/"[^>]*>Docs<[\s\S]*href="\/faq\/"[^>]*>FAQ</);
   assert.doesNotMatch(header(page("/")), /site-search/);
   assert.match(header(page("/faq/")), /site-search/);
+  assert.match(header(page("/docs/logging/")), /site-search/);
 });
 
 test("each still phone is there in both themes, and described", () => {
@@ -189,10 +238,12 @@ test("on a desk the phone shows each section's screen as the reader scrolls, and
     await bring(screen, second ? "top" : "end");
     await phoneShows(screen);
   }
-  // The phone is still pinned in view beside the last section.
+  // The phone is still pinned in view beside the last section. It takes the middle 0.74 of its
+  // canvas (phone.js, FILL), which is itself taller than the view.
   const pinned = await site.run(() => {
-    const { top, bottom } = document.querySelector(".home-stage").getBoundingClientRect();
-    return top >= 0 && bottom <= window.innerHeight;
+    const { top, height } = document.querySelector(".home-stage").getBoundingClientRect();
+    const header = document.querySelector("header.header").offsetHeight;
+    return top + 0.13 * height >= header && top + 0.87 * height <= window.innerHeight;
   });
   assert.ok(pinned, "the phone has scrolled away");
 
@@ -215,10 +266,10 @@ test("a section whole in view reads beside its own screen, also while it is low 
 });
 
 for (const [where, size] of [["a desk", DESK], ["a tall desk", HIGH_DESK]]) {
-  test(`on ${where} the hero's link to a section with two screens lands on its first`, async () => {
+  test(`on ${where} a link to a section lands on its screen`, async () => {
     await visit(size);
     await phoneShows("today");
-    await site.run(() => document.querySelector('.home .glance a[href="#technique"]').click());
+    await site.run(() => (location.hash = "#technique"));
     await pause(1500);
     assert.equal(await site.run(() => document.querySelector(".home-stage").dataset.screen), "mannequin");
   });
@@ -270,11 +321,12 @@ async function withScreens(rewrite, body) {
   await body();
 }
 
-/** The live phone's side of the page as a visitor sees it now, as raw pixels. */
+/** The live phone's side of the page as a visitor sees it now, under the header, as raw pixels. */
 async function seeStage() {
   const box = await site.run(() => {
-    const { left, top, width, height } = document.querySelector(".home-stage").getBoundingClientRect();
-    return { left: Math.round(left), top: Math.round(top), width: Math.floor(width), height: Math.floor(height) };
+    const { left, width } = document.querySelector(".home-stage").getBoundingClientRect();
+    const top = document.querySelector("header.header").offsetHeight;
+    return { left: Math.round(left), top, width: Math.floor(width), height: window.innerHeight - top };
   });
   const { data } = await site.send("Page.captureScreenshot", { format: "png" });
   const pixels = await sharp(Buffer.from(data, "base64")).extract(box).removeAlpha().raw().toBuffer();
@@ -289,6 +341,33 @@ function differing({ pixels: one }, { pixels: other }) {
   return count / one.length;
 }
 
+test("the glass leaves a black screen black, but for the window it mirrors in a corner", async () => {
+  // Every screen is a black picture, so whatever light the phone's screen shows is the glass's.
+  const black = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNgYGD4DwABBAEAwS2OUAAAAABJRU5ErkJggg==";
+  await withScreens(`(screens) => { for (const screen of Object.values(screens)) { screen.light = screen.dark = "${black}"; delete screen.clip; } }`, async () => {
+    await phoneShows("today");
+    await pickTheme("dark");
+    await bring("progress", "end");
+    await phoneShows("progress");
+    await pause(600);
+    assert.ok((await screenBrightness()) < 4, `the middle of a black screen is ${await screenBrightness()} bright`);
+    // Over the screen's middle half, nearly every point is black, and the mirrored window is
+    // a patch of clearly lighter ones with the rest left alone.
+    const { pixels, width, height } = await seeStage();
+    let [points, lifted, lit] = [0, 0, 0];
+    for (let y = Math.round(height * 0.12); y < height * 0.8; y++) {
+      for (let x = Math.round(width * 0.3); x < width * 0.78; x++) {
+        const value = pixels[(y * width + x) * 3];
+        points++;
+        if (value > 8) lifted++;
+        if (value > 30) lit++;
+      }
+    }
+    assert.ok(lifted / points < 0.12, `the glass lightens ${Math.round((lifted / points) * 100)}% of a black screen's middle`);
+    assert.ok(lit / points > 0.005, `the glass mirrors nothing: ${lit} lit points`);
+  });
+});
+
 test("the phone turns into place as the scroll begins, then stands still through every change of screen", async () => {
   // Every screen is given Today's picture, so whatever changes on the phone's side is the phone
   // moving, not its screen.
@@ -297,6 +376,9 @@ test("the phone turns into place as the scroll begins, then stands still through
       for (const name in screens) screens[name] = screens.today;
     },
     async () => {
+      // Without the big mark and the end of the name behind the phone, which scroll away with
+      // the top of the page.
+      await site.run(() => (document.head.appendChild(document.createElement("style")).textContent = ".mark-big, .hero h1 { visibility: hidden }"));
       await phoneShows("today");
       await pause(700);
       const opening = await seeStage();
@@ -395,7 +477,7 @@ test("a section with a clip plays it on the phone while it is current, and stops
   }
 });
 
-test("each clip lasts 4 to 8 s, and its last frame leads into its first as one frame leads into the next", async () => {
+test("each clip lasts 4 to 8 s, or up to 12 with screens to read, and its last frame leads into its first as one frame leads into the next", async () => {
   await visit(DESK);
   const clips = await site.run(async () => {
     const screens = JSON.parse(document.querySelector(".home-stage").dataset.screens);
@@ -423,14 +505,35 @@ test("each clip lasts 4 to 8 s, and its last frame leads into its first as one f
         const first = await frameAt(0);
         const second = await frameAt(1 / 30);
         const last = await frameAt(video.duration - 1 / 60);
-        seen[`${screen} ${theme}`] = { duration: video.duration, seam: apart(last, first), step: apart(first, second) };
+        // How long each stretch lasts in which nothing on the screen changes, looked at every tenth of a second.
+        const stills = [];
+        if (screen === "check-in") {
+          let [before, since] = [first, 0];
+          for (let time = 0.1; time < video.duration; time += 0.1) {
+            const now = await frameAt(time);
+            if (apart(before, now) > 0.0005) {
+              stills.push(time - 0.1 - since);
+              since = time;
+            }
+            before = now;
+          }
+          stills.push(video.duration - since);
+        }
+        seen[`${screen} ${theme}`] = { duration: video.duration, seam: apart(last, first), step: apart(first, second), stills };
       }
     }
     return seen;
   });
   assert.deepEqual(Object.keys(clips).sort(), CLIPS.flatMap((screen) => [`${screen} dark`, `${screen} light`]).sort());
-  for (const [name, { duration, seam, step }] of Object.entries(clips)) {
-    assert.ok(duration >= 4 && duration <= 8, `${name} lasts ${duration} s`);
+  for (const [name, { duration, seam, step, stills }] of Object.entries(clips)) {
+    // Coaching's has a question and a proposed Change to read, and Coach to come back to: each
+    // stands still long enough to, which takes the clip past 8 s.
+    const reading = name.startsWith("check-in");
+    assert.ok(duration >= 4 && duration <= (reading ? 12 : 8), `${name} lasts ${duration} s`);
+    if (reading) {
+      const longest = stills.sort((a, b) => b - a).slice(0, 3).map((still) => Math.round(still * 10) / 10);
+      assert.ok(longest[0] >= 2.6 && longest[1] >= 2.1 && longest[2] >= 0.7, `${name} holds its screens for ${longest} s`);
+    }
     assert.ok(seam <= step + 0.002, `${name} jumps at its loop: ${seam} of the values change, against ${step} from one frame to the next`);
   }
 });
@@ -493,7 +596,8 @@ for (const [where, size] of [["a desk", DESK], ["a window taller than wide", NAR
       const hidden = await site.run(async () => {
         const style = document.head.appendChild(document.createElement("style"));
         style.id = "picture-alone";
-        style.textContent = ".home-stage canvas { visibility: hidden } .home-stage img { opacity: 1 !important }";
+        // At once: the picture's own fade would still be under way when it is looked at.
+        style.textContent = ".home-stage canvas { visibility: hidden } .home-stage img { opacity: 1 !important; transition: none !important }";
         await Promise.all([...document.querySelectorAll(".home-stage img")].filter((img) => img.getClientRects().length).map((img) => img.decode()));
         return true;
       });
@@ -539,6 +643,7 @@ test("the theme menu changes the phone's screen, both ways", async () => {
   assert.ok(dark < 90 && light > 170 && darkAgain < 90, `dark ${dark}, light ${light}, dark again ${darkAgain}`);
 });
 
+// The stills a visitor sees.
 const STILLS = ["today", ...PICTURED];
 
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
@@ -581,5 +686,163 @@ for (const [who, open] of [
     assert.deepEqual(await stillsSeen(), STILLS.map((screen) => `phone-${screen}-light`));
     assert.equal(askedForThree(requests()), false, "three.js was asked for");
     assert.deepEqual(clipsAskedFor(requests()), [], "a clip was asked for");
+  });
+}
+
+test("pressing a reps-in-reserve chip marks it and says what it means", async () => {
+  await visit(POCKET);
+  const seen = await site.run(() => {
+    const chips = [...document.querySelectorAll(".rir button")];
+    const state = () => ({ pressed: chips.filter((chip) => chip.getAttribute("aria-pressed") === "true").map((chip) => chip.textContent), says: document.querySelector("#rir-say").textContent });
+    const before = state();
+    chips[0].click();
+    return { before, after: state() };
+  });
+  assert.deepEqual(seen.before, { pressed: ["2"], says: "2 in reserve: two more reps were there." });
+  assert.deepEqual(seen.after, { pressed: ["0"], says: "Nothing left: that was the last rep you had." });
+});
+
+test("saying how the last session went shows the next weight, its step and its plates", async () => {
+  await visit(POCKET);
+  const seen = await site.run(() => {
+    const state = () => ({
+      kg: document.querySelector("#next-kg").textContent,
+      why: document.querySelector("#next-why").parentElement.textContent.trim().replace(/\s+/g, " "),
+      step: [...document.querySelectorAll("#rungs g.on")].map((step) => step.dataset.kg),
+      plates: [...document.querySelectorAll("#next-plates span")].map((plate) => plate.textContent.trim()),
+    });
+    const before = state();
+    [...document.querySelectorAll(".outcomes button")].find((button) => button.textContent.includes("under 6")).click();
+    return { before, after: state() };
+  });
+  assert.deepEqual(seen.before, { kg: "62.5", why: "Up one step. A side, on plates this gym has:", step: ["62.5"], plates: ["1 × 20", "1 × 10", "1 × 1.25"] });
+  assert.deepEqual(seen.after, { kg: "57.5", why: "One step down, about 5% lighter. A side, on plates this gym has:", step: ["57.5"], plates: ["1 × 20", "1 × 5", "1 × 2.5", "1 × 1.25"] });
+});
+
+test("Technique lists the muscles of a barbell bench press as the app names them: the main ones, then the rest", () => {
+  const html = page("/");
+  const list = html.slice(html.indexOf('class="muscles'), html.indexOf("</ul>", html.indexOf('class="muscles')));
+  assert.match(list, /aria-label="The muscles a barbell bench press works"/);
+  const muscles = [...list.matchAll(/<li([^>]*)>([^<]*)<\/li>/g)].map(([, set, name]) => (/class="main"/.test(set) ? `${name}*` : name));
+  assert.deepEqual(muscles, ["Chest*", "Front delts*", "Triceps*", "Forearms", "Side delts"]);
+});
+
+// The main muscle's dot as red, green and blue out of 255, however the browser writes it.
+const dot = () =>
+  site.run(() => {
+    const colour = getComputedStyle(document.querySelector(".muscles li.main"), "::before").backgroundColor;
+    const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+    return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+  });
+const ORANGE = { dark: "232 87 28", light: "224 82 24" };
+
+test("without the live phone Technique's muscles are lit in the signal's orange, with no switch, beside the still of them", async () => {
+  assert.doesNotMatch(page("/"), /id="layer"|class="switch/);
+  await visit(POCKET);
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    assert.deepEqual((await stillsSeen()).filter((still) => /mannequin|muscles/.test(still)), [`phone-muscles-${theme}`]);
+    assert.equal(await dot(), ORANGE[theme]);
+  }
+});
+
+test("on the live phone Technique's muscles light while the clip shows them lit, and dim while it doesn't", async () => {
+  await visit(DESK);
+  await phoneShows("today");
+  // The list changes at once, so each look finds it wholly lit or wholly dim.
+  await site.run(() => {
+    document.head.append(Object.assign(document.createElement("style"), { textContent: ".muscles li::before { transition: none !important }" }));
+  });
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    await bring("mannequin", "end");
+    await phoneShows("mannequin");
+    await playing("mannequin");
+    // Two loops, looked at as often as a look takes: how orange the phone's side is, and
+    // whether the list is lit.
+    const looks = [];
+    for (const end = Date.now() + 17000; Date.now() < end; await pause(60)) {
+      const [{ pixels }, colour] = await Promise.all([seeStage(), dot()]);
+      let orange = 0;
+      for (let i = 0; i < pixels.length; i += 3) if (pixels[i] > 180 && pixels[i + 1] > 40 && pixels[i + 1] < 130 && pixels[i + 2] < 80) orange++;
+      // With the layer off the phone's side has no orange at all; lit, a pressing arm hides some of it.
+      looks.push({ onPhone: orange > 20, onList: colour === ORANGE[theme] });
+    }
+    // A look takes a moment, so the two may differ in a look beside a change, and never between.
+    const steady = looks.filter((look, at) => at > 0 && looks[at - 1].onPhone === look.onPhone && looks[at + 1]?.onPhone === look.onPhone);
+    const [lit, dim] = [steady.filter(({ onPhone }) => onPhone), steady.filter(({ onPhone }) => !onPhone)];
+    assert.ok(lit.length >= 3 && dim.length >= 3, `${theme}: of ${looks.length} looks, the clip was steadily lit in ${lit.length} and dim in ${dim.length}`);
+    const apart = steady.filter(({ onPhone, onList }) => onPhone !== onList).length;
+    assert.equal(apart, 0, `${theme}: the list and the clip differed in ${apart} of ${steady.length} steady looks`);
+    // Away from Technique the list is lit again.
+    await bring("progress", "end");
+    await playing(null);
+    assert.equal(await dot(), ORANGE[theme]);
+  }
+});
+
+test("what you press is drawn as the app draws its buttons: 8 px of rounding, no stepped corner, the signal for the primary action", async () => {
+  await visit(DESK);
+  for (const [theme, tonal] of [["dark", "68 68 74"], ["light", "226 226 230"]]) {
+    await pickTheme(theme);
+    const seen = await site.run(() => {
+      const rgb = (colour) => {
+        const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+        return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+      };
+      const look = (selector) => {
+        const style = getComputedStyle(document.querySelector(selector));
+        return { fill: rgb(style.backgroundColor), ink: rgb(style.color), round: style.borderTopLeftRadius, cut: style.clipPath, weight: style.fontWeight };
+      };
+      return { go: look(".hero .ov-go"), alt: look(".hero .ov-alt"), picked: look('.outcomes button[aria-pressed="true"]'), chip: look(".rir button").round };
+    });
+    assert.deepEqual(seen.go, { fill: ORANGE[theme], ink: "17 17 17", round: "8px", cut: "none", weight: "500" });
+    assert.deepEqual(seen.alt, { fill: tonal, ink: theme === "dark" ? "242 242 244" : "25 25 27", round: "8px", cut: "none", weight: "500" });
+    assert.deepEqual([seen.picked.round, seen.picked.cut, seen.chip], ["8px", "none", "8px"]);
+  }
+});
+
+test("the Coaching card's Accept is drawn as the app draws it: the theme's orange, near-black words, modest rounding", async () => {
+  await visit(POCKET);
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    const seen = await site.run(() => {
+      const accept = document.querySelector(".change .verdict span:last-child");
+      const style = getComputedStyle(accept);
+      const rgb = (colour) => {
+        const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+        return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+      };
+      return { words: accept.textContent, fill: rgb(style.backgroundColor), ink: rgb(style.color), round: parseFloat(style.borderTopLeftRadius) / accept.offsetHeight };
+    });
+    assert.deepEqual({ ...seen, round: undefined }, { words: "Accept", fill: ORANGE[theme], ink: "17 17 17", round: undefined });
+    assert.ok(seen.round > 0.1 && seen.round < 0.3, `its corners are ${seen.round} of its height`);
+  }
+});
+
+test("a window made narrow while the clip shows the muscles dim has them lit beside the still", async () => {
+  await visit(DESK);
+  await phoneShows("today");
+  await bring("mannequin", "end");
+  await until("the clip showing its muscles dim", () => document.querySelector(".home-stage").hasAttribute("data-unlit"));
+  await site.send("Emulation.setDeviceMetricsOverride", { ...POCKET, deviceScaleFactor: 1, mobile: false });
+  await until("the stills", () => document.querySelector(".home-stage canvas").getClientRects().length === 0);
+  await pause(500);
+  assert.equal(await dot(), ORANGE[await site.run(() => document.documentElement.dataset.theme)]);
+});
+
+for (const [where, size, behind] of [["a desk", DESK, ".home-stage"], ["a phone", POCKET, ".hero .phone-still img"]]) {
+  test(`on ${where} the big mark stands behind the phone the page opens with`, async () => {
+    await visit(size);
+    const seen = await site.run((behind) => {
+      const box = (element) => element.getBoundingClientRect();
+      const mark = [...document.querySelectorAll(".mark-big")].filter((mark) => mark.getClientRects().length);
+      const phone = [...document.querySelectorAll(behind)].find((phone) => phone.getClientRects().length);
+      const [m, p] = [box(mark[0]), box(phone)];
+      // The phone's middle lies on the mark.
+      const [x, y] = [p.left + p.width / 2, p.top + p.height / 2];
+      return { marks: mark.length, behind: m.left < x && x < m.right && m.top < y && y < m.bottom };
+    }, behind);
+    assert.deepEqual(seen, { marks: 1, behind: true });
   });
 }

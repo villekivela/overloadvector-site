@@ -89,17 +89,21 @@ function panel(width, height, radius) {
 
 const SCREEN_VERTEX = `
   varying vec2 vUv;
-  varying float vTurn;
+  varying vec3 vNormal;
   void main() {
     vUv = uv;
-    vTurn = normalize(normalMatrix * normal).x;
+    vNormal = normalMatrix * normal;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
 
-// The screen lights itself: no lamp or tone mapping changes the app's colours. The glass over it
-// throws back one soft band of light, which crosses the screen as the phone turns. A picture comes
-// in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to linear here.
+// The screen lights itself: no lamp or tone mapping changes the app's colours, and its picture is
+// read a little sharper than the size it is drawn at asks for, so the text on it stays crisp. The
+// glass over it is glossy: it mirrors one window, a pane of light with a hard edge that fades
+// out, over the screen's upper right corner. It moves in from the corner as the phone turns
+// into place. Everywhere else the screen's colours are untouched. A picture
+// comes in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to
+// linear here.
 const SCREEN_FRAGMENT = `
   uniform sampler2D from;
   uniform sampler2D to;
@@ -107,16 +111,23 @@ const SCREEN_FRAGMENT = `
   uniform bool toVideo;
   uniform float blend;
   varying vec2 vUv;
-  varying float vTurn;
+  varying vec3 vNormal;
   vec3 colour(sampler2D screen, bool video) {
-    vec4 texel = texture2D(screen, vUv);
+    vec4 texel = texture2D(screen, vUv, -0.5);
     return video ? sRGBTransferEOTF(texel).rgb : texel.rgb;
+  }
+  // 1 between two edges, each a hair wide.
+  float pane(float from, float to, float at) {
+    return smoothstep(from, from + 0.004, at) * (1.0 - smoothstep(to, to + 0.004, at));
   }
   void main() {
     vec3 shown = mix(colour(from, fromVideo), colour(to, toVideo), blend);
-    float across = vUv.x * 0.8 + vUv.y * 0.45 - 0.2 + vTurn * 2.2;
-    float glare = smoothstep(0.0, 0.3, across) * (1.0 - smoothstep(0.3, 0.75, across));
-    gl_FragColor = vec4(shown + glare * 0.028, 1.0);
+    // The pane lies aslant over the upper right corner, and reaches further in the more the
+    // phone faces the reader: a tip of it as the page opens, a band once the phone is in place.
+    float turned = normalize(vNormal).x;
+    float across = vUv.x * 0.8 + vUv.y * 0.45 - (0.882 - 0.401 * turned);
+    float window = pane(0.0, 0.13, across) * mix(0.055, 0.0, across / 0.13);
+    gl_FragColor = vec4(shown + window, 1.0);
     #include <colorspace_fragment>
   }
 `;

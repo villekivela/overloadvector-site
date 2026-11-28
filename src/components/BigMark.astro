@@ -1,0 +1,41 @@
+---
+// The mark as a block, as big as the screen allows, in the page's own greys with the signal on its
+// stepped face. The phone the page opens with stands in front of it.
+---
+
+<svg class="mark-big" viewBox="29.85 26.11 48.3 55.78" aria-hidden="true">
+  <path class="top" d="M32.05,41.67L54,29L75.95,41.67L54,54.35Z"></path>
+  <path class="left" d="M32.35,41.5L54.3,54.17L54.3,79.17L32.35,66.5Z"></path>
+  <path class="right" d="M54,54L75.65,41.5L75.65,49.83L68.43,54L68.43,62.33L61.22,66.5L61.22,74.83L54,79Z"></path>
+  <path class="band" fill-rule="evenodd" d="M54,81.89L63.72,76.28L63.72,67.94L70.93,63.78L70.93,55.44L78.15,51.28L78.15,40.06L54,26.11L29.85,40.06L29.85,67.94ZM54,76.11L58.72,73.39L58.72,65.06L65.93,60.89L65.93,52.56L73.15,48.39L73.15,42.94L54,31.89L34.85,42.94L34.85,65.06Z"></path>
+</svg>
+
+<style>
+  .mark-big {
+    position: absolute;
+    overflow: visible;
+  }
+  .band {
+    fill: var(--ov-mark-band);
+  }
+  .top {
+    fill: var(--ov-mark-top);
+  }
+  .left {
+    fill: var(--ov-mark-left);
+  }
+  .right {
+    fill: var(--ov-signal);
+  }
+  /* The one moment the page moves by itself: the mark fades in behind the phone. */
+  @media (prefers-reduced-motion: no-preference) {
+    .mark-big {
+      animation: rise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+    @keyframes rise {
+      from {
+        opacity: 0;
+      }
+    }
+  }
+</style>

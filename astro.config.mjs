@@ -9,8 +9,6 @@ export default defineConfig({
     starlight({
       title: "Overload Vector",
       description: "A strength-training app for Android: a periodized program, logging, progression and coaching with Claude.",
-      // The logo's files come from the app's repository (README, The logo).
-      logo: { light: "./src/assets/logo-light.svg", dark: "./src/assets/logo-dark.svg", replacesTitle: true },
       favicon: "/favicon.svg",
       head: [
         { tag: "link", attrs: { rel: "icon", href: "/favicon.ico", sizes: "32x32" } },
@@ -18,12 +16,12 @@ export default defineConfig({
         { tag: "meta", attrs: { name: "twitter:card", content: "summary_large_image" } },
       ],
       customCss: ["./src/styles/fonts.css", "./src/styles/graphite.css"],
-      // Hero puts Home.astro at the top of the home page, and Search gives it links in the
-      // search's place (README, The home page).
+      // Hero puts Home.astro on the home page (README, The home page), and Header is the site's
+      // own on every page (README, The look).
       components: {
         Footer: "./src/components/Footer.astro",
+        Header: "./src/components/Header.astro",
         Hero: "./src/components/Hero.astro",
-        Search: "./src/components/Search.astro",
       },
       pagination: false,
       sidebar: [

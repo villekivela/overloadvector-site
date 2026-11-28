@@ -28,15 +28,15 @@ function onlyIn(family, fonts, what) {
   }
 }
 
-test("the site's title, the hero title and headings are in Space Grotesk", async () => {
+test("the site's name, the hero title and headings are in Mona Sans", async () => {
   await site.visit("/");
-  onlyIn("Space Grotesk", await fontsOf(".site-title span"), "the site's title");
-  onlyIn("Space Grotesk", await fontsOf(".hero h1"), "the hero title");
-  onlyIn("Space Grotesk", await fontsOf(".sl-markdown-content h2"), "a home page heading");
-  onlyIn("Space Grotesk", await fontsOf(".home-feature h2"), "a feature's heading");
+  onlyIn("Mona Sans", await fontsOf(".site-title"), "the site's name");
+  onlyIn("Mona Sans", await fontsOf(".hero h1 span"), "the hero title");
+  onlyIn("Mona Sans", await fontsOf(".home-feature h2"), "a feature's heading");
+  onlyIn("Mona Sans", await fontsOf(".home-cta h2"), "the closing band's heading");
   await site.visit("/docs/logging/");
-  onlyIn("Space Grotesk", await fontsOf("h1#_top"), "a page's title");
-  onlyIn("Space Grotesk", await fontsOf(".sl-markdown-content h2"), "a heading");
+  onlyIn("Mona Sans", await fontsOf("h1#_top"), "a page's title");
+  onlyIn("Mona Sans", await fontsOf(".sl-markdown-content h2"), "a heading");
 });
 
 test("text is in Inter", async () => {
@@ -44,20 +44,44 @@ test("text is in Inter", async () => {
   onlyIn("Inter", await fontsOf(".sl-markdown-content > p"), "a paragraph");
   onlyIn("Inter", await fontsOf(".sl-markdown-content td"), "a table cell");
   onlyIn("Inter", await fontsOf(".site-footer p"), "the footer");
+  await site.visit("/docs/getting-started/");
+  onlyIn("Inter", await fontsOf(".sl-markdown-content h3"), "a smaller heading");
+  onlyIn("Inter", await fontsOf(".sl-markdown-content li > code"), "a word of code in a sentence");
+  await site.visit("/");
+  onlyIn("Inter", await fontsOf(".home-feature .lead"), "a feature's text");
 });
 
-test("a number in a heading is in Inter, its words in Space Grotesk", async () => {
+test("a number in a heading is in Mona Sans, as its words are", async () => {
   await site.visit("/docs/logging/");
   await site.run(async () => {
     const content = document.querySelector(".sl-markdown-content");
-    content.insertAdjacentHTML("afterbegin", '<h2 id="figures">1234567890</h2><h3 id="mixed">Week 7</h3>');
+    content.insertAdjacentHTML("afterbegin", '<h2 id="figures">Week 7: 1234567890</h2>');
     document.querySelector("#figures").getBoundingClientRect();
     await document.fonts.ready;
   });
   await site.run(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
-  onlyIn("Inter", await fontsOf("#figures"), "a heading's number");
-  const mixed = await fontsOf("#mixed");
-  assert.ok(mixed.some((f) => f.startsWith("Inter")) && mixed.some((f) => f.startsWith("Space Grotesk")), mixed.join(", "));
+  onlyIn("Mona Sans", await fontsOf("#figures"), "a heading's number");
+});
+
+// Inter is installed on many a desk, so a missing letter in the site's own cut looks right by eye.
+test("no text is drawn in a font of the visitor's own, blocks of code and keys aside", async () => {
+  for (const route of ["/", ...Object.keys(PAGES)]) {
+    await site.visit(route);
+    // The app's ⋮ menu is named by its sign, which Inter doesn't have: that one is the visitor's.
+    await site.run(async () => {
+      for (const element of document.querySelectorAll("strong")) if (element.textContent === "⋮") element.dataset.sign = "";
+      await document.fonts.ready;
+    });
+    const { root } = await site.send("DOM.getDocument", { depth: -1 });
+    const { nodeIds } = await site.send("DOM.querySelectorAll", { nodeId: root.nodeId, selector: "body *:not(script, style, pre, pre *, kbd, svg *, [data-sign], :has(kbd, [data-sign]))" });
+    // A row's fonts count those of a key or the sign within it, so only what holds neither is asked.
+    const strays = new Set();
+    for (const nodeId of nodeIds) {
+      const { fonts } = await site.send("CSS.getPlatformFontsForNode", { nodeId });
+      for (const font of fonts) if (!font.isCustomFont) strays.add(font.familyName);
+    }
+    assert.deepEqual([...strays], [], route);
+  }
 });
 
 test("no page loads anything from another server", async () => {
@@ -69,10 +93,10 @@ test("no page loads anything from another server", async () => {
 
 test("the footer's credit reads as a sentence", () => {
   const words = page("/faq/").replace(/<[^>]*>/g, "").replace(/\s+/g, " ");
-  assert.ok(words.includes("Fonts: Inter and Space Grotesk, under the SIL Open Font License."), words.slice(-300));
+  assert.ok(words.includes("Fonts: Inter and Mona Sans, under the SIL Open Font License."), words.slice(-300));
 });
 
-for (const family of ["Inter", "SpaceGrotesk"]) {
+for (const family of ["Inter", "MonaSans"]) {
   test(`the site ships ${family}'s licence and every page credits it`, () => {
     const licence = `fonts/${family}-OFL.txt`;
     assert.ok(builtFiles().includes(licence), `${licence} isn't published`);

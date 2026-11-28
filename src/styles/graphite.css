@@ -1,33 +1,335 @@
-/* The app's Graphite theme: greys with a faint cool bias and an accent with no hue. */
-:root {
-  --sl-color-white: #ededef;
-  --sl-color-gray-1: #dcdce0;
-  --sl-color-gray-2: #a3a3a8;
-  --sl-color-gray-3: #7c7c83;
-  --sl-color-gray-4: #44444a;
-  --sl-color-gray-5: #2e2e33;
-  --sl-color-gray-6: #1b1b1e;
-  --sl-color-black: #121214;
+/* The site's look: the app's Graphite greys, one signal colour, and two faces (fonts.css).
 
-  --sl-color-accent-low: #2e2e33;
+   The signal is for the primary action and "you are here". As a fill it is the same orange in both
+   themes, with near-black on it. As text or a thin line it is --ov-signal-ink. Today that is a
+   step's large number and a link's underline, which need 3:1 (WCAG AA) and get it from the same
+   orange on both themes' pages; smaller orange text on the light theme would need this darkened,
+   and test/contrast.test.mjs would say so.
+   A lit muscle is the signal's orange too, as in the app, tuned for each theme. */
+:root {
+  --ov-bg: #121214;
+  --ov-raised: #1b1b1e;
+  --ov-line: #2e2e33;
+  --ov-muted: #a3a3a8;
+  /* The rim of a control that has no fill: 3:1 against the page. */
+  --ov-rim: #6e6e75;
+  --ov-ink: #ededef;
+  --ov-signal: #e8571c;
+  --ov-on-signal: #111;
+  --ov-signal-ink: #e8571c;
+  --ov-lit: #e8571c;
+  --ov-shadow: #000;
+  /* The big mark's faces, and a step's, lit from the upper left. */
+  --ov-mark-band: #34343a;
+  --ov-mark-top: #27272b;
+  --ov-mark-left: #18181b;
+  --ov-step-tread: #3d3d43;
+  --ov-step-riser: #222226;
+  --ov-step-side: #5a5a61;
+
+  /* The page's unit, which the home page's large type scales with, its margin and its gutter. */
+  --ov-u: min(1vw, 1.6vh);
+  --ov-m: clamp(1.25rem, calc(3.9 * var(--ov-u)), 6rem);
+  --ov-gut: clamp(0.75rem, calc(1.67 * var(--ov-u)), 2.5rem);
+
+  --sl-color-white: var(--ov-ink);
+  --sl-color-gray-1: #dcdce0;
+  --sl-color-gray-2: var(--ov-muted);
+  --sl-color-gray-3: #8c8c93;
+  --sl-color-gray-4: #44444a;
+  --sl-color-gray-5: var(--ov-line);
+  --sl-color-gray-6: var(--ov-raised);
+  --sl-color-black: var(--ov-bg);
+
+  --sl-color-accent-low: var(--ov-line);
   --sl-color-accent: #e9e9ec;
   --sl-color-accent-high: #f2f2f4;
+  --sl-color-text-accent: var(--ov-ink);
+  --sl-color-bg: var(--ov-bg);
+  --sl-color-bg-nav: var(--ov-bg);
+  --sl-color-bg-sidebar: var(--ov-bg);
+  --sl-color-hairline: var(--ov-line);
+  --sl-color-hairline-light: var(--ov-line);
+  --sl-color-hairline-shade: var(--ov-line);
+
+  --sl-nav-height: 3.75rem;
+  --sl-nav-pad-x: var(--ov-m);
+  --sl-line-height: 1.65;
+  /* A section's heading and a smaller one: Starlight sizes the heading and its link from these. */
+  --sl-text-h2: clamp(1.875rem, calc(1.2rem + 1.6vw), 2.75rem);
+  --sl-text-h3: calc(1.15 * var(--sl-text-body));
+}
+
+@media (min-width: 50rem) {
+  :root {
+    --sl-nav-height: 4.5rem;
+  }
 }
 
 :root[data-theme="light"] {
-  --sl-color-white: #19191b;
+  --ov-bg: #f5f5f7;
+  --ov-raised: #ececef;
+  --ov-line: #d6d6da;
+  --ov-muted: #5c5c62;
+  --ov-rim: #86868c;
+  --ov-ink: #19191b;
+  --ov-lit: #e05218;
+  --ov-shadow: rgb(30 30 40 / 0.35);
+  --ov-mark-band: #d9d9de;
+  --ov-mark-top: #fff;
+  --ov-mark-left: #e4e4e8;
+  --ov-step-tread: #fff;
+  --ov-step-riser: #c9c9cf;
+  --ov-step-side: #e2e2e7;
+
+  --sl-color-white: var(--ov-ink);
   --sl-color-gray-1: #232326;
   --sl-color-gray-2: #38383e;
-  --sl-color-gray-3: #5c5c62;
+  --sl-color-gray-3: var(--ov-muted);
   --sl-color-gray-4: #8a8a90;
-  --sl-color-gray-5: #d6d6da;
-  --sl-color-gray-6: #eeeef0;
-  --sl-color-gray-7: #f5f5f7;
-  --sl-color-black: #fafafb;
+  --sl-color-gray-5: var(--ov-line);
+  --sl-color-gray-6: var(--ov-raised);
+  --sl-color-gray-7: var(--ov-bg);
+  --sl-color-black: var(--ov-bg);
 
   --sl-color-accent-low: #e2e2e6;
   --sl-color-accent: #1c1c1f;
   --sl-color-accent-high: #1c1c1f;
+}
+
+::selection {
+  background: var(--ov-signal);
+  color: var(--ov-on-signal);
+}
+
+/* What you press, drawn as the app draws its buttons (a trial): 8 px of rounding, the label in
+   Inter Medium, Material's 40-high, 24-padded button scaled to the page's text. The primary
+   action is the app's signal under near-black words, the one beside it the app's tonal grey. */
+:root {
+  --ov-tonal: #44444a;
+  --ov-on-tonal: #f2f2f4;
+  --ov-primary: #f2f2f4;
+  --ov-on-primary: #141416;
+}
+:root[data-theme="light"] {
+  --ov-tonal: #e2e2e6;
+  --ov-on-tonal: #19191b;
+  --ov-primary: #1c1c1f;
+  --ov-on-primary: #fff;
+}
+.ov-go,
+.ov-alt {
+  display: inline-block;
+  padding: 0.8em 1.6em;
+  border-radius: 8px;
+  font-size: 1em;
+  font-weight: 500;
+  letter-spacing: 0.006em;
+  line-height: 1.25;
+  text-decoration: none;
+}
+.ov-go {
+  background: var(--ov-lit);
+  color: var(--ov-on-signal);
+}
+.ov-go:hover {
+  filter: brightness(1.08);
+}
+.ov-alt {
+  background: var(--ov-tonal);
+  color: var(--ov-on-tonal);
+}
+.ov-alt:hover {
+  filter: brightness(1.08);
+}
+/* The band the home page ends with keeps the mark's stepped corner: it is no button. */
+.home-cta {
+  --s: 0.5em;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 2 * var(--s)),
+    calc(100% - var(--s)) calc(100% - 2 * var(--s)),
+    calc(100% - var(--s)) calc(100% - var(--s)),
+    calc(100% - 2 * var(--s)) calc(100% - var(--s)),
+    calc(100% - 2 * var(--s)) 100%,
+    0 100%
+  );
+}
+/* The header's search, a tonal button too. */
+.site-search button[data-open-modal] {
+  border: 0;
+  border-radius: 8px;
+  background: var(--ov-tonal);
+  color: var(--ov-on-tonal);
+}
+
+/* ---------- Reading pages: the docs, the FAQ and the rest. ---------- */
+
+/* The sidebar: ruled rows, and the signal beside the page you are on. */
+.sidebar-content .group-label .large {
+  font-size: var(--sl-text-sm);
+  font-weight: 500;
+  color: var(--ov-muted);
+}
+.sidebar-content details > ul {
+  margin-block: 0.25rem 1.5rem;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--ov-line);
+}
+.sidebar-content details > ul > li {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.sidebar-content details > ul a {
+  padding: 0.55em 0.9em;
+  border-radius: 0;
+  border-bottom: 1px solid var(--ov-line);
+  color: var(--ov-muted);
+}
+.sidebar-content details > ul a:hover,
+.sidebar-content details > ul a:focus {
+  color: var(--ov-ink);
+}
+.sidebar-content details > ul a[aria-current="page"],
+.sidebar-content details > ul a[aria-current="page"]:hover,
+.sidebar-content details > ul a[aria-current="page"]:focus {
+  background: none;
+  font-weight: 500;
+  color: var(--ov-ink);
+  box-shadow: inset 3px 0 var(--ov-signal);
+}
+
+/* Type: Mona Sans capitals for a page's title and its sections, Inter below that. */
+h1#_top:not(.home *),
+.sl-markdown-content h2:not(:where(.not-content *)) {
+  font-family: var(--ov-font-title);
+  font-stretch: 75%;
+  font-weight: 800;
+  font-variant-numeric: normal;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+h1#_top:not(.home *) {
+  margin-top: clamp(0.5rem, 3vh, 2.5rem);
+  font-size: clamp(3rem, calc(1.5rem + 5vw), 6rem);
+  line-height: 0.86;
+}
+.sl-markdown-content h2:not(:where(.not-content *)) {
+  line-height: 0.95;
+}
+/* A section opens under a rule. */
+.sl-markdown-content .sl-heading-wrapper.level-h2 {
+  margin-top: 3rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--ov-line);
+}
+.sl-markdown-content :is(h3, h4, h5, h6):not(:where(.not-content *)) {
+  font-family: var(--sl-font), var(--sl-font-system);
+  font-weight: 600;
+}
+.sl-markdown-content h3:not(:where(.not-content *)) {
+  line-height: 1.3;
+}
+/* A page opens on its first paragraph, a size up and muted. */
+.sl-markdown-content > p:first-child {
+  font-size: 1.15em;
+  line-height: 1.45;
+  color: var(--ov-muted);
+  text-wrap: pretty;
+}
+.sl-markdown-content strong:not(:where(.not-content *)) {
+  font-weight: 600;
+}
+.sl-markdown-content a:not(:where(.not-content *)) {
+  color: var(--ov-ink);
+  text-decoration-color: var(--ov-signal-ink);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+.sl-markdown-content a:hover:not(:where(.not-content *)) {
+  color: var(--ov-ink);
+  text-decoration-color: var(--ov-ink);
+}
+/* A word of code in a sentence stays in the text's face, on a raised chip. */
+.sl-markdown-content :not(pre) > code:not(:where(.not-content *)) {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  border: 1px solid var(--ov-line);
+  background: var(--ov-raised);
+}
+
+/* A list is ruled rows. Steps are a sequence, so they carry their number, in the figures' face. */
+.sl-markdown-content :is(ul, ol):not(:where(.not-content *)) {
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ov-line);
+}
+.sl-markdown-content :is(ul, ol):not(:where(.not-content *)) > li {
+  margin: 0;
+  padding: 0.65em 0;
+  border-bottom: 1px solid var(--ov-line);
+}
+.sl-markdown-content ol:not(:where(.not-content *)) {
+  counter-reset: step;
+}
+.sl-markdown-content ol:not(:where(.not-content *)) > li {
+  counter-increment: step;
+  position: relative;
+  padding-left: 2.6em;
+}
+.sl-markdown-content ol:not(:where(.not-content *)) > li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  font: 800 1.7em / 1 var(--ov-font-title);
+  font-stretch: 75%;
+  font-variant-numeric: normal;
+  color: var(--ov-signal-ink);
+}
+/* A list inside a row is plain, so its rules don't cross the row's. */
+.sl-markdown-content li :is(ul, ol):not(:where(.not-content *)) {
+  margin-top: 0.4em;
+  border-top: 0;
+}
+.sl-markdown-content li :is(ul, ol):not(:where(.not-content *)) > li {
+  padding-block: 0.25em;
+  border-bottom: 0;
+}
+
+/* The FAQ: each question a ruled row, in the text's face. */
+:root:has(#starlight__sidebar a[href="/faq/"][aria-current="page"]) .sl-markdown-content {
+  --sl-text-h2: calc(1.3 * var(--sl-text-body));
+  h2 {
+    font-family: var(--sl-font), var(--sl-font-system);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .sl-heading-wrapper.level-h2 {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+  }
+  .sl-heading-wrapper.level-h2 ~ p {
+    max-width: 40em;
+    color: var(--ov-muted);
+  }
+  p :is(strong, a) {
+    color: var(--ov-ink);
+  }
+}
+
+/* On this page. */
+starlight-toc a[aria-current="true"],
+mobile-starlight-toc a[aria-current="true"] {
+  font-weight: 500;
+  color: var(--ov-ink);
 }
 
 /* Screenshots from the app. A row of them wraps, two abreast on a phone. */
@@ -42,8 +344,8 @@
 .sl-markdown-content .shots img {
   width: min(15rem, calc(50% - 0.5rem));
   margin: 0;
-  border: 1px solid var(--sl-color-gray-5);
-  border-radius: 1.25rem;
+  border: 1px solid var(--ov-line);
+  border-radius: 1.2em;
 }
 
 .sl-markdown-content .shots:not(.part) img:first-child:nth-last-child(2),
@@ -64,8 +366,10 @@
   display: none;
 }
 
-/* On a page without a sidebar, the home page above all, the header's logo and menus line up with
-   the edges of the page's content below them. */
-:root:not([data-has-sidebar]) header.header {
-  padding-inline: max(var(--sl-content-pad-x), calc(50% - var(--sl-content-width) / 2));
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
 }

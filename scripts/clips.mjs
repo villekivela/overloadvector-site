@@ -1,10 +1,12 @@
 // Makes one of the home page's clips from a screen recording of the app (adb shell screenrecord),
-// with ffmpeg: npm run clips -- <recording> <screen> <light|dark> <from s> <to s> [<hold>].
+// with ffmpeg: npm run clips -- <recording> <screen> <light|dark> <from s> <to s> [<hold>] [+<t>:<d>...].
 // The recording comes back to where it began (a set logged and taken back, the muscles shown and
 // hidden), and the cut ends a frame before it does, so the clip's last frame leads into its first
 // as any frame leads into the next. `hold` (x:y:w:h, in the clip's pixels) keeps a part of the
 // screen as it is in the first frame, for what only ever moves on (the session clock), but between
 // the seconds a and b of the clip when it ends in :a:b (while the rest timer takes the clock's place).
+// Each +t:d stops the clip at its second t, counted before any stop, for d seconds more: time to
+// read a screen that the recording left too soon. Put t where the screen stands still.
 // It writes src/assets/clips/clip-<screen>-<theme>.webm (VP9), .mp4 (H.264, for a browser without
 // VP9) and .png, the clip's first frame, which the phone shows until the clip plays. It says how
 // big each file is and how far the last frame is from the first, which should be next to nothing
@@ -20,19 +22,32 @@ const OUT = fileURLToPath(new URL("../src/assets/clips/", import.meta.url));
 const SCALE = "scale=640:1428:flags=lanczos,fps=30,format=yuv420p";
 const FRAME = 1 / 30;
 
-const [recording, screen, theme, ...times] = process.argv.slice(2);
+const [recording, screen, theme, ...rest] = process.argv.slice(2);
+const times = rest.filter((arg) => !arg.startsWith("+"));
+const stops = rest.filter((arg) => arg.startsWith("+")).map((arg) => arg.slice(1).split(":").map(Number)).sort(([a], [b]) => a - b);
 const [from, to] = times.slice(0, 2).map(Number);
 const hold = times[2]?.split(":").map(Number);
-const length = to - from;
+const length = to - from + stops.reduce((sum, [, more]) => sum + more, 0);
 // The last frame is held 3 s past the recording's end, and no more.
-if (!recording || !screen || !["light", "dark"].includes(theme) || !(length > FRAME) || (hold && (![4, 6].includes(hold.length) || hold.some(Number.isNaN)))) {
-  console.error("usage: npm run clips -- <recording> <screen> <light|dark> <from s> <to s> [<x:y:w:h[:a:b] held>]");
+if (!recording || !screen || !["light", "dark"].includes(theme) || !(length > FRAME) || (hold && (![4, 6].includes(hold.length) || hold.some(Number.isNaN))) || stops.some((stop) => stop.length !== 2 || stop.some(Number.isNaN))) {
+  console.error("usage: npm run clips -- <recording> <screen> <light|dark> <from s> <to s> [<x:y:w:h[:a:b] held>] [+<t>:<d> stopped...]");
   process.exit(1);
 }
 const name = join(OUT, `clip-${screen}-${theme}`);
 const ffmpeg = (...args) => execFileSync("ffmpeg", ["-hide_banner", "-loglevel", "error", "-y", ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
 // screenrecord writes a frame only when the screen changes, so its last is held to fill the cut.
-const cut = `[0:v]fps=30,tpad=stop_mode=clone:stop_duration=3,trim=start=${from}:end=${to},setpts=PTS-STARTPTS,${SCALE}`;
+const whole = `[0:v]fps=30,tpad=stop_mode=clone:stop_duration=3,trim=start=${from}:end=${to},setpts=PTS-STARTPTS,${SCALE}`;
+// A stop cuts the clip in two there and holds the first part's last frame.
+const edges = [0, ...stops.map(([at]) => at), to - from];
+const parts = stops.map(([, more], at) => `[p${at}]trim=start=${edges[at]}:end=${edges[at + 1]},setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop_duration=${more}[q${at}]`);
+const cut = stops.length
+  ? [
+      `${whole},split=${edges.length - 1}${edges.slice(1).map((_, at) => `[p${at}]`).join("")}`,
+      ...parts,
+      `[p${stops.length}]trim=start=${edges.at(-2)},setpts=PTS-STARTPTS[q${stops.length}]`,
+      `${edges.slice(1).map((_, at) => `[q${at}]`).join("")}concat=n=${edges.length - 1},fps=30`,
+    ].join(";")
+  : whole;
 const [x, y, w, h, a, b] = hold ?? [];
 const held = a === undefined ? "" : `:enable='not(between(t,${a},${b}))'`;
 const loop = hold

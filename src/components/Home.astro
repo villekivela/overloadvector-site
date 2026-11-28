@@ -2,22 +2,22 @@
 // The home page: the pitch, then what the app does, section by section, beside one phone. On a wide screen the
 // phone is a live 3D model (src/phone/) that turns a little into place as the scroll begins, then
 // stands still, pinned, while its screen changes or plays a section's clip. A narrow screen, a
-// visitor who asked for less motion and a browser without WebGL get a still of the same phone under
+// visitor who asked for less motion and a browser without WebGL get a still of the same phone with
 // each text, and never load three.js or a clip.
 import { getImage, Image } from "astro:assets";
-import { LinkButton } from "@astrojs/starlight/components";
+import BigMark from "./BigMark.astro";
+import Mark from "./Mark.astro";
 
-const { data } = Astro.locals.starlightRoute.entry;
-const { tagline, actions = [] } = data.hero ?? {};
+const BETA = "https://github.com/villekivela/overloadvector-releases/releases/latest";
+const INSTALL = "/docs/getting-started/";
 
-// Each thing the app does for the reader: a heading that says what the reader gets, one sentence, three
-// particulars. `kicker` names it in a word, and `brief` is its line in the hero. `screens` are
-// what the phone shows as the section passes, each with its words in `alts`.
+// Each thing the app does for the reader: a heading that says what the reader gets, one sentence, a
+// small working model of it (below, by `kicker`), and three particulars. `screens` are what the
+// phone shows as the section passes, each with its words in `alts`.
 const FEATURES = [
   {
     screens: ["new-program"],
     kicker: "Program",
-    brief: "A plan built for your week and your gym",
     title: "A program built around you",
     text: "Tell it your week and your gym, and setup writes a periodized program you can start today.",
     points: [
@@ -31,7 +31,6 @@ const FEATURES = [
   {
     screens: ["logging"],
     kicker: "Logging",
-    brief: "Every set logged in a few taps",
     title: "Log every set in a few taps",
     text: "Weight, reps and reps in reserve go in fast, so your attention stays on the lift.",
     points: [
@@ -45,7 +44,6 @@ const FEATURES = [
   {
     screens: ["mannequin", "muscles"],
     kicker: "Technique",
-    brief: "Every lift shown in 3D, on your machine",
     title: "See how every lift is done",
     text: "A 3D mannequin does each exercise on your machine, so you know the movement before you load the bar.",
     points: [
@@ -55,14 +53,13 @@ const FEATURES = [
     ],
     more: { text: "How exercises are shown", href: "/docs/logging/#moving-between-exercises" },
     alts: [
-      "An exercise's details: the mannequin doing a Smith machine RDL, and the muscles it works",
-      "The same exercise with the muscles layer on: the working muscles lit up on the mannequin",
+      "An exercise's details: the mannequin doing a barbell bench press, and the muscles it works",
+      "An exercise's details with the muscles layer on: the mannequin doing a barbell bench press, its working muscles lit up",
     ],
   },
   {
     screens: ["progress"],
     kicker: "Progression",
-    brief: "Your next weight, worked out for you",
     title: "Know what to lift next",
     text: "Every exercise gets its next weight from what you did last time, so you never have to guess.",
     points: [
@@ -76,7 +73,6 @@ const FEATURES = [
   {
     screens: ["check-in"],
     kicker: "Coaching",
-    brief: "A new plan when life gets in the way",
     title: "Replan when life gets in the way",
     text: "Sore wrist, short evening, hotel gym: tell Claude what's going on, and it proposes what to change.",
     points: [
@@ -88,8 +84,13 @@ const FEATURES = [
     alts: ["The coach asking what's going on: pain, short on time, another gym and more"],
   },
 ];
-// What a visitor asks first, under the buttons.
-const FACTS = ["Android 8.0 or newer", "Free in the beta", "No account, no ads, no trackers"];
+// What a visitor asks first, under the hero.
+// Each fact's icon is the path of a 24-unit drawing: a phone, a price tag, a shield.
+const FACTS = [
+  { text: "Android 8.0 or newer", icon: "M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v16a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 20V4A1.5 1.5 0 0 1 7 2.5ZM10 18.5h4" },
+  { text: "Free in the beta", icon: "M3.5 3.5h8l9 9-8 8-9-9v-8ZM8 8h.01" },
+  { text: "No account, no ads, no trackers", icon: "M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6l8-3ZM8.5 12l2.5 2.5 4.5-5" },
+];
 const TODAY = {
   screen: "today",
   alt: "Today in Overload Vector: the week's calendar and the next day to train, with the muscles it works",
@@ -110,7 +111,12 @@ const video = (name: string) => Object.entries(videos).find(([path]) => path.end
 
 type Clip = { webm: string; mp4: string };
 // What the live phone puts on its screen: each screenshot's address, per theme, and a clip's.
-const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip } }> = {};
+type Span = [from: number, to: number];
+const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip }; lit?: { light: Span; dark: Span } }> = {};
+// Technique's clip turns the muscles layer on and off: the seconds of each theme's clip between
+// which its muscles are lit. The list beside the phone lights and dims with it. Measure these
+// again whenever the clip is cut again (README, "Clips").
+const LIT: Record<string, { light: Span; dark: Span }> = { mannequin: { dark: [1.23, 4.87], light: [0.77, 4.4] } };
 // A section whose screen has a clip puts only that on the live phone: the clip shows the rest
 // (Technique's plays the mannequin with its muscles on, and off). The pictures keep them all.
 const played = (screen: string) => Boolean(video(`clip-${screen}-light.webm`));
@@ -132,7 +138,74 @@ for (const { screen, alt } of shown) {
     return { webm, mp4 };
   };
   screens[screen].clip = { light: clip("light"), dark: clip("dark") };
+  if (LIT[screen]) screens[screen].lit = LIT[screen];
 }
+
+// Program: the block as it is, a column a week and a row a training day. Four weeks are done,
+// and in week 5 the first day is done and the second is next.
+const WEEKS = Array.from({ length: 12 }, (_, week) => week + 1);
+const DAYS = ["A", "B", "C"];
+const NOW = { week: 5, day: 1 };
+const dayState = (week: number, day: number) =>
+  week < NOW.week || (week === NOW.week && day < NOW.day) ? "done" : week === NOW.week && day === NOW.day ? "now" : undefined;
+
+// Logging: how hard a set was, in the app's reps-in-reserve colours.
+const RIR = [
+  { label: "0", tone: "r0", say: "Nothing left: that was the last rep you had." },
+  { label: "1", tone: "r1", say: "1 in reserve: one more rep was there." },
+  { label: "2", tone: "r1", say: "2 in reserve: two more reps were there.", pressed: true },
+  { label: "3", tone: "r3", say: "3 in reserve: three more reps were there." },
+  { label: "4+", tone: "r3", say: "4 or more in reserve: an easy set." },
+];
+
+// Technique: the muscles a barbell bench press works, as the app's exercise details name them:
+// the main ones, then the "also" ones, which the list lights half as much.
+const MUSCLES = [
+  ["Chest", 1],
+  ["Front delts", 1],
+  ["Triceps", 1],
+  ["Forearms", 0.5],
+  ["Side delts", 0.5],
+] as const;
+
+// Progression: how the last session went, and the weight that follows from it.
+const OUTCOMES = [
+  { text: "Every set reached 8", kg: 62.5, why: "Up one step." },
+  { text: "In the range, short of 8", kg: 60, why: "The same weight, and one more rep." },
+  { text: "Two or more reps under 6", kg: 57.5, why: "One step down, about 5% lighter." },
+];
+// Three steps of the gym's weights, drawn as the mark's steps: each rises as far as it runs, and
+// its weight lies on its tread.
+const STEPS = [57.5, 60, 62.5];
+// The plates this gym has, heaviest first, in the app's colours, and what goes on each side of the
+// bar for a weight.
+const PLATES: [number, string][] = [[20, "#2f6fdb"], [10, "#3b9c55"], [5, "#f2f2f2"], [2.5, "#d9453b"], [1.25, "#a7adb4"]];
+function side(kg: number) {
+  const loaded: [number, string][] = [];
+  let left = kg / 2;
+  for (const plate of PLATES) {
+    while (left >= plate[0] - 1e-9) {
+      loaded.push(plate);
+      left -= plate[0];
+    }
+  }
+  return loaded;
+}
+const [RUN, RISE] = [2.7, 1];
+const project = ([x, y, z]: number[]) => [0.866 * (x - y), 0.5 * (x + y) - z];
+const rungs = STEPS.map((kg, at) => {
+  const high = (at + 1) * RISE;
+  const faces = {
+    side: [[RUN, -at, high - RISE], [RUN, -at, high], [RUN, -at - 1, high], [RUN, -at - 1, 0], [RUN, -at, 0]],
+    riser: [[0, -at, high], [RUN, -at, high], [RUN, -at, high - RISE], [0, -at, high - RISE]],
+    tread: [[0, -at, high], [RUN, -at, high], [RUN, -at - 1, high], [0, -at - 1, high]],
+  };
+  return { kg, faces: Object.entries(faces).map(([face, points]) => ({ face, points: points.map(project) })), label: project([RUN / 2, -at - 0.5, high]) };
+}).reverse();
+const corners = rungs.flatMap(({ faces }) => faces.flatMap(({ points }) => points));
+const [left, top] = [0, 1].map((axis) => Math.min(...corners.map((point) => point[axis])) - 0.05);
+const [right, bottom] = [0, 1].map((axis) => Math.max(...corners.map((point) => point[axis])) + 0.05);
+const path = (points: number[][]) => `M${points.map((point) => point.map((value) => value.toFixed(3)).join(",")).join("L")}Z`;
 ---
 
 {/* Before the first paint, so the page never jumps from one layout to the other. */}
@@ -162,60 +235,153 @@ for (const { screen, alt } of shown) {
 </script>
 
 <div class="home">
-  <div class="home-copy">
-    <section class="hero">
-      <img class="icon" src="/favicon.svg" alt="" width="72" height="72" />
-      <h1 id="_top" data-page-title>{data.title}</h1>
-      {tagline && <p class="tagline">{tagline}</p>}
-      <div class="actions">
-        {actions.map(({ icon, link, text, variant }) => (
-          <LinkButton href={link} variant={variant} icon={icon?.name}>{text}</LinkButton>
-        ))}
-      </div>
-      {/* The app at a glance: each job in a line, leading to its section below. */}
-      <ul class="glance">
-        {FEATURES.map(({ kicker, brief }, index) => (
+  <div class="home-top grid">
+    {/* Behind the live phone, and behind the opening still where the stills stand beside the text. */}
+    <BigMark />
+    <div class="home-copy">
+      <section class="hero">
+        <h1 id="_top" data-page-title><span>Overload</span> <span>Vector</span></h1>
+        <p class="lead">
+          <b>A strength-training app that runs your program set by set.</b> It works out every weight from your last
+          session, and replans when your week doesn't go to plan.
+        </p>
+        <div class="actions">
+          <a class="ov-go" href="#start">Get the beta</a>
+          <a class="ov-alt" href={INSTALL}>Read the docs</a>
+        </div>
+        <div class="phone-still">
+          {/* Behind the opening still on a narrow screen. */}
+          <BigMark />
+          <Image src={still("phone-today-light")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
+          <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
+        </div>
+      </section>
+      <ul class="facts">
+        {FACTS.map(({ text, icon }) => (
           <li>
-            <a href={`#${kicker.toLowerCase()}`}>
-              <span class="number">{String(index + 1).padStart(2, "0")}</span>
-              <strong>{kicker}</strong>
-              <span>{brief}</span>
-            </a>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon} /></svg>
+            {text}
           </li>
         ))}
       </ul>
-      <ul class="facts">
-        {FACTS.map((fact) => <li>{fact}</li>)}
-      </ul>
-      <div class="phone-still">
-        <Image src={still("phone-today-light")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
-        <Image src={still("phone-today-dark")} alt={TODAY.alt} width={360} densities={[1, 2]} loading="lazy" />
-      </div>
-    </section>
-    {FEATURES.map(({ screens, kicker, title, text, points, more, alts }, index) => (
-      <section class="home-feature" id={kicker.toLowerCase()} data-screen={live(screens).join(" ")}>
-        <p class="kicker"><span>{String(index + 1).padStart(2, "0")}</span>{kicker}</p>
-        <h2>{title}</h2>
-        <p class="lead">{text}</p>
-        <ul class="points">
-          {points.map((point) => <li>{point}</li>)}
-        </ul>
-        <a class="more" href={more.href}>{more.text}<span aria-hidden="true"> →</span></a>
-        <div class="phone-still">
-          {screens.map((screen, at) => (
-            <Fragment>
-              <Image src={still(`phone-${screen}-light`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
-              <Image src={still(`phone-${screen}-dark`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
-            </Fragment>
-          ))}
-        </div>
-      </section>
-    ))}
+      {FEATURES.map(({ screens, kicker, title, text, points, more, alts }) => (
+        <section class="home-feature" id={kicker.toLowerCase()} data-screen={live(screens).join(" ")}>
+          <h2>{title}</h2>
+          <p class="lead">{text}</p>
+          <div class="inst">
+            {kicker === "Program" && (
+              <Fragment>
+                <div class="block" role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next">
+                  <span></span>
+                  {WEEKS.map((week) => <span>{week}</span>)}
+                  {DAYS.map((day, row) => (
+                    <Fragment>
+                      <span class="day">Day {day}</span>
+                      {WEEKS.map((week) => <i class={dayState(week, row)}></i>)}
+                    </Fragment>
+                  ))}
+                </div>
+                <p class="note"><b>Full Body, 3 days.</b> 12 weeks, 60 minutes a day, built for the gym you set up.</p>
+              </Fragment>
+            )}
+            {kicker === "Logging" && (
+              <Fragment>
+                <div class="set">
+                  <span class="fig">80<small>kg</small></span>
+                  <span class="x">×</span>
+                  <span class="fig">6<small>reps</small></span>
+                </div>
+                <div class="rir" role="group" aria-label="Reps in reserve">
+                  {RIR.map(({ label, tone, say, pressed }) => (
+                    <button type="button" class={tone} aria-pressed={pressed ? "true" : "false"} data-say={say}>{label}</button>
+                  ))}
+                  <span class="note" id="rir-say" aria-live="polite">{RIR.find(({ pressed }) => pressed)?.say}</span>
+                </div>
+              </Fragment>
+            )}
+            {kicker === "Technique" && (
+              <Fragment>
+                <ul class="muscles" aria-label="The muscles a barbell bench press works">
+                  {MUSCLES.map(([muscle, share]) => <li class={share === 1 ? "main" : undefined} style={`--share:${share}`}>{muscle}</li>)}
+                </ul>
+              </Fragment>
+            )}
+            {kicker === "Progression" && (
+              <Fragment>
+                <p class="ask">Last time: 60 kg, aiming for 6 to 8 reps with 2 in reserve. How did it go?</p>
+                <div class="outcomes" role="group" aria-label="How the last session went">
+                  {OUTCOMES.map(({ text, kg, why }, at) => (
+                    <button type="button" data-kg={kg} data-why={why} data-side={JSON.stringify(side(kg))} aria-pressed={at === 0 ? "true" : "false"}>{text}</button>
+                  ))}
+                </div>
+                <div class="rungs">
+                  <svg id="rungs" viewBox={`${left} ${top} ${right - left} ${bottom - top}`} role="img" aria-label="Three steps of this gym's weights: 57.5, 60 and 62.5 kg">
+                    {rungs.map(({ kg, faces, label }) => (
+                      <g data-kg={kg} class={kg === OUTCOMES[0].kg ? "on" : undefined}>
+                        {faces.map(({ face, points }) => <path class={face} d={path(points)}></path>)}
+                        <text transform={`matrix(.866,.5,-.866,.5,${label.map((value) => value.toFixed(3)).join(",")})`}>{kg}</text>
+                      </g>
+                    ))}
+                  </svg>
+                  <div class="verdict-fig" aria-live="polite">
+                    <div class="fig"><span id="next-kg">{OUTCOMES[0].kg}</span><small>kg</small></div>
+                    <p><span id="next-why">{OUTCOMES[0].why}</span> <span class="aside">A side, on plates this gym has:</span></p>
+                    <div class="plates" id="next-plates">
+                      {side(OUTCOMES[0].kg).map(([size, colour]) => <span><i style={`--c:${colour}`}></i>1 × {size}</span>)}
+                    </div>
+                  </div>
+                </div>
+              </Fragment>
+            )}
+            {kicker === "Coaching" && (
+              <div class="change">
+                <p class="said"><b>Something hurts.</b> My wrist, on the Smith machine bench press.</p>
+                <h3>For a week: an easier-on-the-joints alternative and one more rep in reserve.</h3>
+                <dl>
+                  <dt>Exercise</dt>
+                  <dd><s>Smith machine bench press</s> Machine chest press</dd>
+                  <dt>Reps in reserve</dt>
+                  <dd><s>2</s> 3</dd>
+                </dl>
+                <p class="verdict"><span>Ask for changes</span><span>Accept</span></p>
+              </div>
+            )}
+          </div>
+          <ul class="points">
+            {points.map((point) => <li>{point}</li>)}
+          </ul>
+          <a class="more" href={more.href}>{more.text}</a>
+          <div class="phone-still">
+            {/* Technique's is its second screen, the mannequin with its muscles lit, as the list is. */}
+            <Image src={still(`phone-${screens.at(-1)}-light`)} alt={alts.at(-1)!} width={360} densities={[1, 2]} loading="lazy" />
+            <Image src={still(`phone-${screens.at(-1)}-dark`)} alt={alts.at(-1)!} width={360} densities={[1, 2]} loading="lazy" />
+          </div>
+        </section>
+      ))}
+    </div>
+    <div class="home-stage" data-screens={JSON.stringify(screens)}>
+      <Image class="stage-opening" src={still("phone-today-light")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+      <Image class="stage-opening" src={still("phone-today-dark")} alt="" width={360} densities={[1, 2]} loading="lazy" />
+      <canvas role="img" aria-label={TODAY.alt}></canvas>
+    </div>
   </div>
-  <div class="home-stage" data-screens={JSON.stringify(screens)}>
-    <Image class="stage-opening" src={still("phone-today-light")} alt="" width={360} densities={[1, 2]} loading="lazy" />
-    <Image class="stage-opening" src={still("phone-today-dark")} alt="" width={360} densities={[1, 2]} loading="lazy" />
-    <canvas role="img" aria-label={TODAY.alt}></canvas>
+
+  <div class="home-closing grid">
+    <section>
+      <h2>Your training stays yours</h2>
+      <p>
+        No account, no ads and no trackers. Your training lives on your phone, and leaves it only for what you switch
+        on. Read the <a href="/privacy/">privacy policy</a>.
+      </p>
+    </section>
+  </div>
+  <div class="home-cta grid" id="start">
+    <Mark />
+    <h2>Start training</h2>
+    <div class="actions">
+      <a class="ov-go" href={BETA}>Get the beta</a>
+      <a class="ov-alt" href={INSTALL}>Install guide</a>
+    </div>
   </div>
 </div>
 
@@ -240,54 +406,202 @@ for (const { screen, alt } of shown) {
   start();
 </script>
 
-<style>
-  .hero,
-  .home-feature {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.25rem;
-    padding-block: 2.5rem;
-    text-align: center;
+<script>
+  // The sections' small working models. Each is whole without this: the page says what a first
+  // choice gives, and this lets the reader make another.
+  const all = <T extends Element>(selector: string) => [...document.querySelectorAll<T>(selector)];
+  const press = (pressed: Element, among: Element[]) => among.forEach((one) => one.setAttribute("aria-pressed", String(one === pressed)));
+
+  // Logging: pick how hard the set was.
+  const chips = all<HTMLButtonElement>(".rir button");
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      press(chip, chips);
+      document.querySelector("#rir-say")!.textContent = chip.dataset.say!;
+    });
   }
-  .icon {
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 1rem;
-    box-shadow: 0 0 0 1px var(--sl-color-gray-5);
+
+  // Progression: the step you take, and what goes on each side of the bar for it.
+  const outcomes = all<HTMLButtonElement>(".outcomes button");
+  function next(outcome: HTMLButtonElement) {
+    press(outcome, outcomes);
+    const kg = Number(outcome.dataset.kg);
+    for (const step of all<SVGGElement>("#rungs g")) step.classList.toggle("on", Number(step.dataset.kg) === kg);
+    document.querySelector("#next-kg")!.textContent = String(kg);
+    document.querySelector("#next-why")!.textContent = outcome.dataset.why!;
+    document.querySelector("#next-plates")!.replaceChildren(
+      ...(JSON.parse(outcome.dataset.side!) as [number, string][]).map(([size, colour]) => {
+        const plate = document.createElement("span");
+        const swatch = document.createElement("i");
+        swatch.style.setProperty("--c", colour);
+        plate.append(swatch, `1 × ${size}`);
+        return plate;
+      }),
+    );
+  }
+  for (const outcome of outcomes) outcome.addEventListener("click", () => next(outcome));
+</script>
+<style>
+  /* The home page is as wide as the window: Starlight's column and its padding step aside. */
+  :global(:root[data-home]) {
+    --sl-content-width: 100%;
+    --sl-content-pad-x: 0rem;
+  }
+  :global(:root[data-home] .content-panel) {
+    padding-block: 0;
+  }
+  :global(:root[data-home] .sl-container > *) {
+    margin-top: 0;
+  }
+  .home {
+    --head: var(--sl-nav-height);
+    overflow-x: clip;
+    font-size: clamp(1rem, calc(1.15 * var(--ov-u)), 1.375rem);
+    line-height: 1.55;
+    color: var(--ov-ink);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: var(--ov-gut);
+    padding-inline: var(--ov-m);
+  }
+  .home-copy,
+  .home-closing section,
+  .home-cta > * {
+    grid-column: 1 / -1;
+  }
+  h1,
+  h2,
+  .fig {
+    font-family: var(--ov-font-title);
+    font-stretch: 75%;
+    font-weight: 800;
+    font-variant-numeric: normal;
+    line-height: 0.86;
+    color: inherit;
   }
   h1,
   h2 {
-    font-family: var(--ov-font-title);
-    line-height: var(--sl-line-height-headings);
-    color: var(--sl-color-white);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
     text-wrap: balance;
   }
-  h1 {
-    font-size: clamp(var(--sl-text-4xl), calc(0.25rem + 6vw), var(--sl-text-6xl));
-    font-weight: 700;
-    letter-spacing: -0.02em;
-  }
   h2 {
-    font-size: clamp(var(--sl-text-2xl), calc(0.5rem + 3vw), var(--sl-text-4xl));
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-size: clamp(2.75rem, calc(5.4 * var(--ov-u)), 8rem);
   }
-  .tagline,
   .lead {
-    max-width: 34rem;
-    font-size: clamp(var(--sl-text-base), calc(0.5rem + 1.2vw), var(--sl-text-xl));
-    color: var(--sl-color-gray-2);
+    font-size: 1.2em;
+    line-height: 1.45;
+    color: var(--ov-muted);
     text-wrap: pretty;
+  }
+  .lead b,
+  .note b {
+    font-weight: 500;
+    color: var(--ov-ink);
+  }
+  .note {
+    font-size: 0.85em;
+    color: var(--ov-muted);
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .home :global(:focus-visible) {
+    outline: 2px solid var(--ov-ink);
+    outline-offset: 3px;
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.75rem 0.5em;
+  }
+
+  /* ---------- The hero: the name, and the phone standing in front of the mark. ---------- */
+  .home-top {
+    position: relative;
+  }
+  .hero {
+    padding-block: 1.75rem 0;
+  }
+  .hero h1 {
+    font-size: 23.5vw;
+    line-height: 0.82;
+  }
+  /* A word a line, each whole: on a desk the name runs on under the phone's edge. */
+  .hero h1 span {
+    display: block;
+    white-space: nowrap;
+  }
+  .hero .lead,
+  .hero .actions {
+    margin-top: 1.5rem;
+  }
+  .hero .lead {
+    max-width: 27em;
+  }
+  /* The big mark: the one in the hero's still on a narrow screen, the page's own on a wide one. */
+  .home-top > :global(.mark-big) {
+    display: none;
+  }
+  .hero .phone-still {
+    position: relative;
+  }
+  .hero .phone-still :global(.mark-big) {
+    z-index: -1;
+    right: -22vw;
+    bottom: 2%;
+    width: auto;
+    height: 96%;
+  }
+  .home-copy {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+  }
+  .facts {
+    margin-top: 2.5rem;
+    border-block: 1px solid var(--ov-line);
+  }
+  .facts li {
+    display: flex;
+    align-items: center;
+    gap: 0.7em;
+    padding: 0.875rem 0;
+    font-weight: 500;
+  }
+  .facts svg {
+    flex: none;
+    width: 1.5em;
+    height: 1.5em;
+    fill: none;
+    stroke: var(--ov-signal);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .facts li + li {
+    border-top: 1px solid var(--ov-line);
+  }
+
+  /* ---------- The phone. ---------- */
+  .phone-still {
+    display: flex;
     justify-content: center;
-    gap: 1rem 2rem;
+    margin-top: 2.5rem;
   }
   .phone-still :global(img) {
-    width: min(20rem, 80vw);
+    width: min(84%, 22rem);
     height: auto;
   }
   /* Each still is there in both themes, a moonstone phone for the light one and a charcoal
@@ -296,210 +610,566 @@ for (const { screen, alt } of shown) {
   :global(:root[data-theme="light"]) :is(.phone-still, .home-stage) :global(img[src*="-dark."]) {
     display: none;
   }
-  .facts,
-  .glance,
-  .points {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-  .facts {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.5rem;
-    font-size: var(--sl-text-sm);
-    color: var(--sl-color-gray-2);
-  }
-  .facts li {
-    padding: 0.3rem 0.8rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 99rem;
-  }
-  /* The app at a glance, as a contents list: a rule between the lines, no boxes. */
-  .glance {
-    width: min(100%, 36rem);
-    border-block: 1px solid var(--sl-color-gray-5);
-    text-align: start;
-  }
-  .glance li + li {
-    margin: 0;
-    border-top: 1px solid var(--sl-color-gray-5);
-  }
-  .glance a {
-    display: grid;
-    grid-template-columns: 2.25rem 1fr;
-    align-items: baseline;
-    padding-block: 0.7rem;
-    color: var(--sl-color-gray-2);
-    font-size: var(--sl-text-sm);
-    line-height: 1.5;
-    text-decoration: none;
-  }
-  .glance .number {
-    grid-row: span 2;
-    font-variant-numeric: tabular-nums;
-    color: var(--sl-color-gray-3);
-  }
-  .glance strong {
-    font-family: var(--ov-font-title);
-    font-size: var(--sl-text-base);
-    font-weight: 600;
-    color: var(--sl-color-white);
-  }
-  .glance a:hover strong {
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
-  }
-  /* With room for it, each line is one: the name in its own column, what it does beside it. */
-  @media (min-width: 34rem) {
-    .glance a {
-      grid-template-columns: 2.25rem 8.5rem 1fr;
-    }
-    .glance .number {
-      grid-row: auto;
-    }
-  }
-  /* A feature: its number and name, what it does, three particulars, and where to read on. */
-  .kicker {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: var(--sl-text-sm);
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--sl-color-gray-3);
-  }
-  .kicker span {
-    padding: 0.15rem 0.55rem;
-    border: 1px solid var(--sl-color-gray-4);
-    border-radius: 0.4rem;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.04em;
-    color: var(--sl-color-white);
-  }
-  .points {
-    display: grid;
-    gap: 0.6rem;
-    width: min(100%, 30rem);
-    text-align: start;
-    color: var(--sl-color-gray-1);
-  }
-  .points li {
-    display: flex;
-    align-items: baseline;
-    gap: 0.75rem;
-    padding: 0.7rem 1rem;
-    border: 1px solid var(--sl-color-gray-5);
-    border-radius: 0.75rem;
-    background: color-mix(in srgb, var(--sl-color-gray-6) 60%, transparent);
-  }
-  .points li::before {
-    content: "";
-    flex: none;
-    width: 0.45rem;
-    height: 0.45rem;
-    border-radius: 0.1rem;
-    background: var(--sl-color-white);
-    translate: 0 -0.1rem;
-  }
-  .more {
-    font-weight: 600;
-    color: var(--sl-color-white);
-    text-decoration: none;
-    border-bottom: 1px solid var(--sl-color-gray-4);
-  }
-  .more:hover {
-    border-color: var(--sl-color-white);
+  /* The phone hangs in front of the page, lit from the upper left, and throws a shadow on it. */
+  .phone-still :global(img),
+  .home-stage :global(.stage-opening),
+  canvas {
+    filter: drop-shadow(calc(1.2 * var(--ov-u)) calc(1.8 * var(--ov-u)) calc(1.6 * var(--ov-u)) var(--ov-shadow));
   }
   .home-stage {
     display: none;
   }
-  /* Behind the phone: a pool of light and a grid of dots that fades out around it, so the
-     phone stands in a space, not on a flat page. */
-  .phone-still,
-  .home-stage {
-    --pool: radial-gradient(
-      ellipse 62% 50% at 50% 48%,
-      color-mix(in srgb, var(--sl-color-white) 20%, transparent),
-      transparent 72%
-    );
-    --dots: radial-gradient(circle, color-mix(in srgb, var(--sl-color-white) 26%, transparent) 1px, transparent 1.6px);
+
+  /* ---------- What the app does: five sections beside one phone. ---------- */
+  .home-feature {
+    padding: 5.5rem 0 0;
   }
-  .phone-still {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 1.5rem 2rem;
-    background: var(--pool);
+  .home-feature h2 {
+    margin-bottom: 0.42em;
   }
-  /* The phone hangs in front of the page, and throws a shadow on it. */
-  .phone-still :global(img),
-  .home-stage :global(.stage-opening),
-  canvas {
-    filter: drop-shadow(0 1.75rem 2.25rem rgb(0 0 0 / 0.55));
+  .home-feature .lead {
+    max-width: 31em;
   }
-  :global(:root[data-theme="light"]) :is(.phone-still :global(img), .home-stage :global(.stage-opening), canvas) {
-    filter: drop-shadow(0 1.75rem 2.25rem rgb(20 20 30 / 0.3));
+  .inst,
+  .points {
+    margin-top: clamp(1.75rem, 4.5vh, 3.5rem);
   }
-  .home-stage::before,
-  .home-stage::after {
-    content: "";
-    position: absolute;
-    inset: 0;
+  .points {
+    display: grid;
+    column-gap: var(--ov-gut);
   }
-  .home-stage::before {
-    background: var(--pool);
+  .points li {
+    padding-block: 0.8em;
+    border-top: 1px solid var(--ov-line);
+    font-size: 0.92em;
+    line-height: 1.45;
+    text-wrap: pretty;
   }
-  .home-stage::after {
-    background: var(--dots) center / 1.5rem 1.5rem;
-    mask-image: radial-gradient(ellipse 62% 56% at 50% 50%, #000 15%, transparent 78%);
+  .more {
+    display: inline-block;
+    margin-top: 1.8em;
+    font-weight: 500;
+    color: var(--ov-ink);
+    text-decoration: underline 2px var(--ov-signal-ink);
+    text-underline-offset: 5px;
+  }
+  .more:hover {
+    text-decoration-color: var(--ov-ink);
   }
 
+  /* Program: the block drawn as it is, a column a week, a row a training day. */
+  .block {
+    display: grid;
+    grid-template-columns: auto repeat(12, minmax(0, 1fr));
+    gap: 4px;
+    align-items: center;
+  }
+  .block span {
+    font-size: 0.8em;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    color: var(--ov-muted);
+  }
+  .block span.day {
+    padding-right: 0.9em;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--ov-ink);
+  }
+  .block i {
+    height: clamp(1.375rem, calc(2 * var(--ov-u)), 2.75rem);
+    border: 1px solid var(--ov-line);
+    background: var(--ov-raised);
+  }
+  .block i.done {
+    border-color: var(--ov-muted);
+    background: var(--ov-muted);
+  }
+  .block i.now {
+    border-color: var(--ov-signal);
+    background: var(--ov-signal);
+  }
+  .inst .note {
+    margin-top: 1em;
+  }
+
+  /* Logging: one set as the app takes it. */
+  .set {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 0.2em calc(2.2 * var(--ov-u));
+  }
+  .fig {
+    font-size: clamp(4.5rem, calc(9 * var(--ov-u)), 13.75rem);
+    line-height: 0.8;
+    white-space: nowrap;
+  }
+  .fig small {
+    margin-left: 0.3em;
+    font: 600 0.18em / 1 var(--sl-font), var(--sl-font-system);
+    color: var(--ov-muted);
+  }
+  .set .x {
+    font-family: var(--ov-font-title);
+    font-stretch: 75%;
+    font-weight: 800;
+    font-size: clamp(2.5rem, calc(5 * var(--ov-u)), 7.5rem);
+    line-height: 0.9;
+    color: var(--ov-muted);
+  }
+  /* Reps in reserve, in the app's colours. A pressed chip carries the darker of the two inks its
+     colour takes, so its number reads on it in both themes. */
+  .rir {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6em;
+    margin-top: 1.4em;
+  }
+  .rir .r0 {
+    --c: #d5544a;
+    --t: #f2c8c5;
+  }
+  .rir .r1 {
+    --c: #aa741e;
+    --t: #f4e1c2;
+  }
+  .rir .r3 {
+    --c: #4a8983;
+    --t: #d1e6e4;
+  }
+  .rir button {
+    --on: #111;
+    min-width: 2.4em;
+    height: 2.4em;
+    padding: 0 0.6em;
+    border: 2px solid var(--c);
+    border-radius: 8px;
+    font-size: 1.25em;
+    font-weight: 600;
+    color: var(--t);
+  }
+  :global(:root[data-theme="light"]) .rir {
+    .r0 {
+      --c: #a52f26;
+    }
+    .r1 {
+      --c: #7d5516;
+    }
+    .r3 {
+      --c: #366460;
+    }
+    button {
+      --t: var(--c);
+      --on: #fff;
+    }
+  }
+  .rir button[aria-pressed="true"] {
+    background: var(--c);
+    color: var(--on);
+  }
+  .rir .note {
+    margin-left: 0.6em;
+  }
+
+  /* Technique: the muscles a lift works, lit as the mannequin lights them. */
+  .muscles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5em 1.6em;
+    max-width: 40em;
+  }
+  .muscles li {
+    display: flex;
+    align-items: center;
+    gap: 0.55em;
+    font-weight: 500;
+  }
+  .muscles li::before {
+    content: "";
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--ov-lit) calc(var(--share) * 100%), var(--ov-line));
+    transition:
+      background 0.3s,
+      box-shadow 0.3s;
+  }
+  .muscles li.main::before {
+    box-shadow: 0 0 0.7em var(--ov-lit);
+  }
+  /* The live phone's clip turns the muscles layer on and off, and the list goes with it. Beside a
+     still it stays lit, whatever the clip last showed. */
+  :global(:root[data-home="live"]) .home:has(.home-stage[data-unlit]) .muscles li::before {
+    background: var(--ov-line);
+    box-shadow: none;
+  }
+
+  /* Progression: say how the last session went, and see the step you take. The steps are the mark's. */
+  .ask {
+    margin-bottom: 0.8em;
+    font-weight: 500;
+  }
+  .outcomes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6em;
+  }
+  .outcomes button {
+    padding: 0.8em 0.9em;
+    border: 1px solid var(--ov-rim);
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--ov-muted);
+  }
+  .outcomes button:hover {
+    color: var(--ov-ink);
+  }
+  .outcomes button[aria-pressed="true"] {
+    border-color: var(--ov-primary);
+    background: var(--ov-primary);
+    color: var(--ov-on-primary);
+  }
+  .rungs {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.75rem;
+    margin-top: 1.75rem;
+  }
+  .rungs svg {
+    flex: none;
+    width: 62vw;
+    height: auto;
+    overflow: visible;
+  }
+  /* Solid, as the mark is: the tread mid, the riser in shade, the side in light, seams in the page's colour. */
+  .rungs path {
+    stroke: var(--ov-bg);
+    stroke-width: 0.045;
+    stroke-linejoin: round;
+    transition: fill 0.25s;
+  }
+  .rungs .tread {
+    fill: var(--ov-step-tread);
+  }
+  .rungs .riser {
+    fill: var(--ov-step-riser);
+  }
+  .rungs .side {
+    fill: var(--ov-step-side);
+  }
+  .rungs g.on .tread {
+    fill: var(--ov-signal);
+  }
+  .rungs g.on .riser {
+    fill: color-mix(in srgb, var(--ov-signal), #000 50%);
+  }
+  .rungs g.on .side {
+    fill: color-mix(in srgb, var(--ov-signal), #000 22%);
+  }
+  .rungs text {
+    font: 800 0.56px var(--ov-font-title);
+    font-stretch: 75%;
+    font-variant-numeric: normal;
+    fill: var(--ov-muted);
+    text-anchor: middle;
+    dominant-baseline: central;
+    transition: fill 0.25s;
+  }
+  .rungs g.on text {
+    fill: var(--ov-on-signal);
+  }
+  .verdict-fig p {
+    max-width: 22em;
+    margin-top: 0.9em;
+    font-size: 0.92em;
+  }
+  .verdict-fig p .aside {
+    color: var(--ov-muted);
+  }
+  /* The load a side, written as the app writes it. */
+  .plates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3em 1em;
+    margin-top: 0.5em;
+    font-size: 0.92em;
+    font-weight: 500;
+  }
+  .plates :global(span) {
+    display: flex;
+    align-items: center;
+    gap: 0.45em;
+  }
+  .plates :global(i) {
+    width: 0.8em;
+    height: 0.8em;
+    background: var(--c);
+    outline: 1px solid rgb(128 128 128 / 0.4);
+  }
+
+  /* Coaching: a Change as Claude proposes it. Nothing here is the signal colour: it isn't yours to press yet. */
+  .change {
+    max-width: 38em;
+    border: 1px solid var(--ov-line);
+    background: var(--ov-raised);
+  }
+  .change > * {
+    margin: 0;
+    padding: 1em 1.3em;
+  }
+  .change .said {
+    border-bottom: 1px solid var(--ov-line);
+    color: var(--ov-muted);
+  }
+  .change .said b {
+    font-weight: 500;
+    color: var(--ov-ink);
+  }
+  .change h3 {
+    padding-bottom: 0.2em;
+    font: 600 1.1em / 1.35 var(--sl-font), var(--sl-font-system);
+    color: var(--ov-ink);
+  }
+  .change dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35em 1.2em;
+    padding-top: 0.6em;
+    font-size: 0.92em;
+  }
+  .change dd {
+    margin: 0;
+  }
+  .change dt,
+  .change s {
+    color: var(--ov-muted);
+  }
+  .change .verdict {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1.6em;
+    border-top: 1px solid var(--ov-line);
+    font-size: 0.92em;
+    font-weight: 500;
+  }
+  .change .verdict span:last-child {
+    /* Accept as the app draws it: its accent in each theme, the lit muscles' orange. */
+    padding: 0.6em 1.3em;
+    border-radius: 8px;
+    background: var(--ov-lit);
+    color: var(--ov-on-signal);
+  }
+
+  /* ---------- What the page ends with: privacy, then the band that offers the beta. ---------- */
+  .home-closing {
+    margin-top: clamp(5rem, 14vh, 12.5rem);
+  }
+  .home-closing section {
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--ov-line);
+  }
+  .home-closing h2 {
+    margin-bottom: 0.4em;
+  }
+  .home-closing p {
+    max-width: 31em;
+    color: var(--ov-muted);
+  }
+  .home-closing p a {
+    color: var(--ov-ink);
+  }
+  .home-cta {
+    --s: clamp(1.75rem, calc(4.2 * var(--ov-u)), 6.875rem);
+    position: relative;
+    overflow: hidden;
+    align-items: end;
+    row-gap: 2rem;
+    margin-top: clamp(4rem, 10vh, 8.75rem);
+    padding-block: clamp(3.5rem, 10vh, 8.75rem);
+    background: var(--ov-signal);
+    color: var(--ov-on-signal);
+  }
+  .home-cta h2 {
+    font-size: clamp(4rem, calc(11 * var(--ov-u)), 17.5rem);
+    line-height: 0.8;
+  }
+  .home-cta .actions {
+    position: relative;
+  }
+  /* On the orange band the primary action is the app's ink button, and the other its outlined one. */
+  .home-cta .ov-go {
+    background: #1c1c1f;
+    color: #fff;
+  }
+  .home-cta .ov-alt {
+    background: none;
+    box-shadow: inset 0 0 0 1px var(--ov-on-signal);
+    color: var(--ov-on-signal);
+  }
+  .home-cta .ov-alt:hover {
+    background: rgb(0 0 0 / 0.1);
+    filter: none;
+  }
+  .home-cta :global(:focus-visible) {
+    outline-color: var(--ov-on-signal);
+  }
+  .home-cta :global(svg) {
+    position: absolute;
+    top: 50%;
+    right: calc(-4 * var(--ov-u));
+    width: auto;
+    height: 150%;
+    color: rgb(0 0 0 / 0.1);
+    translate: 0 -50%;
+  }
+
+  /* ---------- With room for it: twelve columns, the words in eight and the phone in four. ---------- */
+  @media (min-width: 60rem) {
+    .grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+    /* The words take seven columns and the phone four, with one free between them. */
+    .home-copy,
+    .home-closing section,
+    .home-cta h2 {
+      grid-column: 1 / 8;
+    }
+    .home-cta .actions {
+      grid-column: 7 / 13;
+      justify-content: flex-end;
+      margin-right: calc(2.4 * var(--s));
+    }
+    .hero {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: calc(100vh - var(--head));
+      padding-block: calc(2.4 * var(--ov-u));
+    }
+    .hero h1 {
+      font-size: calc(17.4 * var(--ov-u));
+      line-height: 0.8;
+    }
+    .hero .lead {
+      max-width: min(27em, 72%);
+      margin-top: calc(2.6 * var(--ov-u));
+    }
+    .hero .actions {
+      margin-top: calc(2.2 * var(--ov-u));
+    }
+    .hero .phone-still :global(.mark-big) {
+      display: none;
+    }
+    .home-top > :global(.mark-big) {
+      display: block;
+      z-index: 0;
+      top: calc((100vh - var(--head)) / 2);
+      right: calc(var(--ov-m) - 9 * var(--ov-u));
+      width: auto;
+      height: calc(62 * var(--ov-u));
+      translate: 0 -47%;
+    }
+    .facts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      column-gap: var(--ov-gut);
+      margin-top: 0;
+    }
+    .facts li {
+      padding: 1.2em 0;
+    }
+    .facts li + li {
+      margin-left: calc(-1 * var(--ov-gut));
+      padding-left: var(--ov-gut);
+      border-top: 0;
+      border-left: 1px solid var(--ov-line);
+    }
+    .home-feature {
+      padding: clamp(4.5rem, 12vh, 10rem) 0 2.5rem;
+    }
+    .points {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .points li {
+      padding-block: 0.8em 0;
+    }
+    .outcomes button {
+      padding: 0.85em 1.3em;
+      font-size: 1em;
+    }
+    .rungs {
+      flex-direction: row;
+      align-items: flex-end;
+      gap: calc(2.4 * var(--ov-u));
+      margin-top: calc(2 * var(--ov-u));
+    }
+    .rungs svg {
+      width: calc(21 * var(--ov-u));
+    }
+    /* Without the live phone, each section's still stands in the phone's columns beside it. */
+    :global(:root[data-home="still"]) {
+      .home-copy {
+        grid-column: 1 / -1;
+      }
+      .hero,
+      .home-feature {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        column-gap: var(--ov-gut);
+        align-content: center;
+      }
+      :is(.hero, .home-feature) > :not(.phone-still) {
+        grid-column: 1;
+      }
+      .phone-still {
+        grid-column: 2;
+        grid-row: 1 / span 8;
+        align-self: center;
+        position: relative;
+        z-index: 1;
+        margin-top: 0;
+      }
+      .phone-still :global(img) {
+        width: 100%;
+      }
+    }
+  }
   /* The live phone: the texts scroll past on one side, the phone stays on the other. */
   :global(:root[data-home="live"]) {
-    .home {
-      display: grid;
-      grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
-      column-gap: 2rem;
-    }
-    .hero,
     .home-feature {
-      align-items: flex-start;
-      justify-content: center;
-      min-height: 56vh;
-      text-align: start;
-    }
-    /* A link to a section lands it in the middle of the view, on the first of its screens. */
-    .home-feature {
+      min-height: 92vh;
+      /* A link to a section lands it in the middle of the view, on the first of its screens. */
       scroll-margin-top: 19vh;
     }
     /* Room below the last section, so the phone is still pinned while it is read. */
     .home-copy {
-      padding-bottom: 18vh;
-    }
-    .facts {
-      justify-content: flex-start;
-    }
-    .hero {
-      min-height: calc(100vh - var(--sl-nav-height) - 3rem);
-      padding-block: 0 4rem;
-    }
-    .actions {
-      justify-content: flex-start;
+      padding-bottom: 10vh;
     }
     .phone-still {
       display: none;
     }
     .home-stage {
       display: block;
-      /* Pinned where it already stands, below the header and the page's own top margin, so it
-         doesn't ride up with the first of the scroll. */
+      grid-column: 9 / 13;
+      /* The model takes 0.74 of its canvas's height (phone.js, FILL). For the phone to stand
+         nearly as tall as the view under the header, the canvas is taller than that view, and
+         as much of it lies above as below. */
+      --view: calc(100vh - var(--head));
+      --over: calc(var(--view) * 0.08);
+      /* Pinned where it already stands, so it doesn't ride up with the first of the scroll. */
       position: sticky;
-      top: calc(var(--sl-nav-height) + 3rem);
+      z-index: 1;
+      top: calc(var(--head) - var(--over));
       align-self: start;
-      height: calc(100vh - var(--sl-nav-height) - 3rem);
+      height: calc(var(--view) + 2 * var(--over));
+      margin-top: calc(-1 * var(--over));
+      pointer-events: none;
     }
     /* The phone as the page opens, drawn ahead of time, holds the place until the model has
        loaded. */
