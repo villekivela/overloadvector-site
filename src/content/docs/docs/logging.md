@@ -76,8 +76,8 @@ session's exercises with a dot for each set.
 
 ![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises-light.png)
 ![The exercise rail open at the right edge, with a dot for each set](../../../assets/shots/shot-exercises-dark.png)
-![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise-light.png)
-![An exercise's details: the mannequin doing the movement, the exercise's muscles and its machine](../../../assets/shots/shot-exercise-dark.png)
+![An exercise's details: the mannequin doing a barbell bench press, the muscles it works and a note on technique](../../../assets/shots/shot-exercise-light.png)
+![An exercise's details: the mannequin doing a barbell bench press, the muscles it works and a note on technique](../../../assets/shots/shot-exercise-dark.png)
 
 </div>
 
