@@ -102,9 +102,9 @@ const SCREEN_VERTEX = `
 
 // The screen lights itself: no lamp or tone mapping changes the app's colours, and its picture is
 // read a little sharper than the size it is drawn at asks for, so the text on it stays crisp. The
-// glass over it is glossy: it mirrors a window up and to the right as a pane of light with hard
-// edges and a thin line beside it, which cross the screen as the phone turns and at rest lie
-// over its upper right corner. Everywhere else the screen's colours are untouched. A picture
+// glass over it is glossy: it mirrors a room's windows, each a pane of light with a hard edge
+// that fades out and a thin line beside it. They cross the screen as the phone turns, and one
+// lies over its upper right corner at rest. Everywhere else the screen's colours are untouched. A picture
 // comes in as linear colour, a clip's frame as it was encoded, sRGB, which is taken back to
 // linear here.
 const SCREEN_FRAGMENT = `
@@ -126,16 +126,19 @@ const SCREEN_FRAGMENT = `
   }
   void main() {
     vec3 shown = mix(colour(from, fromVideo), colour(to, toVideo), blend);
-    // Where the glass's mirror image of this spot lies, on a wall a unit behind the camera.
+    // Which way the glass's mirror image of this spot lies, as an angle to the side, leaning
+    // with its height. The room has a window every GLOSS_APART of that angle, so one is on the
+    // screen both as the page opens and once the phone has turned into place.
     vec3 mirrored = reflect(normalize(vPlace), normalize(vNormal));
-    vec2 wall = mirrored.xy / max(mirrored.z, 0.001);
-    float across = wall.x + 0.35 * wall.y;
-    float window = pane(GLOSS_FROM, GLOSS_FROM + 2.0, across) * mix(0.04, 0.014, clamp((across - GLOSS_FROM) / 0.12, 0.0, 1.0));
-    float line = pane(GLOSS_FROM - 0.03, GLOSS_FROM - 0.022, across) * 0.02;
+    float across = mod(atan(mirrored.x, mirrored.z) + 0.3 * mirrored.y - GLOSS_FROM, GLOSS_APART);
+    float window = pane(0.0, 0.1, across) * mix(0.04, 0.0, across / 0.1);
+    float line = pane(GLOSS_APART - 0.03, GLOSS_APART - 0.022, across) * 0.02;
     gl_FragColor = vec4(shown + window + line, 1.0);
     #include <colorspace_fragment>
   }
-`.replace(/GLOSS_FROM/g, "(-0.585)");
+`
+  .replace(/GLOSS_FROM/g, "(-0.53)")
+  .replace(/GLOSS_APART/g, "0.44");
 
 /** A camera lens seen from above, painted: the glass's rings, its coating and the light on it. */
 function lensFace(periscope) {
