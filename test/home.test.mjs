@@ -41,13 +41,36 @@ test("the home page's first buttons lead to the band it ends with and to the doc
   assert.match(band, /href="\/docs\/getting-started\/"[^>]*>\s*Install guide/);
 });
 
-test("the Program section draws its block: twelve weeks of three days, one day done and the next one marked", () => {
+test("the Program section draws its block: twelve weeks of three days, four weeks done and the next day marked", () => {
   const html = page("/");
   const block = html.slice(html.indexOf('class="block'), html.indexOf('class="points', html.indexOf('class="block')));
   const days = [...block.matchAll(/<i\b([^>]*)><\/i>/g)].map(([, set]) => set.match(/class="(done|now)"/)?.[1] ?? "");
   assert.equal(days.length, 36);
-  assert.deepEqual(days.filter(Boolean), ["done", "now"]);
-  assert.match(block, /role="img" aria-label="A 12-week block of three training days a week/);
+  // A row is a training day and a column a week: weeks 1 to 4 are done, and week 5 has day A done and day B next.
+  const row = (done, fifth) => [...Array(done).fill("done"), fifth, ...Array(7).fill("")];
+  assert.deepEqual(days, [...row(4, "done"), ...row(4, "now"), ...row(4, "")]);
+  assert.match(block, /role="img" aria-label="A 12-week block of three training days a week, with four weeks done and week 5's second day next"/);
+});
+
+test("the facts under the hero each carry an icon, and the closing band doesn't say them again", () => {
+  const html = page("/");
+  const facts = html.slice(html.indexOf('class="facts'), html.indexOf("</ul>", html.indexOf('class="facts')));
+  const items = facts.split("<li").slice(1);
+  assert.equal(items.length, 3);
+  for (const item of items) assert.match(item, /^[^>]*>\s*<svg[^>]*aria-hidden="true"/, "a fact starts with an icon that a screen reader skips");
+  const band = html.slice(html.indexOf('id="start"'), html.indexOf('<footer class="site-footer')).replace(/<[^>]+>/g, " ");
+  assert.doesNotMatch(band, /Android|free|account|ads|trackers/i);
+});
+
+test("the outcome buttons stand apart, and the reps-in-reserve numbers are larger than the text beside them", async () => {
+  await visit(DESK);
+  const seen = await site.run(() => {
+    const [first, second] = [...document.querySelectorAll(".outcomes button")].map((button) => button.getBoundingClientRect());
+    const size = (selector) => parseFloat(getComputedStyle(document.querySelector(selector)).fontSize);
+    return { gap: second.left - first.right, chip: size(".rir button"), note: size(".rir .note") };
+  });
+  assert.ok(seen.gap >= 8, `the outcomes are ${seen.gap}px apart`);
+  assert.ok(seen.chip >= seen.note * 1.2, `a chip's number is ${seen.chip}px beside ${seen.note}px text`);
 });
 
 test("the Logging section's example set is the one its clip logs: 50 kg for 8 reps", () => {
