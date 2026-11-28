@@ -56,6 +56,23 @@ test("the Logging section's example set is the one its clip logs: 50 kg for 8 re
   assert.equal(set.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(), "50 kg × 8 reps");
 });
 
+const text = (html) => html.replace(/<[^>]+>/g, "").replace(/\s+/g, " ");
+
+test("the home page keeps a space between its words and the link to the privacy policy", () => {
+  assert.match(text(page("/")), /and the privacy policy lists each case/);
+});
+
+test("the home page leaves the processor to the install guide", () => {
+  assert.doesNotMatch(text(page("/")), /64-bit|ARM/);
+});
+
+test("the home page's example Change swaps an exercise without calling either one safer", () => {
+  const html = page("/");
+  const change = text(html.slice(html.indexOf('class="change"'), html.indexOf('class="verdict"')));
+  assert.match(change, /Machine chest press/);
+  assert.doesNotMatch(change, /easier|safer|joints/i);
+});
+
 test("the Progression section draws three steps of the gym's weights", () => {
   const steps = [...page("/").matchAll(/<g\b[^>]*data-kg="([\d.]+)"/g)].map(([, kg]) => kg);
   assert.deepEqual(steps.sort(), ["57.5", "60", "62.5"]);
