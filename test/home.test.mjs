@@ -7,9 +7,9 @@ import { builtFiles, page, read } from "./dist.mjs";
 // The feature sections in page order, by the screen each puts on the live phone. Technique's is
 // the mannequin's clip, which shows its muscles too.
 const SECTIONS = ["new-program", "logging", "mannequin", "progress", "check-in"];
-// The pictures of the phone in the sections, where there is no live phone: Technique's are two,
-// the mannequin, then its muscles, which its switch puts in the mannequin's place.
-const PICTURED = ["new-program", "logging", "mannequin", "muscles", "progress", "check-in"];
+// The pictures of the phone in the sections, where there is no live phone: Technique's is the
+// mannequin with its muscles lit, as the list beside it is.
+const PICTURED = ["new-program", "logging", "muscles", "progress", "check-in"];
 // The screens the phone plays a clip of, in place of their still.
 const CLIPS = ["logging", "mannequin", "check-in"];
 const DESK = { width: 1280, height: 800 };
@@ -595,8 +595,8 @@ test("the theme menu changes the phone's screen, both ways", async () => {
   assert.ok(dark < 90 && light > 170 && darkAgain < 90, `dark ${dark}, light ${light}, dark again ${darkAgain}`);
 });
 
-// The stills a visitor sees until Technique's switch is pressed.
-const STILLS = ["today", ...PICTURED.filter((screen) => screen !== "muscles")];
+// The stills a visitor sees.
+const STILLS = ["today", ...PICTURED];
 
 test("a window made narrow while the phone is live goes to the stills, and back when widened", async () => {
   await visit(DESK);
@@ -671,24 +671,56 @@ test("saying how the last session went shows the next weight, its step and its p
   assert.deepEqual(seen.after, { kg: "57.5", why: "One step down, about 5% lighter. A side, on plates this gym has:", step: ["57.5"], plates: ["1 × 20", "1 × 5", "1 × 2.5", "1 × 1.25"] });
 });
 
-test("Technique's switch lights the muscles in the signal's orange, and puts them on the still phone", async () => {
+// The main muscle's dot as red, green and blue out of 255, however the browser writes it.
+const dot = () =>
+  site.run(() => {
+    const colour = getComputedStyle(document.querySelector(".muscles li.main"), "::before").backgroundColor;
+    const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+    return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+  });
+const ORANGE = { dark: "232 87 28", light: "224 82 24" };
+
+test("without the live phone Technique's muscles are lit in the signal's orange, with no switch, beside the still of them", async () => {
+  assert.doesNotMatch(page("/"), /id="layer"|class="switch/);
   await visit(POCKET);
-  // The dot's colour as red, green and blue out of 255, however the browser writes it.
-  const dot = () =>
-    site.run(() => {
-      const colour = getComputedStyle(document.querySelector(".muscles li.main"), "::before").backgroundColor;
-      const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
-      return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
-    });
-  for (const [theme, orange] of [["dark", "232 87 28"], ["light", "224 82 24"]]) {
+  for (const theme of ["dark", "light"]) {
     await pickTheme(theme);
-    assert.deepEqual((await stillsSeen()).filter((still) => /mannequin|muscles/.test(still)), [`phone-mannequin-${theme}`]);
-    assert.notEqual(await dot(), orange);
-    await site.run(() => document.querySelector("#layer").click());
-    assert.equal(await site.run(() => document.querySelector("#layer").getAttribute("aria-pressed")), "true");
     assert.deepEqual((await stillsSeen()).filter((still) => /mannequin|muscles/.test(still)), [`phone-muscles-${theme}`]);
-    assert.equal(await dot(), orange);
-    await site.run(() => document.querySelector("#layer").click());
+    assert.equal(await dot(), ORANGE[theme]);
+  }
+});
+
+test("on the live phone Technique's muscles light while the clip shows them lit, and dim while it doesn't", async () => {
+  await visit(DESK);
+  await phoneShows("today");
+  // The list changes at once, so each look finds it wholly lit or wholly dim.
+  await site.run(() => {
+    document.head.append(Object.assign(document.createElement("style"), { textContent: ".muscles li::before { transition: none !important }" }));
+  });
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    await bring("mannequin", "end");
+    await phoneShows("mannequin");
+    await playing("mannequin");
+    // A loop and a little more, looked at a few times a second: how orange the phone's side is,
+    // and whether the list is lit.
+    const looks = [];
+    for (const end = Date.now() + 9000; Date.now() < end; await pause(60)) {
+      const [{ pixels }, colour] = await Promise.all([seeStage(), dot()]);
+      let orange = 0;
+      for (let i = 0; i < pixels.length; i += 3) if (pixels[i] > 180 && pixels[i + 1] > 40 && pixels[i + 1] < 130 && pixels[i + 2] < 80) orange++;
+      looks.push({ onPhone: orange > 150, onList: colour === ORANGE[theme] });
+    }
+    const [lit, dim] = [looks.filter(({ onPhone }) => onPhone), looks.filter(({ onPhone }) => !onPhone)];
+    assert.ok(lit.length > 8 && dim.length > 8, `${theme}: the clip was lit in ${lit.length} looks and dim in ${dim.length}`);
+    // A look takes a moment, so the two may differ in a look beside a change, and never between.
+    const steady = looks.filter((look, at) => at > 0 && looks[at - 1].onPhone === look.onPhone && looks[at + 1]?.onPhone === look.onPhone);
+    const apart = steady.filter(({ onPhone, onList }) => onPhone !== onList).length;
+    assert.equal(apart, 0, `${theme}: the list and the clip differed in ${apart} of ${steady.length} steady looks`);
+    // Away from Technique the list is lit again.
+    await bring("progress", "end");
+    await playing(null);
+    assert.equal(await dot(), ORANGE[theme]);
   }
 });
 

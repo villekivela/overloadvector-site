@@ -111,7 +111,12 @@ const video = (name: string) => Object.entries(videos).find(([path]) => path.end
 
 type Clip = { webm: string; mp4: string };
 // What the live phone puts on its screen: each screenshot's address, per theme, and a clip's.
-const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip } }> = {};
+type Span = [from: number, to: number];
+const screens: Record<string, { light: string; dark: string; alt: string; clip?: { light: Clip; dark: Clip }; lit?: { light: Span; dark: Span } }> = {};
+// Technique's clip turns the muscles layer on and off: the seconds of each theme's clip between
+// which its muscles are lit. The list beside the phone lights and dims with it. Measure these
+// again whenever the clip is cut again (README, "Clips").
+const LIT: Record<string, { light: Span; dark: Span }> = { mannequin: { dark: [1.27, 4.73], light: [0.8, 4.27] } };
 // A section whose screen has a clip puts only that on the live phone: the clip shows the rest
 // (Technique's plays the mannequin with its muscles on, and off). The pictures keep them all.
 const played = (screen: string) => Boolean(video(`clip-${screen}-light.webm`));
@@ -133,6 +138,7 @@ for (const { screen, alt } of shown) {
     return { webm, mp4 };
   };
   screens[screen].clip = { light: clip("light"), dark: clip("dark") };
+  if (LIT[screen]) screens[screen].lit = LIT[screen];
 }
 
 // Program: the block as it is, a column a week and a row a training day. Four weeks are done,
@@ -296,10 +302,9 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
             )}
             {kicker === "Technique" && (
               <Fragment>
-                <ul class="muscles" id="muscles" aria-label="The muscles a Smith machine RDL works">
+                <ul class="muscles" aria-label="The muscles a Smith machine RDL works">
                   {MUSCLES.map(([muscle, share]) => <li class={share === 1 ? "main" : undefined} style={`--share:${share}`}>{muscle}</li>)}
                 </ul>
-                <button type="button" class="switch" id="layer" aria-pressed="false"><i></i>Light up the muscles it works</button>
               </Fragment>
             )}
             {kicker === "Progression" && (
@@ -348,12 +353,9 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
           </ul>
           <a class="more" href={more.href}>{more.text}</a>
           <div class="phone-still">
-            {screens.map((screen, at) => (
-              <Fragment>
-                <Image src={still(`phone-${screen}-light`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
-                <Image src={still(`phone-${screen}-dark`)} alt={alts[at]} width={360} densities={[1, 2]} loading="lazy" />
-              </Fragment>
-            ))}
+            {/* Technique's is its second screen, the mannequin with its muscles lit, as the list is. */}
+            <Image src={still(`phone-${screens.at(-1)}-light`)} alt={alts.at(-1)!} width={360} densities={[1, 2]} loading="lazy" />
+            <Image src={still(`phone-${screens.at(-1)}-dark`)} alt={alts.at(-1)!} width={360} densities={[1, 2]} loading="lazy" />
           </div>
         </section>
       ))}
@@ -419,15 +421,6 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
       document.querySelector("#rir-say")!.textContent = chip.dataset.say!;
     });
   }
-
-  // Technique: the muscles layer, on the list and on the still phone.
-  const layer = document.querySelector("#layer")!;
-  layer.addEventListener("click", () => {
-    const lit = layer.getAttribute("aria-pressed") !== "true";
-    layer.setAttribute("aria-pressed", String(lit));
-    document.querySelector("#muscles")!.classList.toggle("lit", lit);
-    layer.closest("section")!.toggleAttribute("data-lit", lit);
-  });
 
   // Progression: the step you take, and what goes on each side of the bar for it.
   const outcomes = all<HTMLButtonElement>(".outcomes button");
@@ -618,11 +611,6 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
   :global(:root[data-theme="light"]) :is(.phone-still, .home-stage) :global(img[src*="-dark."]) {
     display: none;
   }
-  /* Technique's still is the mannequin, and its muscles once the switch is on. */
-  .home-feature:not([data-lit]) .phone-still :global(img[src*="phone-muscles-"]),
-  .home-feature[data-lit] .phone-still :global(img[src*="phone-mannequin-"]) {
-    display: none;
-  }
   /* The phone hangs in front of the page, lit from the upper left, and throws a shadow on it. */
   .phone-still :global(img),
   .home-stage :global(.stage-opening),
@@ -805,55 +793,18 @@ const path = (points: number[][]) => `M${points.map((point) => point.map((value)
     width: 0.8em;
     height: 0.8em;
     border-radius: 50%;
-    background: var(--ov-line);
+    background: color-mix(in srgb, var(--ov-lit) calc(var(--share) * 100%), var(--ov-line));
     transition:
       background 0.3s,
       box-shadow 0.3s;
   }
-  .muscles.lit li::before {
-    background: color-mix(in srgb, var(--ov-lit) calc(var(--share) * 100%), var(--ov-line));
-  }
-  .muscles.lit li.main::before {
+  .muscles li.main::before {
     box-shadow: 0 0 0.7em var(--ov-lit);
   }
-  .switch {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8em;
-    margin-top: 1.5em;
-    font-weight: 500;
-  }
-  .switch i {
-    position: relative;
-    width: 3em;
-    height: 1.7em;
-    border: 2px solid var(--ov-muted);
-    border-radius: 1em;
-    transition:
-      background 0.2s,
-      border-color 0.2s;
-  }
-  .switch i::after {
-    content: "";
-    position: absolute;
-    top: 50%;
-    left: 0.2em;
-    width: 1em;
-    height: 1em;
-    border-radius: 50%;
-    background: var(--ov-muted);
-    translate: 0 -50%;
-    transition:
-      left 0.2s,
-      background 0.2s;
-  }
-  .switch[aria-pressed="true"] i {
-    border-color: var(--ov-signal);
-    background: var(--ov-signal);
-  }
-  .switch[aria-pressed="true"] i::after {
-    left: 1.5em;
-    background: var(--ov-on-signal);
+  /* The live phone's clip turns the muscles layer on and off, and the list goes with it. */
+  .home:has(.home-stage[data-unlit]) .muscles li::before {
+    background: var(--ov-line);
+    box-shadow: none;
   }
 
   /* Progression: say how the last session went, and see the step you take. The steps are the mark's. */

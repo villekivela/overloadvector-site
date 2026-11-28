@@ -72,7 +72,7 @@ does, section by section, beside one phone, then privacy and the band that offer
 `index.mdx` only gives the page its title and description.
 
 Each section has a small working model of what it describes, drawn by the page: Program's 12-week
-block, Logging's set and its reps-in-reserve chips, Technique's muscles and their switch,
+block, Logging's set and its reps-in-reserve chips, Technique's muscles,
 Progression's three steps and plates, Coaching's proposed Change. They show made-up training, and
 read whole without JavaScript.
 
@@ -89,7 +89,7 @@ model from it.
 
 A narrow screen, a visitor who asked for less motion and a browser without WebGL get a still of the
 same phone with each text instead, under it on a narrow screen and beside it on a wide one, and
-never load three.js. Technique's still is the mannequin, and its muscles once the switch is on. The stills are in `src/assets/phone/`,
+never load three.js. Technique's still is the mannequin with its muscles lit, as the list beside it is. The stills are in `src/assets/phone/`,
 drawn from the model by `npm run stills` (it needs Chrome, as the tests do). Run it after changing
 the model, a pose or a screenshot the home page shows, and commit what it draws. Today's still stands
 as the page opens, and holds the live phone's place until the model has loaded; the others stand as
@@ -131,7 +131,14 @@ well below the step will show. Retake both themes together, so that the section 
 either.
 
 A section with a clip puts only that on the live phone: Technique's clip shows its muscles, so the
-live phone doesn't change to `muscles`, which the stills still show.
+live phone doesn't change to `muscles`, which the stills show.
+
+The list of muscles beside Technique's clip lights and dims with the clip. `LIT` in
+`src/components/Home.astro` holds, for each theme, the seconds between which that clip's muscles
+are lit; `src/phone/stage.js` marks the stage `data-unlit` outside them, and the list is lit
+whenever the clip isn't playing. After cutting the clip again, measure the two times again: write
+the clip out frame by frame with `ffmpeg` (30 a second), find the first frame with the muscles
+orange and the first without, and divide each frame's number by 30.
 
 The coach's clip uses the scripted coach (Settings → Scripted coach, debug builds), never a real
 key or account. No clip shows a technique video or any of its frames.
@@ -152,8 +159,8 @@ have changed: update `scripts/sync-formats.mjs` then.
 
 `src/assets/shots/shot-<screen>-light.png` and `-dark.png`, 640 px wide, from the app on an Android
 emulator with made-up training. No real person's data, and nothing that shows a debug build.
-`shot-mannequin-*` and `shot-muscles-*` are on no page: they are the screens of Technique's two
-still phones, which `npm run stills` draws from them.
+`shot-muscles-*` is on no page: it is the screen of Technique's still phone, which
+`npm run stills` draws from it.
 
 A docs page places both, the light one first, inside `<div class="shots">`; the theme picked in the menu
 shows its own:
