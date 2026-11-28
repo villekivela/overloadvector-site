@@ -724,6 +724,24 @@ test("on the live phone Technique's muscles light while the clip shows them lit,
   }
 });
 
+test("the Coaching card's Accept is drawn as the app draws it: the theme's orange, near-black words, modest rounding", async () => {
+  await visit(POCKET);
+  for (const theme of ["dark", "light"]) {
+    await pickTheme(theme);
+    const seen = await site.run(() => {
+      const accept = document.querySelector(".change .verdict span:last-child");
+      const style = getComputedStyle(accept);
+      const rgb = (colour) => {
+        const parts = colour.match(/[\d.]+/g).slice(0, 3).map(Number);
+        return (colour.startsWith("color(") ? parts.map((part) => Math.round(part * 255)) : parts).join(" ");
+      };
+      return { words: accept.textContent, fill: rgb(style.backgroundColor), ink: rgb(style.color), round: parseFloat(style.borderTopLeftRadius) / accept.offsetHeight };
+    });
+    assert.deepEqual({ ...seen, round: undefined }, { words: "Accept", fill: ORANGE[theme], ink: "17 17 17", round: undefined });
+    assert.ok(seen.round > 0.1 && seen.round < 0.3, `its corners are ${seen.round} of its height`);
+  }
+});
+
 test("a window made narrow while the clip shows the muscles dim has them lit beside the still", async () => {
   await visit(DESK);
   await phoneShows("today");
